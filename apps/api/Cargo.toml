@@ -1,0 +1,36 @@
+[package]
+name = "cardlattice-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+catalogue = { version = "0.1.0", path = "../../crates/catalogue" }
+ingestion = { version = "0.1.0", path = "../../crates/ingestion" }
+publishing = { version = "0.1.0", path = "../../crates/publishing" }
+observability = { version = "0.1.0", path = "../../crates/observability" }
+chrono.workspace = true
+httpdate.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tokio-util = { version = "0.7", features = ["io"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "set-header"] }
+tracing.workspace = true
+url = "2"
+utoipa.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+tempfile = "3"
+jsonschema = { version = "0.33", default-features = false }
+
+[lints]
+workspace = true

@@ -1,0 +1,6 @@
+[advisories]
+# SQLx's optional MySQL backend remains in Cargo.lock, but is not enabled or built.
+# `scripts/audit.sh` fails if rsa becomes reachable under any target/all features.
+# cargo-deny separately audits the active graph without an advisory exception.
+# Remove this exception if SQLx removes the lock-only dependency or a fix is released.
+ignore = ["RUSTSEC-2023-0071"]

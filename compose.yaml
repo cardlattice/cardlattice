@@ -1,0 +1,84 @@
+name: cardlattice
+services:
+  secrets:
+    image: postgres:18-alpine
+    user: root
+    entrypoint: ["sh", "/init-secrets.sh"]
+    volumes:
+      - credentials:/run/cardlattice
+      - ./infra/init-secrets.sh:/init-secrets.sh:ro
+    restart: "no"
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: cardlattice
+      POSTGRES_DB: cardlattice
+      POSTGRES_PASSWORD_FILE: /run/cardlattice/database-password
+    volumes:
+      - database:/var/lib/postgresql
+      - credentials:/run/cardlattice:ro
+    depends_on:
+      secrets: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cardlattice -d cardlattice"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  migrate:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    command: ["migrate"]
+    environment: &api-environment
+      DATABASE_URL_FILE: /run/cardlattice/database-url
+      CONTRIBUTOR_TOKEN_FILE: /run/cardlattice/contributor
+      MODERATOR_TOKEN_FILE: /run/cardlattice/moderator
+      METRICS_TOKEN_FILE: /run/cardlattice/metrics
+      DATASET_DIRECTORY: /var/lib/cardlattice/datasets
+      PUBLIC_API_ORIGIN: http://localhost:8080
+      RUST_LOG: info
+    volumes:
+      - credentials:/run/cardlattice:ro
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+  seed:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    command: ["seed"]
+    environment: *api-environment
+    volumes:
+      - credentials:/run/cardlattice:ro
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    restart: "no"
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    environment: *api-environment
+    ports: ["127.0.0.1:${CARDLATTICE_API_PORT:-8080}:8080"]
+    volumes:
+      - credentials:/run/cardlattice:ro
+      - datasets:/var/lib/cardlattice/datasets
+    depends_on:
+      seed: { condition: service_completed_successfully }
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/readyz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    ports: ["127.0.0.1:${CARDLATTICE_WEB_PORT:-3000}:80"]
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+volumes:
+  credentials:
+  database:
+  datasets:

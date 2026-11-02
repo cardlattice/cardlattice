@@ -1,0 +1,64 @@
+name: CI
+on:
+  push:
+    branches: [main, 'luna/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: cardlattice
+          POSTGRES_PASSWORD: ci-test-only-password
+          POSTGRES_DB: cardlattice
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cardlattice"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://cardlattice:ci-test-only-password@localhost:5432/cardlattice
+      CONTRIBUTOR_TOKEN: ci-contributor-capability-test-only-123456789
+      MODERATOR_TOKEN: ci-moderator-capability-test-only-123456789
+      METRICS_TOKEN: ci-metrics-capability-test-only-123456789
+      RUST_BACKTRACE: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.21.0'
+      - run: npm install --global pnpm@12.4.1
+      - run: rustup update stable && rustup default stable && rustup component add clippy rustfmt
+      - run: cargo install --locked cargo-nextest cargo-audit cargo-deny
+      - run: pnpm install --frozen-lockfile
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo nextest run --workspace --all-features
+      - run: cargo test --workspace --doc --all-features
+      - run: bash scripts/audit.sh
+      - run: pnpm --filter @cardlattice/web format:check && pnpm check
+      - name: Verify generated API contract
+        run: |
+          cargo run --quiet -p cardlattice-api -- openapi > docs/openapi.json
+          pnpm --filter @cardlattice/web generate
+          git diff --exit-code -- docs/openapi.json apps/web/src/generated
+      - run: cargo build --release --package cardlattice-api
+      - name: Prepare original development catalogue
+        run: |
+          target/release/cardlattice-api migrate
+          target/release/cardlattice-api seed
+          target/release/cardlattice-api serve > /tmp/cardlattice-api.log 2>&1 &
+          curl --retry 20 --retry-connrefused --retry-delay 1 -fsS http://localhost:8080/readyz
+      - run: pnpm --filter @cardlattice/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: browser-validation
+          path: apps/web/test-results
+          retention-days: 7
+      - name: Docker packaging
+        run: docker compose build

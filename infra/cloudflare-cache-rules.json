@@ -1,0 +1,26 @@
+{
+  "name": "Cardlattice public API caching",
+  "kind": "zone",
+  "phase": "http_request_cache_settings",
+  "rules": [
+    {
+      "description": "Bypass API and private operational resources by default",
+      "expression": "(http.host eq \"api.example.org\" and (starts_with(http.request.uri.path, \"/v1/\") or starts_with(http.request.uri.path, \"/datasets/\") or http.request.uri.path in {\"/healthz\" \"/readyz\" \"/metrics\"}))",
+      "action": "set_cache_settings",
+      "action_parameters": { "cache": false },
+      "enabled": true
+    },
+    {
+      "description": "Explicitly cache anonymous query-free public JSON and immutable datasets",
+      "expression": "(http.host eq \"api.example.org\" and http.request.method in {\"GET\" \"HEAD\"} and http.request.uri.query eq \"\" and not any(http.request.headers.names[*] eq \"authorization\") and not any(http.request.headers.names[*] eq \"cookie\") and (http.request.uri.path eq \"/v1/games\" or starts_with(http.request.uri.path, \"/v1/games/\") or http.request.uri.path in {\"/v1/stats\" \"/v1/datasets\"} or starts_with(http.request.uri.path, \"/datasets/\")))",
+      "action": "set_cache_settings",
+      "action_parameters": {
+        "cache": true,
+        "edge_ttl": { "mode": "respect_origin" },
+        "browser_ttl": { "mode": "respect_origin" },
+        "respect_strong_etags": true
+      },
+      "enabled": true
+    }
+  ]
+}

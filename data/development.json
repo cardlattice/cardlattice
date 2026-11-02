@@ -1,0 +1,139 @@
+[
+  {
+    "id": "01900000-0000-7000-8000-000000000001",
+    "draft": {
+      "kind": "game",
+      "name": "Pokémon",
+      "gameId": null,
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "slug": "pokemon"
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000002",
+    "draft": {
+      "kind": "series",
+      "name": "Development series — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000003",
+    "draft": {
+      "kind": "set",
+      "name": "Lattice laboratory — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "seriesId": "01900000-0000-7000-8000-000000000002",
+      "releaseDate": "2026-01-01"
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000004",
+    "draft": {
+      "kind": "card",
+      "name": "Prism Seed — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {
+        "category": "pokemon",
+        "hp": 40,
+        "types": [
+          "grass"
+        ],
+        "stage": "basic"
+      },
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000005",
+    "draft": {
+      "kind": "card",
+      "name": "Café Lantern — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {
+        "category": "trainer",
+        "types": []
+      },
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000006",
+    "draft": {
+      "kind": "printing",
+      "name": "Prism Seed · LAB-001 — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "cardId": "01900000-0000-7000-8000-000000000004",
+      "setId": "01900000-0000-7000-8000-000000000003",
+      "collectorNumber": "LAB-001",
+      "language": "en",
+      "region": "test",
+      "rarity": "demo"
+    }
+  },
+  {
+    "id": "01900000-0000-7000-8000-000000000007",
+    "draft": {
+      "kind": "printing",
+      "name": "Café Lantern · LAB-002 — synthetic",
+      "gameId": "01900000-0000-7000-8000-000000000001",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "cardId": "01900000-0000-7000-8000-000000000005",
+      "setId": "01900000-0000-7000-8000-000000000003",
+      "collectorNumber": "LAB-002",
+      "language": "en",
+      "region": "test",
+      "rarity": "demo"
+    }
+  }
+]
