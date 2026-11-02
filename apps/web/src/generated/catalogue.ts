@@ -196,12 +196,18 @@ export interface Page {
 }
 
 export interface PokemonAttributes {
-  category: string;
+  /** @nullable */
+  category?: string | null;
   /**
      * @minimum 0
      * @nullable
      */
   hp?: number | null;
+  /**
+     * Provisional identity bounded to an internal printing UUID until rules are reviewed.
+     * @nullable
+     */
+  identityScope?: string | null;
   /** @nullable */
   stage?: string | null;
   types?: string[];

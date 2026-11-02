@@ -167,3 +167,39 @@ test("forms and resource screens meet automated accessibility checks", async ({ 
     expect(result.violations, route).toEqual([]);
   }
 });
+
+test("detail links keep printing collections scoped to their parent", async ({ page }) => {
+  const setId = "01900000-0000-7000-8000-000000000003";
+  const cardId = "01900000-0000-7000-8000-000000000004";
+  for (const [collection, id, filter] of [
+    ["sets", setId, "setId"],
+    ["cards", cardId, "cardId"],
+  ]) {
+    await page.goto(`/games/pokemon/${collection}/${id}`);
+    await page.getByRole("link", { name: "Browse printings →" }).click();
+    await expect(page).toHaveURL(new RegExp(`${filter}=${id}`));
+    await expect(page.getByRole("link", { name: /Prism Seed/ }).first()).toBeVisible();
+    await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("en");
+    await expect(page).toHaveURL(new RegExp(`${filter}=${id}`));
+    await page.reload();
+    await expect(page.getByRole("link", { name: /Prism Seed/ }).first()).toBeVisible();
+  }
+});
+
+test("long provisional identity metadata fits a phone", async ({ page }) => {
+  const path = "/v1/games/pokemon/cards/01900000-0000-7000-8000-000000000004";
+  await page.route(`**${path}`, async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.data.attributes.identityScope = "01900000-0000-7000-8000-000000000005";
+    await route.fulfill({ response, json: body });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(path.replace("/v1", ""));
+  await expect(page.getByText(/This card identity is provisional/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const result = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(result.violations).toEqual([]);
+});

@@ -43,6 +43,8 @@ const route = (path: string, component: ReturnType<typeof lazyRouteComponent>) =
       q: typeof search.q === "string" ? search.q : "",
       cursor: typeof search.cursor === "string" ? search.cursor : "",
       language: typeof search.language === "string" ? search.language : "",
+      setId: typeof search.setId === "string" ? search.setId : "",
+      cardId: typeof search.cardId === "string" ? search.cardId : "",
       sort: search.sort === "newest" ? "newest" : "name",
       kind: typeof search.kind === "string" ? search.kind : "",
       target: typeof search.target === "string" ? search.target : "",

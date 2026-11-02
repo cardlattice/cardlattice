@@ -82,3 +82,91 @@ so a later demo seed does not resurrect retired fixtures.
 
 Do not run the fixture-based browser suite against a real catalogue. CI and
 integration tests use disposable databases with original synthetic fixtures.
+
+## Numbered card checklists (2026-11-02)
+
+`cards-reviewed-2026-11-02.json` adds independently transcribed names and collector
+numbers from eight publisher-hosted English PDF checklists. The PDF source URLs,
+retrieval timestamps and SHA-256 digests are in `checklist-plan.json` and every
+imported record's provenance. No third-party catalogue records, prices, images,
+marketing prose or rules text are imported. Search/editorial pages were used only
+to discover some outbound links to the publisher's PDFs, never as card-data inputs.
+
+| Set | Numbered entries transcribed |
+| --- | ---: |
+| Mega Evolution | 188 |
+| Phantasmal Flames | 130 |
+| Ascended Heroes | 295 |
+| Perfect Order | 124 |
+| Chaos Rising | 122 |
+| Pitch Black | 120 |
+| 30th Celebration | 158 |
+| Delta Reign | 141 |
+
+These 1,278 entries cover each selected checklist's consecutive main numbered
+section, including its numbered alternate illustrations. They **do not establish
+complete set coverage**: promotional products, languages, regional differences,
+finishes and other variants remain unverified. The 30th Celebration checklist also
+lists Classic Collection and separate Basic Energy sections with overlapping or
+original numbers; those sections are intentionally excluded pending identity review.
+Delta Reign remains an announced future release as of the retrieval date.
+
+Rarity, category, HP, attacks, rules, evolution and artwork remain unknown. Energy
+symbols in names were visually transcribed into accessible words (for example,
+“Growing Grass Energy”); Nidoran♀ spacing was corrected. Exact extraction-to-review
+changes are recorded in `checklist-transcription-corrections.json`. Wrapped names,
+number continuity, source headings and anomalous text were reviewed. This is an
+operator-requested automated review, not a claim of expert human verification.
+
+Every entry creates a distinct printing and a **provisional** card identity.
+`attributes.identityScope` contains its internally generated printing UUID. Names
+alone cannot establish rules equivalence, so same-name entries are never merged by
+this importer. Later moderator-reviewed comparisons can link equivalent printings.
+Unknown typed Pokémon categories are nullable; known categories still validate.
+
+The source PDFs contain copyrighted layout, logos and other content. They are not
+committed, served or included in datasets. Public availability is not a redistribution
+license. General Pokémon terms are linked for transparency, not treated as blanket
+permission to copy content; the main site's access challenge was not bypassed.
+Only independently structured factual metadata is dedicated under CC0. This batch
+does not authorize a recursive crawler or artwork collection.
+
+### Reproduce and review
+
+Fetch the explicitly listed public PDF URLs using an ordinary HTTP client, allowing
+at least five seconds between requests. Save each privately as
+`<contentSha256>.pdf`. Stop on challenges, redirects, changed checksums or access
+restrictions; do not try to bypass them. Python 3 and Poppler are optional offline
+review tools, not application dependencies:
+
+```sh
+python3 scripts/pokemon/extract_checklists.py \
+  data/pokemon/checklist-plan.json .local/pokemon-cards .local/card-candidates.json
+```
+
+The tool verifies PDF digests and consecutive numbers and produces `reviewedBy:
+null`. Review the PDFs visually, including multiline names and non-text energy
+symbols, and review source usage policies before setting a truthful reviewer.
+`checklist-transcription-corrections.json` documents this batch's visual corrections;
+it is not automatically applied to future PDFs. Poppler reports “Invalid Font Weight”
+for the 30th Celebration source's font metadata; its names and main numbered section
+were separately checked. No software quality-check warnings are waived.
+
+```sh
+cargo run -p cardlattice-api -- import-pokemon-cards data/pokemon/cards-reviewed-2026-11-02.json
+cargo run -p cardlattice-api -- import-pokemon-cards data/pokemon/cards-reviewed-2026-11-02.json --apply
+```
+
+Import the reviewed sets first. Back up the database before applying a new batch.
+Dry runs roll back all data, sources, audit rows and events (PostgreSQL sequences can
+still advance). The importer is deliberately insert-only: identical printings are
+skipped, while conflicting identities, changed names, tombstones and manual duplicate
+printings abort the whole transaction for correction review. Existing community
+metadata is never overwritten. There is no network access during import.
+
+Each inserted record keeps its own revision and source provenance. All invalidation
+paths for the import are deduplicated into one event **in the same transaction**;
+parent set/card URLs and collection URLs are included. Existing purge batching,
+backoff and manual replay apply. Arbitrary filtered/search pages retain bounded TTLs.
+New records appear immediately after commit; immutable dataset releases still occur
+at most once per UTC day. Importing cards does not replace today's snapshot.

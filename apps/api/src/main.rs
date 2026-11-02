@@ -50,6 +50,19 @@ async fn main() -> anyhow::Result<()> {
             tracing::info!(count, "original synthetic fixtures inserted");
             return Ok(());
         }
+        "import-pokemon-cards" => {
+            anyhow::ensure!(
+                arguments.len() == 2 || (arguments.len() == 3 && arguments[2] == "--apply"),
+                "Usage: import-pokemon-cards <reviewed.json> [--apply]"
+            );
+            let bytes = tokio::fs::read(&arguments[1]).await?;
+            anyhow::ensure!(bytes.len() <= 2 * 1024 * 1024, "Import batch exceeds 2 MiB");
+            let batch = serde_json::from_slice(&bytes)?;
+            let summary =
+                ingestion::pokemon_cards::import(&pool, &batch, arguments.len() == 3).await?;
+            println!("{}", serde_json::to_string_pretty(&summary)?);
+            return Ok(());
+        }
         "import-pokemon-sets" => {
             anyhow::ensure!(
                 arguments.len() >= 2
@@ -73,7 +86,7 @@ async fn main() -> anyhow::Result<()> {
         }
         "serve" => {}
         _ => anyhow::bail!(
-            "Commands: serve, migrate, seed, openapi, scan-pokemon-sets, import-pokemon-sets"
+            "Commands: serve, migrate, seed, openapi, scan-pokemon-sets, import-pokemon-sets, import-pokemon-cards"
         ),
     }
     let config = Arc::new(Config::from_env()?);

@@ -1,0 +1,5199 @@
+{
+  "schemaVersion": 1,
+  "reviewedBy": "Codex: checklist transcription and symbol review requested by the Cardlattice operator",
+  "termsUrl": "https://www.pokemon.com/us/legal/",
+  "sets": [
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-Evolution-49281",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me01/gallery/_pdfs/P10346_ME01_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:01:23.660313+00:00",
+      "contentSha256": "01188166c0dbe880fde95013ba116057ac78bb706761ae341761e0ba70036dca",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 188,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Bulbasaur"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Ivysaur"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Mega Venusaur ex"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Exeggcute"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Exeggutor"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Tangela"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Tangrowth"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Chikorita"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Bayleef"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Meganium"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Shuckle"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Celebi"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Seedot"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Nuzleaf"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Shiftry"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Nincada"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Ninjask"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Dhelmise"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Vulpix"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Ninetales"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Numel"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Mega Camerupt ex"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Litleo"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Pyroar"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Volcanion"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Scorbunny"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Raboot"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Cinderace"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Sizzlipede"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Centiskorch"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Chi-Yu"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Mantine"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Corphish"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Kyogre"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Snover"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Mega Abomasnow ex"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Clauncher"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Clawitzer"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Sobble"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Drizzile"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Inteleon"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Snom"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Frosmoth"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Eiscue"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Magnemite"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Magneton"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Magnezone"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Raikou"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Electrike"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Mega Manectric ex"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Pachirisu"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Helioptile"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Heliolisk"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Abra"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Kadabra"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Alakazam"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Jynx"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Ralts"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Kirlia"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Mega Gardevoir ex"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Shedinja"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Spoink"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Grumpig"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Xerneas"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Greavard"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Houndstone"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Gimmighoul"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Sandshrew"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Sandslash"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Onix"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Tyrogue"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Makuhita"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Hariyama"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Lunatone"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Solrock"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Riolu"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Mega Lucario ex"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Croagunk"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Toxicroak"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Marshadow"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Stonjourner"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Nacli"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Naclstack"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Garganacl"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Crawdaunt"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Mega Absol ex"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Spiritomb"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Yveltal"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Nickit"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Thievul"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Shroodle"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Grafaiai"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Steelix"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Mega Mawile ex"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Dialga"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Tinkatink"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Tinkatuff"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Tinkaton"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Gholdengo"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Mega Latias ex"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Latios"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Spearow"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Fearow"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Mega Kangaskhan ex"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Delibird"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Miltank"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Buneary"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Lopunny"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Yungoos"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Gumshoos"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Stufful"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Bewear"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Acerola’s Mischief"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Boss’s Orders (Ghetsis)"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Energy Switch"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Fighting Gong"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Forest of Vitality"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Iron Defender"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Lillie’s Determination"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Lt. Surge’s Bargain"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Mega Signal"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Mystery Garden"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Pokémon Center Lady"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Premium Power Pro"
+        },
+        {
+          "collectorNumber": "125",
+          "name": "Rare Candy"
+        },
+        {
+          "collectorNumber": "126",
+          "name": "Repel"
+        },
+        {
+          "collectorNumber": "127",
+          "name": "Risky Ruins"
+        },
+        {
+          "collectorNumber": "128",
+          "name": "Strange Timepiece"
+        },
+        {
+          "collectorNumber": "129",
+          "name": "Surfing Beach"
+        },
+        {
+          "collectorNumber": "130",
+          "name": "Switch"
+        },
+        {
+          "collectorNumber": "131",
+          "name": "Ultra Ball"
+        },
+        {
+          "collectorNumber": "132",
+          "name": "Wally’s Compassion"
+        },
+        {
+          "collectorNumber": "133",
+          "name": "Bulbasaur"
+        },
+        {
+          "collectorNumber": "134",
+          "name": "Ivysaur"
+        },
+        {
+          "collectorNumber": "135",
+          "name": "Exeggutor"
+        },
+        {
+          "collectorNumber": "136",
+          "name": "Shuckle"
+        },
+        {
+          "collectorNumber": "137",
+          "name": "Ninjask"
+        },
+        {
+          "collectorNumber": "138",
+          "name": "Vulpix"
+        },
+        {
+          "collectorNumber": "139",
+          "name": "Litleo"
+        },
+        {
+          "collectorNumber": "140",
+          "name": "Snover"
+        },
+        {
+          "collectorNumber": "141",
+          "name": "Clawitzer"
+        },
+        {
+          "collectorNumber": "142",
+          "name": "Inteleon"
+        },
+        {
+          "collectorNumber": "143",
+          "name": "Helioptile"
+        },
+        {
+          "collectorNumber": "144",
+          "name": "Shedinja"
+        },
+        {
+          "collectorNumber": "145",
+          "name": "Houndstone"
+        },
+        {
+          "collectorNumber": "146",
+          "name": "Marshadow"
+        },
+        {
+          "collectorNumber": "147",
+          "name": "Garganacl"
+        },
+        {
+          "collectorNumber": "148",
+          "name": "Spiritomb"
+        },
+        {
+          "collectorNumber": "149",
+          "name": "Shroodle"
+        },
+        {
+          "collectorNumber": "150",
+          "name": "Steelix"
+        },
+        {
+          "collectorNumber": "151",
+          "name": "Spearow"
+        },
+        {
+          "collectorNumber": "152",
+          "name": "Delibird"
+        },
+        {
+          "collectorNumber": "153",
+          "name": "Gumshoos"
+        },
+        {
+          "collectorNumber": "154",
+          "name": "Stufful"
+        },
+        {
+          "collectorNumber": "155",
+          "name": "Mega Venusaur ex"
+        },
+        {
+          "collectorNumber": "156",
+          "name": "Mega Camerupt ex"
+        },
+        {
+          "collectorNumber": "157",
+          "name": "Mega Abomasnow ex"
+        },
+        {
+          "collectorNumber": "158",
+          "name": "Mega Manectric ex"
+        },
+        {
+          "collectorNumber": "159",
+          "name": "Mega Gardevoir ex"
+        },
+        {
+          "collectorNumber": "160",
+          "name": "Mega Lucario ex"
+        },
+        {
+          "collectorNumber": "161",
+          "name": "Mega Absol ex"
+        },
+        {
+          "collectorNumber": "162",
+          "name": "Mega Mawile ex"
+        },
+        {
+          "collectorNumber": "163",
+          "name": "Mega Latias ex"
+        },
+        {
+          "collectorNumber": "164",
+          "name": "Mega Kangaskhan ex"
+        },
+        {
+          "collectorNumber": "165",
+          "name": "Acerola’s Mischief"
+        },
+        {
+          "collectorNumber": "166",
+          "name": "Air Balloon"
+        },
+        {
+          "collectorNumber": "167",
+          "name": "Buddy-Buddy Poffin"
+        },
+        {
+          "collectorNumber": "168",
+          "name": "Fighting Gong"
+        },
+        {
+          "collectorNumber": "169",
+          "name": "Lillie’s Determination"
+        },
+        {
+          "collectorNumber": "170",
+          "name": "Lt. Surge’s Bargain"
+        },
+        {
+          "collectorNumber": "171",
+          "name": "Mega Signal"
+        },
+        {
+          "collectorNumber": "172",
+          "name": "Mystery Garden"
+        },
+        {
+          "collectorNumber": "173",
+          "name": "Night Stretcher"
+        },
+        {
+          "collectorNumber": "174",
+          "name": "Premium Power Pro"
+        },
+        {
+          "collectorNumber": "175",
+          "name": "Rare Candy"
+        },
+        {
+          "collectorNumber": "176",
+          "name": "Wally’s Compassion"
+        },
+        {
+          "collectorNumber": "177",
+          "name": "Mega Venusaur ex"
+        },
+        {
+          "collectorNumber": "178",
+          "name": "Mega Gardevoir ex"
+        },
+        {
+          "collectorNumber": "179",
+          "name": "Mega Lucario ex"
+        },
+        {
+          "collectorNumber": "180",
+          "name": "Mega Absol ex"
+        },
+        {
+          "collectorNumber": "181",
+          "name": "Mega Latias ex"
+        },
+        {
+          "collectorNumber": "182",
+          "name": "Mega Kangaskhan ex"
+        },
+        {
+          "collectorNumber": "183",
+          "name": "Acerola’s Mischief"
+        },
+        {
+          "collectorNumber": "184",
+          "name": "Lillie’s Determination"
+        },
+        {
+          "collectorNumber": "185",
+          "name": "Lt. Surge’s Bargain"
+        },
+        {
+          "collectorNumber": "186",
+          "name": "Wally’s Compassion"
+        },
+        {
+          "collectorNumber": "187",
+          "name": "Mega Gardevoir ex"
+        },
+        {
+          "collectorNumber": "188",
+          "name": "Mega Lucario ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-EvolutionPhantasmal-Flames",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me02/gallery/_pdfs/P10347_ME02_Card_List_EN_HiRes.pdf",
+      "retrievedAt": "2026-11-02T01:01:24.320302+00:00",
+      "contentSha256": "c7227a33e16c5c1902b4eb78eaef2a2a0867ad3fe724ab3f37be72a1f9d5e22f",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 130,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Oddish"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Gloom"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Vileplume"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Mega Heracross ex"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Lotad"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Lombre"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Ludicolo"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Genesect"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Nymble"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Lokix"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Charmander"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Charmeleon"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Mega Charizard X ex"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Moltres"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Darumaka"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Darmanitan"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Reshiram"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Oricorio ex"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Charcadet"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Ceruledge"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Seel"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Dewgong"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Swinub"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Piloswine"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Mamoswine"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Suicune"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Piplup"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Prinplup"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Rotom ex"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Yamper"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Boltund"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Pawmi"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Pawmo"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Pawmot"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Misdreavus"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Mismagius ex"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Snubbull"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Granbull"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Cresselia"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Meloetta"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Mega Diancie ex"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Mimikyu"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Milcery"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Alcremie"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Zacian"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Bramblin"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Brambleghast"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Paldean Tauros"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Gligar"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Gliscor"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Trapinch"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Vibrava"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Flygon"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Gastly"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Haunter"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Mega Gengar ex"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Murkrow"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Honchkrow"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Sableye"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Carvanha"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Mega Sharpedo ex"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Seviper"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Absol"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Sandile"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Krokorok"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Krookodile"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Toxel"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Toxtricity"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Eternatus"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Empoleon ex"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Bronzor"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Bronzong"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Togedemaru"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Duraludon"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Archaludon"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Jigglypuff"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Wigglytuff"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Aipom"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Ambipom"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Smeargle"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Zigzagoon"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Linoone"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Buneary"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Mega Lopunny ex"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Battle Cage"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Blowtorch"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Dawn"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Dizzying Valley"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Firebreather"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Grimsley’s Move"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Jumbo Ice Cream"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Punk Helmet"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Sacred Charm"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Wondrous Patch"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Ludicolo"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Nymble"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Dewgong"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Piplup"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Yamper"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Zacian"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Flygon"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Paldean Wooper"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Toxtricity"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Togedemaru"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Wigglytuff"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Meowth"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Ambipom"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Mega Heracross ex"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Mega Charizard X ex"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Oricorio ex"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Rotom ex"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Mismagius ex"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Mega Sharpedo ex"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Empoleon ex"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Mega Lopunny ex"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Battle Cage"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Blowtorch"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Dawn"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Firebreather"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Grimsley’s Move"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Punk Helmet"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Sacred Charm"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Switch"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Ignition Energy"
+        },
+        {
+          "collectorNumber": "125",
+          "name": "Mega Charizard X ex"
+        },
+        {
+          "collectorNumber": "126",
+          "name": "Rotom ex"
+        },
+        {
+          "collectorNumber": "127",
+          "name": "Mega Sharpedo ex"
+        },
+        {
+          "collectorNumber": "128",
+          "name": "Mega Lopunny ex"
+        },
+        {
+          "collectorNumber": "129",
+          "name": "Dawn"
+        },
+        {
+          "collectorNumber": "130",
+          "name": "Mega Charizard X ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-EvolutionAscended-Heroes",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me2dot5/gallery/_pdfs/ME02pt5_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:06:57.940635+00:00",
+      "contentSha256": "1dd312a123b317af173f94c4def5736950a9d2b49162cf5280a49562fd3c2ba6",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 295,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Erika’s Oddish"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Erika’s Gloom"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Erika’s Vileplume ex"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Erika’s Bellsprout"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Erika’s Weepinbell"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Erika’s Victreebel"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Erika’s Tangela"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Chikorita"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Bayleef"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Mega Meganium ex"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Wurmple"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Silcoon"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Beautifly"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Cascoon"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Dustox"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Budew"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Grubbin"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Team Rocket’s Tarountula"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Team Rocket’s Spidops"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Charmander"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Charmeleon"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Mega Charizard Y ex"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Ethan’s Slugma"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Ethan’s Magcargo"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Entei"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Ethan’s Ho-Oh ex"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Numel"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Camerupt"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Tepig"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Pignite"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Mega Emboar ex"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "N’s Darumaka"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "N’s Darmanitan"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Salandit"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Salazzle"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Scorbunny"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Raboot"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Cinderace ex"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Psyduck"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Golduck"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Totodile"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Croconaw"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Mega Feraligatr ex"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Sneasel"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Weavile"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Snorunt"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Mega Froslass ex"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Regice ex"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "N’s Vanillite"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "N’s Vanillish"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "N’s Vanilluxe"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Snom"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Frosmoth"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Glastrier"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Raichu"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Voltorb ex"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Tynamo"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Eelektrik"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Mega Eelektross ex"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Stunfisk"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Helioptile"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Heliolisk"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Charjabug"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Vikavolt"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Tapu Koko"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Hop’s Pincurchin ex"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Iono’s Tadbulb"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Iono’s Bellibolt ex"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Iono’s Wattrel"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Iono’s Kilowattrel"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Miraidon ex"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Clefairy"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Clefable"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Lillie’s Clefairy ex"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Team Rocket’s Exeggcute"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Team Rocket’s Exeggutor"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Team Rocket’s Mewtwo ex"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Togepi"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Togetic"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Togekiss"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Marill"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Azumarill ex"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Misdreavus"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Mismagius"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Ralts"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Kirlia"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Mega Gardevoir ex"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Shuppet"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Banette"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Rotom"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Swirlix"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Slurpuff"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Hop’s Phantump"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Hop’s Trevenant"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Team Rocket’s Mimikyu"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Spectrier"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Munkidori"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Team Rocket’s Diglett"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Team Rocket’s Dugtrio"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Hitmontop"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Meditite"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Medicham"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Lunatone"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Solrock"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Regirock ex"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Groudon"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Cynthia’s Gible"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Cynthia’s Gabite"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Cynthia’s Garchomp ex"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Riolu"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Mega Lucario ex"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Stunfisk ex"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Pancham"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Mega Hawlucha ex"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Carbink"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Rolycoly"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Carkol"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Coalossal"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Koraidon ex"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Okidogi"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Gastly"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Haunter"
+        },
+        {
+          "collectorNumber": "125",
+          "name": "Mega Gengar ex"
+        },
+        {
+          "collectorNumber": "126",
+          "name": "Team Rocket’s Murkrow"
+        },
+        {
+          "collectorNumber": "127",
+          "name": "Team Rocket’s Honchkrow"
+        },
+        {
+          "collectorNumber": "128",
+          "name": "Poochyena"
+        },
+        {
+          "collectorNumber": "129",
+          "name": "Mightyena"
+        },
+        {
+          "collectorNumber": "130",
+          "name": "Galarian Zigzagoon"
+        },
+        {
+          "collectorNumber": "131",
+          "name": "Galarian Linoone"
+        },
+        {
+          "collectorNumber": "132",
+          "name": "Galarian Obstagoon"
+        },
+        {
+          "collectorNumber": "133",
+          "name": "Cynthia’s Spiritomb"
+        },
+        {
+          "collectorNumber": "134",
+          "name": "Scraggy"
+        },
+        {
+          "collectorNumber": "135",
+          "name": "Mega Scrafty ex"
+        },
+        {
+          "collectorNumber": "136",
+          "name": "N’s Zorua"
+        },
+        {
+          "collectorNumber": "137",
+          "name": "N’s Zoroark ex"
+        },
+        {
+          "collectorNumber": "138",
+          "name": "Vullaby"
+        },
+        {
+          "collectorNumber": "139",
+          "name": "Mandibuzz ex"
+        },
+        {
+          "collectorNumber": "140",
+          "name": "Pangoro"
+        },
+        {
+          "collectorNumber": "141",
+          "name": "Hoopa"
+        },
+        {
+          "collectorNumber": "142",
+          "name": "Fezandipiti ex"
+        },
+        {
+          "collectorNumber": "143",
+          "name": "Pecharunt"
+        },
+        {
+          "collectorNumber": "144",
+          "name": "Mawile"
+        },
+        {
+          "collectorNumber": "145",
+          "name": "Registeel ex"
+        },
+        {
+          "collectorNumber": "146",
+          "name": "Pawniard"
+        },
+        {
+          "collectorNumber": "147",
+          "name": "Bisharp"
+        },
+        {
+          "collectorNumber": "148",
+          "name": "Kingambit"
+        },
+        {
+          "collectorNumber": "149",
+          "name": "Togedemaru ex"
+        },
+        {
+          "collectorNumber": "150",
+          "name": "Dratini"
+        },
+        {
+          "collectorNumber": "151",
+          "name": "Dragonair"
+        },
+        {
+          "collectorNumber": "152",
+          "name": "Mega Dragonite ex"
+        },
+        {
+          "collectorNumber": "153",
+          "name": "Rayquaza"
+        },
+        {
+          "collectorNumber": "154",
+          "name": "N’s Reshiram"
+        },
+        {
+          "collectorNumber": "155",
+          "name": "N’s Zekrom"
+        },
+        {
+          "collectorNumber": "156",
+          "name": "Noibat"
+        },
+        {
+          "collectorNumber": "157",
+          "name": "Noivern"
+        },
+        {
+          "collectorNumber": "158",
+          "name": "Dreepy"
+        },
+        {
+          "collectorNumber": "159",
+          "name": "Drakloak"
+        },
+        {
+          "collectorNumber": "160",
+          "name": "Dragapult ex"
+        },
+        {
+          "collectorNumber": "161",
+          "name": "Team Rocket’s Meowth"
+        },
+        {
+          "collectorNumber": "162",
+          "name": "Team Rocket’s Kangaskhan ex"
+        },
+        {
+          "collectorNumber": "163",
+          "name": "Larry’s Dunsparce"
+        },
+        {
+          "collectorNumber": "164",
+          "name": "Larry’s Dudunsparce ex"
+        },
+        {
+          "collectorNumber": "165",
+          "name": "Skitty"
+        },
+        {
+          "collectorNumber": "166",
+          "name": "Delcatty"
+        },
+        {
+          "collectorNumber": "167",
+          "name": "Zangoose ex"
+        },
+        {
+          "collectorNumber": "168",
+          "name": "Larry’s Starly"
+        },
+        {
+          "collectorNumber": "169",
+          "name": "Larry’s Staravia"
+        },
+        {
+          "collectorNumber": "170",
+          "name": "Larry’s Staraptor"
+        },
+        {
+          "collectorNumber": "171",
+          "name": "Fan Rotom"
+        },
+        {
+          "collectorNumber": "172",
+          "name": "Mega Audino ex"
+        },
+        {
+          "collectorNumber": "173",
+          "name": "Larry’s Rufflet"
+        },
+        {
+          "collectorNumber": "174",
+          "name": "Larry’s Braviary"
+        },
+        {
+          "collectorNumber": "175",
+          "name": "Larry’s Komala"
+        },
+        {
+          "collectorNumber": "176",
+          "name": "Drampa"
+        },
+        {
+          "collectorNumber": "177",
+          "name": "Hop’s Cramorant"
+        },
+        {
+          "collectorNumber": "178",
+          "name": "Terapagos"
+        },
+        {
+          "collectorNumber": "179",
+          "name": "Terapagos ex"
+        },
+        {
+          "collectorNumber": "180",
+          "name": "Acerola’s Mischief"
+        },
+        {
+          "collectorNumber": "181",
+          "name": "Air Balloon"
+        },
+        {
+          "collectorNumber": "182",
+          "name": "Anthea & Concordia"
+        },
+        {
+          "collectorNumber": "183",
+          "name": "Boss’s Orders"
+        },
+        {
+          "collectorNumber": "184",
+          "name": "Buddy-Buddy Poffin"
+        },
+        {
+          "collectorNumber": "185",
+          "name": "Canari"
+        },
+        {
+          "collectorNumber": "186",
+          "name": "Counter Gain"
+        },
+        {
+          "collectorNumber": "187",
+          "name": "Fighting Gong"
+        },
+        {
+          "collectorNumber": "188",
+          "name": "Forest of Vitality"
+        },
+        {
+          "collectorNumber": "189",
+          "name": "Glass Trumpet"
+        },
+        {
+          "collectorNumber": "190",
+          "name": "Iris’s Fighting Spirit"
+        },
+        {
+          "collectorNumber": "191",
+          "name": "Light Ball"
+        },
+        {
+          "collectorNumber": "192",
+          "name": "Lillie’s Determination"
+        },
+        {
+          "collectorNumber": "193",
+          "name": "Mega Signal"
+        },
+        {
+          "collectorNumber": "194",
+          "name": "Mystery Garden"
+        },
+        {
+          "collectorNumber": "195",
+          "name": "N’s PP Up"
+        },
+        {
+          "collectorNumber": "196",
+          "name": "Night Stretcher"
+        },
+        {
+          "collectorNumber": "197",
+          "name": "Nighttime Mine"
+        },
+        {
+          "collectorNumber": "198",
+          "name": "Poké Pad"
+        },
+        {
+          "collectorNumber": "199",
+          "name": "Premium Power Pro"
+        },
+        {
+          "collectorNumber": "200",
+          "name": "Surfer"
+        },
+        {
+          "collectorNumber": "201",
+          "name": "Team Rocket’s Archer"
+        },
+        {
+          "collectorNumber": "202",
+          "name": "Team Rocket’s Ariana"
+        },
+        {
+          "collectorNumber": "203",
+          "name": "Team Rocket’s Factory"
+        },
+        {
+          "collectorNumber": "204",
+          "name": "Team Rocket’s Giovanni"
+        },
+        {
+          "collectorNumber": "205",
+          "name": "Team Rocket’s Great Ball"
+        },
+        {
+          "collectorNumber": "206",
+          "name": "Team Rocket’s Hypnotizer"
+        },
+        {
+          "collectorNumber": "207",
+          "name": "Team Rocket’s Petrel"
+        },
+        {
+          "collectorNumber": "208",
+          "name": "Team Rocket’s Proton"
+        },
+        {
+          "collectorNumber": "209",
+          "name": "Team Rocket’s Transceiver"
+        },
+        {
+          "collectorNumber": "210",
+          "name": "Team Rocket’s Watchtower"
+        },
+        {
+          "collectorNumber": "211",
+          "name": "Thick Scale"
+        },
+        {
+          "collectorNumber": "212",
+          "name": "Tool Scrapper"
+        },
+        {
+          "collectorNumber": "213",
+          "name": "Ultra Ball"
+        },
+        {
+          "collectorNumber": "214",
+          "name": "Urbain"
+        },
+        {
+          "collectorNumber": "215",
+          "name": "Waitress"
+        },
+        {
+          "collectorNumber": "216",
+          "name": "Prism Energy"
+        },
+        {
+          "collectorNumber": "217",
+          "name": "Team Rocket’s Energy"
+        },
+        {
+          "collectorNumber": "218",
+          "name": "Erika’s Tangela"
+        },
+        {
+          "collectorNumber": "219",
+          "name": "Beautifly"
+        },
+        {
+          "collectorNumber": "220",
+          "name": "Dustox"
+        },
+        {
+          "collectorNumber": "221",
+          "name": "Budew"
+        },
+        {
+          "collectorNumber": "222",
+          "name": "Ethan’s Magcargo"
+        },
+        {
+          "collectorNumber": "223",
+          "name": "Numel"
+        },
+        {
+          "collectorNumber": "224",
+          "name": "Salazzle"
+        },
+        {
+          "collectorNumber": "225",
+          "name": "Scorbunny"
+        },
+        {
+          "collectorNumber": "226",
+          "name": "Psyduck"
+        },
+        {
+          "collectorNumber": "227",
+          "name": "Snorunt"
+        },
+        {
+          "collectorNumber": "228",
+          "name": "Weavile"
+        },
+        {
+          "collectorNumber": "229",
+          "name": "Heliolisk"
+        },
+        {
+          "collectorNumber": "230",
+          "name": "Vikavolt"
+        },
+        {
+          "collectorNumber": "231",
+          "name": "Iono’s Wattrel"
+        },
+        {
+          "collectorNumber": "232",
+          "name": "Marill"
+        },
+        {
+          "collectorNumber": "233",
+          "name": "Misdreavus"
+        },
+        {
+          "collectorNumber": "234",
+          "name": "Banette"
+        },
+        {
+          "collectorNumber": "235",
+          "name": "Togekiss"
+        },
+        {
+          "collectorNumber": "236",
+          "name": "Slurpuff"
+        },
+        {
+          "collectorNumber": "237",
+          "name": "Hop’s Trevenant"
+        },
+        {
+          "collectorNumber": "238",
+          "name": "Team Rocket’s Mimikyu"
+        },
+        {
+          "collectorNumber": "239",
+          "name": "Team Rocket’s Dugtrio"
+        },
+        {
+          "collectorNumber": "240",
+          "name": "Hitmontop"
+        },
+        {
+          "collectorNumber": "241",
+          "name": "Medicham"
+        },
+        {
+          "collectorNumber": "242",
+          "name": "Carbink"
+        },
+        {
+          "collectorNumber": "243",
+          "name": "Mightyena"
+        },
+        {
+          "collectorNumber": "244",
+          "name": "Cynthia’s Spiritomb"
+        },
+        {
+          "collectorNumber": "245",
+          "name": "Galarian Obstagoon"
+        },
+        {
+          "collectorNumber": "246",
+          "name": "Mawile"
+        },
+        {
+          "collectorNumber": "247",
+          "name": "Dreepy"
+        },
+        {
+          "collectorNumber": "248",
+          "name": "Drakloak"
+        },
+        {
+          "collectorNumber": "249",
+          "name": "Larry’s Staraptor"
+        },
+        {
+          "collectorNumber": "250",
+          "name": "Fan Rotom"
+        },
+        {
+          "collectorNumber": "251",
+          "name": "Sprigatito ex"
+        },
+        {
+          "collectorNumber": "252",
+          "name": "Stunfisk ex"
+        },
+        {
+          "collectorNumber": "253",
+          "name": "Mega Audino ex"
+        },
+        {
+          "collectorNumber": "254",
+          "name": "Anthea & Concordia"
+        },
+        {
+          "collectorNumber": "255",
+          "name": "Black Belt’s Training"
+        },
+        {
+          "collectorNumber": "256",
+          "name": "Boss’s Orders"
+        },
+        {
+          "collectorNumber": "257",
+          "name": "Canari"
+        },
+        {
+          "collectorNumber": "258",
+          "name": "Cheren"
+        },
+        {
+          "collectorNumber": "259",
+          "name": "Counter Gain"
+        },
+        {
+          "collectorNumber": "260",
+          "name": "Glass Trumpet"
+        },
+        {
+          "collectorNumber": "261",
+          "name": "Jamming Tower"
+        },
+        {
+          "collectorNumber": "262",
+          "name": "N’s PP Up"
+        },
+        {
+          "collectorNumber": "263",
+          "name": "Team Rocket’s Transceiver"
+        },
+        {
+          "collectorNumber": "264",
+          "name": "Ultra Ball"
+        },
+        {
+          "collectorNumber": "265",
+          "name": "Mega Froslass ex"
+        },
+        {
+          "collectorNumber": "266",
+          "name": "Mega Eelektross ex"
+        },
+        {
+          "collectorNumber": "267",
+          "name": "Mega Diancie ex"
+        },
+        {
+          "collectorNumber": "268",
+          "name": "Mega Hawlucha ex"
+        },
+        {
+          "collectorNumber": "269",
+          "name": "Mega Gengar ex"
+        },
+        {
+          "collectorNumber": "270",
+          "name": "Mega Scrafty ex"
+        },
+        {
+          "collectorNumber": "271",
+          "name": "Mega Dragonite ex"
+        },
+        {
+          "collectorNumber": "272",
+          "name": "Mega Meganium ex"
+        },
+        {
+          "collectorNumber": "273",
+          "name": "Mega Emboar ex"
+        },
+        {
+          "collectorNumber": "274",
+          "name": "Mega Feraligatr ex"
+        },
+        {
+          "collectorNumber": "275",
+          "name": "Mega Froslass ex"
+        },
+        {
+          "collectorNumber": "276",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "277",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "278",
+          "name": "Mega Eelektross ex"
+        },
+        {
+          "collectorNumber": "279",
+          "name": "Iono’s Bellibolt ex"
+        },
+        {
+          "collectorNumber": "280",
+          "name": "Lillie’s Clefairy ex"
+        },
+        {
+          "collectorNumber": "281",
+          "name": "Team Rocket’s Mewtwo ex"
+        },
+        {
+          "collectorNumber": "282",
+          "name": "Mega Diancie ex"
+        },
+        {
+          "collectorNumber": "283",
+          "name": "Mega Hawlucha ex"
+        },
+        {
+          "collectorNumber": "284",
+          "name": "Mega Gengar ex"
+        },
+        {
+          "collectorNumber": "285",
+          "name": "Mega Scrafty ex"
+        },
+        {
+          "collectorNumber": "286",
+          "name": "N’s Zoroark ex"
+        },
+        {
+          "collectorNumber": "287",
+          "name": "Marnie’s Grimmsnarl ex"
+        },
+        {
+          "collectorNumber": "288",
+          "name": "Fezandipiti ex"
+        },
+        {
+          "collectorNumber": "289",
+          "name": "Steven’s Metagross ex"
+        },
+        {
+          "collectorNumber": "290",
+          "name": "Mega Dragonite ex"
+        },
+        {
+          "collectorNumber": "291",
+          "name": "Canari"
+        },
+        {
+          "collectorNumber": "292",
+          "name": "Iris’s Fighting Spirit"
+        },
+        {
+          "collectorNumber": "293",
+          "name": "Surfer"
+        },
+        {
+          "collectorNumber": "294",
+          "name": "Mega Charizard Y ex"
+        },
+        {
+          "collectorNumber": "295",
+          "name": "Mega Dragonite ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokkemon-TCG-Mega-EvolutionPerfect-Order",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me03/gallery/_pdfs/P11218_ME03_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:07:25.751162+00:00",
+      "contentSha256": "79003a6ce91143f81495d5beae54b9161b2da4377cf049c04a424bc4687b2e48",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 124,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Spinarak"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Ariados"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Shaymin"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Snivy"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Servine"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Serperior"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Scatterbug"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Spewpa"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Vivillon"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Rowlet"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Dartrix"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Decidueye ex"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Fletchinder"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Talonflame"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Salandit"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Salazzle ex"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Turtonator"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Seel"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Dewgong"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Staryu"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Mega Starmie ex"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Lapras ex"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Amaura"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Aurorus"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Volcanion"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Shinx"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Luxio"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Luxray"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Dedenne"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Clefairy"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Mega Clefable ex"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Mawile"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Espurr"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Meowstic"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Spritzee"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Aromatisse"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Nosepass"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Probopass"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Hippopotas"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Hippowdon"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Landorus"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Binacle"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Barbaracle"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Tyrunt"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Tyrantrum"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Hawlucha"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Mega Zygarde ex"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Gastly"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Haunter"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Gengar"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Skorupi"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Drapion"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Yveltal ex"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Chien-Pao"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Mega Skarmory ex"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Honedge"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Doublade"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Aegislash"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Klefki"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Rattata"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Raticate"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Meowth ex"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Snorlax"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Bunnelby"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Diggersby"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Fletchling"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Furfrou"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Antique Jaw Fossil"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Antique Sail Fossil"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Core Memory"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Crushing Hammer"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Energy Search"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Energy Swatter"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Hole-Digging Shovel"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Jacinthe"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Judge"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Lumiose City"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Lumiose Galette"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Naveen"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Poké Ball"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Poké Pad"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Pokémon Catcher"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Potion"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Rosa’s Encouragement"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Tarragon"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Growing Grass Energy"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Rocky Fighting Energy"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Telepathic Psychic Energy"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Spewpa"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Rowlet"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Talonflame"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Aurorus"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Dedenne"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Clefairy"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Espurr"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Probopass"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Drapion"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Doublade"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Raticate"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Decidueye ex"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Salazzle ex"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Mega Starmie ex"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Mega Clefable ex"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Mega Zygarde ex"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Yveltal ex"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Mega Skarmory ex"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Meowth ex"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Energy Recycler"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Forest of Vitality"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Jacinthe"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Lumiose City"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Naveen"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Poké Pad"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Rosa’s Encouragement"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Sacred Ash"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Tarragon"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Wondrous Patch"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Mega Starmie ex"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Mega Clefable ex"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Mega Zygarde ex"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Meowth ex"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Jacinthe"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Rosa’s Encouragement"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Mega Zygarde ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-EvolutionChaos-Rising",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me04/gallery/_pdfs/ME04_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:02:58.799698+00:00",
+      "contentSha256": "4592ec3bc0dba59c7ed01071e15a0f591e4280975c3af1ee0f971d3446d57676",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 122,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Weedle"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Kakuna"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Beedrill ex"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Carnivine"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Chespin"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Quilladin"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Chesnaught"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Vulpix"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Ninetales"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Ho-Oh"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Fennekin"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Braixen"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Delphox"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Litleo"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Mega Pyroar ex"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Remoraid"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Octillery"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Delibird"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Keldeo"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Froakie"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Frogadier"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Mega Greninja ex"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Bergmite"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Avalugg"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Wimpod"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Golisopod"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Mareep"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Flaaffy"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Ampharos"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Emolga"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Deoxys"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Deoxys"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Deoxys"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Deoxys"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Mega Floette ex"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Espurr"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Meowstic"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Phantump"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Trevenant"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Pumpkaboo"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Gourgeist ex"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Xerneas"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Sudowoodo"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Phanpy"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Donphan"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Baltoy"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Claydol"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Mega Gallade ex"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Zubat"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Golbat"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Crobat"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Qwilfish"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Stunky"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Skuntank"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Krookodile ex"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Trubbish"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Garbodor"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Skrelp"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Beldum"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Metang"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Metagross"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Ferroseed"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Ferrothorn"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Cobalion ex"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Mega Dragalge ex"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Goomy"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Sliggoo"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Goodra"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Tauros"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Patrat"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Watchog"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Minccino"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Cinccino ex"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Adversity Policy"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Ange Floette"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "AZ’s Tranquility"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Emma"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Great Haul Net"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Philippe"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Prism Tower"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Roxie’s Performance"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Special Red Card"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Transformation Tome"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Bubbly Water Energy"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Magnetic Metal Energy"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Nitro Fire Energy"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Chespin"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Froakie"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Frogadier"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Ampharos"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Xerneas"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Claydol"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Crobat"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Metang"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Sliggoo"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Tauros"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Watchog"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Beedrill ex"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Mega Pyroar ex"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Mega Greninja ex"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Mega Floette ex"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Gourgeist ex"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Cobalion ex"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Mega Dragalge ex"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Cinccino ex"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "AZ’s Tranquility"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Emma"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Energy Retrieval"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Jumbo Ice Cream"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Philippe"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Prism Tower"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Roxie’s Performance"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Special Red Card"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Surfing Beach"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Tool Scrapper"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Mega Greninja ex"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Mega Floette ex"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Mega Dragalge ex"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Cinccino ex"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "AZ’s Tranquility"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Roxie’s Performance"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Mega Greninja ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-EvolutionPitch-Black",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me05/gallery/_pdfs/ME05_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:02:42.740971+00:00",
+      "contentSha256": "9fd0a19ea2580eb77e6e33a60172c608459c9fbe54057b0e2b1b4bdf5423015d",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 120,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Tropius"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Grubbin"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Fomantis"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Lurantis ex"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Poltchageist"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Sinistcha"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Heatran"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Mega Delphox ex"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Sizzlipede"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Centiskorch"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Charcadet"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Armarouge"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Goldeen"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Seaking"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Wailmer"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Wailord ex"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Relicanth"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Popplio"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Brionne"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Primarina"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Finizen"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Palafin"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Electrike"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Manectric"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Charjabug"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Vikavolt"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Mega Zeraora ex"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Miraidon"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Slowpoke"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Slowbro"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Mega Slowbro ex"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Jynx"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Shuppet"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Banette"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Spiritomb"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Litwick"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Lampent"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Mega Chandelure ex"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Dhelmise"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Marshadow"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Annihilape"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Mankey"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Primeape"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Cranidos"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Rampardos ex"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Drilbur"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Koraidon"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Mega Darkrai ex"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Vullaby"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Mandibuzz"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Inkay"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Malamar"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Nickit"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Thievul"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Morpeko ex"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Zarude"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Maschiff"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Mabosstiff"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Chi-Yu"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Skarmory"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Shieldon"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Bastiodon"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Bronzor"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Bronzong"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Mega Excadrill ex"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Pikipek"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Trumbeak"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Toucannon"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Type: Null"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Silvally"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Bombirdier"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Antique Armor Fossil"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Antique Skull Fossil"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Backtrack Badge"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Dark Bell"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Fossil Quarry"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Gladion’s Final Battle"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Gwynn"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Jett"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Misty’s Vitality"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Rust Syndicate Grunt"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Tremendous Bomb"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Shadowy Darkness Energy"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Voltaic Lightning Energy"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Fomantis"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Armarouge"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Goldeen"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Primarina"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Manectric"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Slowbro"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Dhelmise"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Thievul"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Bastiodon"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Toucannon"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Silvally"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Lurantis ex"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Wailord ex"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Mega Zeraora ex"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Mega Chandelure ex"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Rampardos ex"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Mega Darkrai ex"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Morpeko ex"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Mega Excadrill ex"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Brave Bangle"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Crushing Hammer"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Dark Bell"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Energy Switch"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Gladion’s Final Battle"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Gwynn"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Iron Defender"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Misty’s Vitality"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Rust Syndicate Grunt"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Tremendous Bomb"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Mega Zeraora ex"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Mega Chandelure ex"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Mega Darkrai ex"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Morpeko ex"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Gladion’s Final Battle"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Gwynn"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Mega Darkrai ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-30th-Celebration",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/thirty/gallery/_pdfs/P11221_30th_Celebration_Card_List_EN_HiRes.pdf",
+      "retrievedAt": "2026-11-02T01:04:52.425768+00:00",
+      "contentSha256": "f875e9a839b2a44d4f8a064e3b0140331dcd8e99e11098a3524f1f1f6629508f",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 158,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Exeggcute"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Alolan Exeggutor"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Volbeat"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Illumise"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Tropius"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Cherubi"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Cherrim"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Vivillon"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Vulpix"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Ninetales"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Moltres"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Ho-Oh"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Victini"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Reshiram"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Fuecoco ex"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Slowpoke"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Lapras"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Articuno"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Kyogre"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Palkia"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Greninja ex"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Wishiwashi"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Pikachu"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Zapdos"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Zekrom"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Zeraora"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Toxel"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Toxtricity"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Toxtricity"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Morpeko"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Miraidon"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Mewtwo"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Mewtwo ex"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Mew"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Mew ex"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Marill"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Azumarill"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Espeon"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Espeon ex"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Sylveon ex"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Unown"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Drifloon"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Cresselia"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Chandelure"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Xerneas"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Comfey"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Cosmog"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Cosmoem"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Lunala"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Gimmighoul"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Groudon"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Lucario"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Seismitoad"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Lycanroc"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Koraidon"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Nidoran♀"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Nidorina"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Alolan Meowth"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Gengar ex"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Umbreon"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Umbreon ex"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Murkrow"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Scraggy"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Zorua"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Zoroark"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Deino"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Zweilous"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Hydreigon"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Yveltal"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Galarian Meowth"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Jirachi ex"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Dialga"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Ferrothorn"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Solgaleo"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Zacian"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Zamazenta"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Gholdengo"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Salamence ex"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Jangmo-o"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Hakamo-o"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Kommo-o"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Meowth"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Kangaskhan"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Ditto"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Eevee"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Eevee"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Eevee"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Snorlax"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Igglybuff"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Lugia"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Hisuian Zorua"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Hisuian Zoroark"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Minior"
+        },
+        {
+          "collectorNumber": "125",
+          "name": "Maushold"
+        },
+        {
+          "collectorNumber": "126",
+          "name": "Poké Pad"
+        },
+        {
+          "collectorNumber": "127",
+          "name": "Switch"
+        },
+        {
+          "collectorNumber": "128",
+          "name": "Ultra Ball"
+        },
+        {
+          "collectorNumber": "129",
+          "name": "Alolan Exeggutor"
+        },
+        {
+          "collectorNumber": "130",
+          "name": "Moltres"
+        },
+        {
+          "collectorNumber": "131",
+          "name": "Lapras"
+        },
+        {
+          "collectorNumber": "132",
+          "name": "Articuno"
+        },
+        {
+          "collectorNumber": "133",
+          "name": "Zapdos"
+        },
+        {
+          "collectorNumber": "134",
+          "name": "Toxtricity"
+        },
+        {
+          "collectorNumber": "135",
+          "name": "Morpeko"
+        },
+        {
+          "collectorNumber": "136",
+          "name": "Drifloon"
+        },
+        {
+          "collectorNumber": "137",
+          "name": "Chandelure"
+        },
+        {
+          "collectorNumber": "138",
+          "name": "Lycanroc"
+        },
+        {
+          "collectorNumber": "139",
+          "name": "Alolan Meowth"
+        },
+        {
+          "collectorNumber": "140",
+          "name": "Scraggy"
+        },
+        {
+          "collectorNumber": "141",
+          "name": "Galarian Meowth"
+        },
+        {
+          "collectorNumber": "142",
+          "name": "Gholdengo"
+        },
+        {
+          "collectorNumber": "143",
+          "name": "Kommo-o"
+        },
+        {
+          "collectorNumber": "144",
+          "name": "Meowth"
+        },
+        {
+          "collectorNumber": "145",
+          "name": "Hisuian Zorua"
+        },
+        {
+          "collectorNumber": "146",
+          "name": "Maushold"
+        },
+        {
+          "collectorNumber": "147",
+          "name": "Fuecoco ex"
+        },
+        {
+          "collectorNumber": "148",
+          "name": "Greninja ex"
+        },
+        {
+          "collectorNumber": "149",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "150",
+          "name": "Pikachu ex"
+        },
+        {
+          "collectorNumber": "151",
+          "name": "Mewtwo ex"
+        },
+        {
+          "collectorNumber": "152",
+          "name": "Mew ex"
+        },
+        {
+          "collectorNumber": "153",
+          "name": "Sylveon ex"
+        },
+        {
+          "collectorNumber": "154",
+          "name": "Gengar ex"
+        },
+        {
+          "collectorNumber": "155",
+          "name": "Jirachi ex"
+        },
+        {
+          "collectorNumber": "156",
+          "name": "Salamence ex"
+        },
+        {
+          "collectorNumber": "157",
+          "name": "Mewtwo ex"
+        },
+        {
+          "collectorNumber": "158",
+          "name": "Mew ex"
+        }
+      ]
+    },
+    {
+      "setSourceUrl": "https://press.pokemon.com/en/products/Pokemon-TCG-Mega-EvolutionDelta-Reign",
+      "sourceUrl": "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/me06/gallery/_pdfs/ME06_Card_List_EN.pdf",
+      "retrievedAt": "2026-11-02T01:03:10.018508+00:00",
+      "contentSha256": "261e3bb1da99e264aa892fe21ffb4955362cb9a155315fefbf14aef1b12c1da0",
+      "scope": "main-numbered-checklist",
+      "expectedCount": 141,
+      "cards": [
+        {
+          "collectorNumber": "001",
+          "name": "Heracross"
+        },
+        {
+          "collectorNumber": "002",
+          "name": "Surskit"
+        },
+        {
+          "collectorNumber": "003",
+          "name": "Masquerain"
+        },
+        {
+          "collectorNumber": "004",
+          "name": "Cacnea"
+        },
+        {
+          "collectorNumber": "005",
+          "name": "Cacturne"
+        },
+        {
+          "collectorNumber": "006",
+          "name": "Combee"
+        },
+        {
+          "collectorNumber": "007",
+          "name": "Vespiquen"
+        },
+        {
+          "collectorNumber": "008",
+          "name": "Shaymin"
+        },
+        {
+          "collectorNumber": "009",
+          "name": "Virizion"
+        },
+        {
+          "collectorNumber": "010",
+          "name": "Wimpod"
+        },
+        {
+          "collectorNumber": "011",
+          "name": "Mega Golisopod ex"
+        },
+        {
+          "collectorNumber": "012",
+          "name": "Sprigatito"
+        },
+        {
+          "collectorNumber": "013",
+          "name": "Floragato"
+        },
+        {
+          "collectorNumber": "014",
+          "name": "Meowscarada ex"
+        },
+        {
+          "collectorNumber": "015",
+          "name": "Smoliv"
+        },
+        {
+          "collectorNumber": "016",
+          "name": "Dolliv"
+        },
+        {
+          "collectorNumber": "017",
+          "name": "Arboliva"
+        },
+        {
+          "collectorNumber": "018",
+          "name": "Growlithe"
+        },
+        {
+          "collectorNumber": "019",
+          "name": "Arcanine"
+        },
+        {
+          "collectorNumber": "020",
+          "name": "Magmar"
+        },
+        {
+          "collectorNumber": "021",
+          "name": "Magmortar"
+        },
+        {
+          "collectorNumber": "022",
+          "name": "Torkoal"
+        },
+        {
+          "collectorNumber": "023",
+          "name": "Heat Rotom ex"
+        },
+        {
+          "collectorNumber": "024",
+          "name": "Heatmor"
+        },
+        {
+          "collectorNumber": "025",
+          "name": "Mantine"
+        },
+        {
+          "collectorNumber": "026",
+          "name": "Kyogre"
+        },
+        {
+          "collectorNumber": "027",
+          "name": "Frillish"
+        },
+        {
+          "collectorNumber": "028",
+          "name": "Jellicent"
+        },
+        {
+          "collectorNumber": "029",
+          "name": "Wishiwashi ex"
+        },
+        {
+          "collectorNumber": "030",
+          "name": "Electabuzz"
+        },
+        {
+          "collectorNumber": "031",
+          "name": "Electivire"
+        },
+        {
+          "collectorNumber": "032",
+          "name": "Jolteon"
+        },
+        {
+          "collectorNumber": "033",
+          "name": "Raikou ex"
+        },
+        {
+          "collectorNumber": "034",
+          "name": "Rotom"
+        },
+        {
+          "collectorNumber": "035",
+          "name": "Thundurus"
+        },
+        {
+          "collectorNumber": "036",
+          "name": "Pincurchin"
+        },
+        {
+          "collectorNumber": "037",
+          "name": "Pawmi"
+        },
+        {
+          "collectorNumber": "038",
+          "name": "Pawmo"
+        },
+        {
+          "collectorNumber": "039",
+          "name": "Pawmot"
+        },
+        {
+          "collectorNumber": "040",
+          "name": "Wattrel"
+        },
+        {
+          "collectorNumber": "041",
+          "name": "Kilowattrel"
+        },
+        {
+          "collectorNumber": "042",
+          "name": "Miraidon"
+        },
+        {
+          "collectorNumber": "043",
+          "name": "Drowzee"
+        },
+        {
+          "collectorNumber": "044",
+          "name": "Hypno"
+        },
+        {
+          "collectorNumber": "045",
+          "name": "Giratina"
+        },
+        {
+          "collectorNumber": "046",
+          "name": "Golett"
+        },
+        {
+          "collectorNumber": "047",
+          "name": "Mega Golurk ex"
+        },
+        {
+          "collectorNumber": "048",
+          "name": "Enamorus"
+        },
+        {
+          "collectorNumber": "049",
+          "name": "Sandshrew"
+        },
+        {
+          "collectorNumber": "050",
+          "name": "Sandslash"
+        },
+        {
+          "collectorNumber": "051",
+          "name": "Onix"
+        },
+        {
+          "collectorNumber": "052",
+          "name": "Steelix"
+        },
+        {
+          "collectorNumber": "053",
+          "name": "Groudon"
+        },
+        {
+          "collectorNumber": "054",
+          "name": "Landorus"
+        },
+        {
+          "collectorNumber": "055",
+          "name": "Nidoran♀"
+        },
+        {
+          "collectorNumber": "056",
+          "name": "Nidorina"
+        },
+        {
+          "collectorNumber": "057",
+          "name": "Nidoqueen"
+        },
+        {
+          "collectorNumber": "058",
+          "name": "Spinarak"
+        },
+        {
+          "collectorNumber": "059",
+          "name": "Ariados"
+        },
+        {
+          "collectorNumber": "060",
+          "name": "Sableye"
+        },
+        {
+          "collectorNumber": "061",
+          "name": "Carvanha"
+        },
+        {
+          "collectorNumber": "062",
+          "name": "Sharpedo"
+        },
+        {
+          "collectorNumber": "063",
+          "name": "Darkrai"
+        },
+        {
+          "collectorNumber": "064",
+          "name": "Purrloin"
+        },
+        {
+          "collectorNumber": "065",
+          "name": "Liepard"
+        },
+        {
+          "collectorNumber": "066",
+          "name": "Zorua"
+        },
+        {
+          "collectorNumber": "067",
+          "name": "Zoroark ex"
+        },
+        {
+          "collectorNumber": "068",
+          "name": "Inkay"
+        },
+        {
+          "collectorNumber": "069",
+          "name": "Mega Malamar ex"
+        },
+        {
+          "collectorNumber": "070",
+          "name": "Morpeko"
+        },
+        {
+          "collectorNumber": "071",
+          "name": "Zarude"
+        },
+        {
+          "collectorNumber": "072",
+          "name": "Druddigon"
+        },
+        {
+          "collectorNumber": "073",
+          "name": "Jangmo-o"
+        },
+        {
+          "collectorNumber": "074",
+          "name": "Hakamo-o"
+        },
+        {
+          "collectorNumber": "075",
+          "name": "Kommo-o"
+        },
+        {
+          "collectorNumber": "076",
+          "name": "Cyclizar"
+        },
+        {
+          "collectorNumber": "077",
+          "name": "Tauros"
+        },
+        {
+          "collectorNumber": "078",
+          "name": "Eevee"
+        },
+        {
+          "collectorNumber": "079",
+          "name": "Delibird"
+        },
+        {
+          "collectorNumber": "080",
+          "name": "Azurill"
+        },
+        {
+          "collectorNumber": "081",
+          "name": "Swablu"
+        },
+        {
+          "collectorNumber": "082",
+          "name": "Altaria"
+        },
+        {
+          "collectorNumber": "083",
+          "name": "Kecleon"
+        },
+        {
+          "collectorNumber": "084",
+          "name": "Mega Rayquaza ex"
+        },
+        {
+          "collectorNumber": "085",
+          "name": "Tornadus"
+        },
+        {
+          "collectorNumber": "086",
+          "name": "Fletchling"
+        },
+        {
+          "collectorNumber": "087",
+          "name": "Fletchinder"
+        },
+        {
+          "collectorNumber": "088",
+          "name": "Talonflame ex"
+        },
+        {
+          "collectorNumber": "089",
+          "name": "Aarune"
+        },
+        {
+          "collectorNumber": "090",
+          "name": "Adventure Lantern"
+        },
+        {
+          "collectorNumber": "091",
+          "name": "Custom Vest"
+        },
+        {
+          "collectorNumber": "092",
+          "name": "Emcee’s Hype"
+        },
+        {
+          "collectorNumber": "093",
+          "name": "Grisham"
+        },
+        {
+          "collectorNumber": "094",
+          "name": "Legendary Pyroduct"
+        },
+        {
+          "collectorNumber": "095",
+          "name": "Legendary Pyroduct"
+        },
+        {
+          "collectorNumber": "096",
+          "name": "Legendary Summit"
+        },
+        {
+          "collectorNumber": "097",
+          "name": "Legendary Summit"
+        },
+        {
+          "collectorNumber": "098",
+          "name": "Legendary Trench"
+        },
+        {
+          "collectorNumber": "099",
+          "name": "Legendary Trench"
+        },
+        {
+          "collectorNumber": "100",
+          "name": "Mega Rayquaza Cap"
+        },
+        {
+          "collectorNumber": "101",
+          "name": "Tasty Rice Ball"
+        },
+        {
+          "collectorNumber": "102",
+          "name": "Tate & Liza’s Training"
+        },
+        {
+          "collectorNumber": "103",
+          "name": "Zinnia’s Trust"
+        },
+        {
+          "collectorNumber": "104",
+          "name": "Masquerain"
+        },
+        {
+          "collectorNumber": "105",
+          "name": "Sprigatito"
+        },
+        {
+          "collectorNumber": "106",
+          "name": "Growlithe"
+        },
+        {
+          "collectorNumber": "107",
+          "name": "Magmortar"
+        },
+        {
+          "collectorNumber": "108",
+          "name": "Electivire"
+        },
+        {
+          "collectorNumber": "109",
+          "name": "Pincurchin"
+        },
+        {
+          "collectorNumber": "110",
+          "name": "Enamorus"
+        },
+        {
+          "collectorNumber": "111",
+          "name": "Groudon"
+        },
+        {
+          "collectorNumber": "112",
+          "name": "Zorua"
+        },
+        {
+          "collectorNumber": "113",
+          "name": "Inkay"
+        },
+        {
+          "collectorNumber": "114",
+          "name": "Eevee"
+        },
+        {
+          "collectorNumber": "115",
+          "name": "Azurill"
+        },
+        {
+          "collectorNumber": "116",
+          "name": "Altaria"
+        },
+        {
+          "collectorNumber": "117",
+          "name": "Kecleon"
+        },
+        {
+          "collectorNumber": "118",
+          "name": "Mega Golisopod ex"
+        },
+        {
+          "collectorNumber": "119",
+          "name": "Heat Rotom ex"
+        },
+        {
+          "collectorNumber": "120",
+          "name": "Wishiwashi ex"
+        },
+        {
+          "collectorNumber": "121",
+          "name": "Raikou ex"
+        },
+        {
+          "collectorNumber": "122",
+          "name": "Mega Golurk ex"
+        },
+        {
+          "collectorNumber": "123",
+          "name": "Mega Malamar ex"
+        },
+        {
+          "collectorNumber": "124",
+          "name": "Talonflame ex"
+        },
+        {
+          "collectorNumber": "125",
+          "name": "Aarune"
+        },
+        {
+          "collectorNumber": "126",
+          "name": "Adventure Lantern"
+        },
+        {
+          "collectorNumber": "127",
+          "name": "Custom Vest"
+        },
+        {
+          "collectorNumber": "128",
+          "name": "Emcee’s Hype"
+        },
+        {
+          "collectorNumber": "129",
+          "name": "Pokémon Catcher"
+        },
+        {
+          "collectorNumber": "130",
+          "name": "Tate & Liza’s Training"
+        },
+        {
+          "collectorNumber": "131",
+          "name": "Zinnia’s Trust"
+        },
+        {
+          "collectorNumber": "132",
+          "name": "Bubbly Water Energy"
+        },
+        {
+          "collectorNumber": "133",
+          "name": "Growing Grass Energy"
+        },
+        {
+          "collectorNumber": "134",
+          "name": "Nitro Fire Energy"
+        },
+        {
+          "collectorNumber": "135",
+          "name": "Mega Golisopod ex"
+        },
+        {
+          "collectorNumber": "136",
+          "name": "Raikou ex"
+        },
+        {
+          "collectorNumber": "137",
+          "name": "Mega Golurk ex"
+        },
+        {
+          "collectorNumber": "138",
+          "name": "Mega Rayquaza ex"
+        },
+        {
+          "collectorNumber": "139",
+          "name": "Aarune"
+        },
+        {
+          "collectorNumber": "140",
+          "name": "Zinnia’s Trust"
+        },
+        {
+          "collectorNumber": "141",
+          "name": "Mega Rayquaza ex"
+        }
+      ]
+    }
+  ]
+}

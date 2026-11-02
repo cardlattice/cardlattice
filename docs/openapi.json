@@ -488,13 +488,24 @@
         "additionalProperties": false,
         "properties": {
           "category": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "hp": {
             "format": "int32",
             "minimum": 0,
             "type": [
               "integer",
+              "null"
+            ]
+          },
+          "identityScope": {
+            "description": "Provisional identity bounded to an internal printing UUID until rules are reviewed.",
+            "format": "uuid",
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -511,9 +522,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "category"
-        ],
         "type": "object"
       },
       "RecordDetail": {

@@ -15,6 +15,8 @@ export function Browse() {
     cursor?: string;
     language?: string;
     sort?: string;
+    setId?: string;
+    cardId?: string;
   };
   const navigate = useNavigate();
   const isSearch = pathname === "/search";
@@ -26,6 +28,8 @@ export function Browse() {
   if (search.q) query.set("q", search.q);
   if (search.cursor) query.set("cursor", search.cursor);
   if (search.language) query.set("language", search.language);
+  if (search.setId) query.set("setId", search.setId);
+  if (search.cardId) query.set("cardId", search.cardId);
   if (search.sort === "newest") query.set("sort", "newest");
   query.sort();
   const endpoint = isSearch
@@ -35,6 +39,10 @@ export function Browse() {
       : `/v1/games/${params.game}/${collection}`;
   const records = useApi<PageData>(`${endpoint}${query.size ? `?${query}` : ""}`);
   const game = useApi<{ data: RecordData }>(`/v1/games/${params.game}`, !!params.game);
+  const parent = useApi<{ data: RecordData }>(
+    `/v1/games/${params.game}/${search.setId ? "sets" : "cards"}/${search.setId || search.cardId}`,
+    !!params.game && !!(search.setId || search.cardId),
+  );
   const title = isSearch
     ? "Find your next starting point."
     : isGames
@@ -45,7 +53,7 @@ export function Browse() {
           ? "Browse sets."
           : collection === "cards"
             ? "Card identities."
-            : "Every printing has a story.";
+            : parent.data?.data.name || "Every printing has a story.";
   function update(values: Record<string, string>) {
     void navigate({ to: pathname, search: { ...search, cursor: "", ...values } });
   }

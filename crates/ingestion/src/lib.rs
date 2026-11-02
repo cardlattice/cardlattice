@@ -7,6 +7,7 @@ use std::io::Cursor;
 use uuid::Uuid;
 
 pub mod official_pokemon;
+pub mod pokemon_cards;
 
 #[derive(Debug, thiserror::Error)]
 pub enum IngestionError {

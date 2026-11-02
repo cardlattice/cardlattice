@@ -173,3 +173,8 @@ Read [architecture](docs/architecture.md), [schema](docs/schema.md),
 [API](docs/api.md), [contributing](docs/contributing.md),
 [sourcing and licensing](docs/licensing.md), [Cloudflare](docs/cloudflare.md),
 [cost model](docs/costs.md), and [backup/recovery](docs/backup.md).
+
+To populate the reviewed Pokémon sets with independently transcribed card names and
+collector numbers, see the [official checklist import workflow](data/pokemon/README.md#numbered-card-checklists-2026-11-02)
+and its [validation record](docs/validation/pokemon-cards.md). It imports factual
+metadata only, with provisional card identities and no artwork.

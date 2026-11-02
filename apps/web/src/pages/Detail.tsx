@@ -68,6 +68,12 @@ export function Detail() {
               </section>
               <section className="panel">
                 <h2>Game-specific attributes</h2>
+                {!!record.attributes.identityScope && (
+                  <p className="notice">
+                    This card identity is provisional. It remains separate from same-name cards
+                    until their rules and characteristics have been compared.
+                  </p>
+                )}
                 <pre className="code-block">
                   <code>{JSON.stringify(record.attributes, null, 2)}</code>
                 </pre>
@@ -105,7 +111,11 @@ export function Detail() {
               <section className="section">
                 <div className="section-heading">
                   <h2>Related printings</h2>
-                  <Link to={`/games/${game}/printings`} className="text-link">
+                  <Link
+                    to={`/games/${game}/printings`}
+                    search={record.kind === "set" ? { setId: record.id } : { cardId: record.id }}
+                    className="text-link"
+                  >
                     Browse printings →
                   </Link>
                 </div>

@@ -120,3 +120,14 @@ that budget is shared by the proxy's traffic: use edge rate limiting for per-use
 limits and plan a trusted-proxy policy before multi-instance public deployment.
 Scan uploads are byte- and decode-limited PNG/JPEG files stored privately in
 PostgreSQL. They are served to moderators as attachments with no-store and nosniff.
+
+### Checklist-based provisional identities
+
+Official Pokémon checklist imports (`ingestion::pokemon_cards`) resolve existing
+sets by secondary official product URLs and assign new internal UUIDs to cards and
+printings. Checklist names do not prove rules equivalence: a nullable typed Pokémon
+category and UUID `identityScope` permit provisional card identities without guessed
+attributes or name-based merging. Numbered alternate illustrations remain distinct
+printings. The insert-only batch operation, provenance, audit revisions and a
+consolidated invalidation event commit atomically. See `data/pokemon/README.md` for
+source boundaries, measured checklist scope, repeatability and exclusions.
