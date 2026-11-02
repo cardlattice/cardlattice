@@ -3,6 +3,7 @@ import { useApi, date, type DetailData } from "../api";
 import { QueryState } from "../components/QueryState";
 import { PageHeader } from "../components/PageHeader";
 import { RecordTable } from "../components/RecordTable";
+import { SourceCitation } from "../components/SourceCitation";
 
 export function Detail() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -129,19 +130,13 @@ export function Detail() {
             <section className="section">
               <h2>Sources & provenance</h2>
               {query.data?.sources.map((source) => (
-                <article key={source.id} className="source">
-                  <p>{source.description}</p>
-                  <p className="field-hint">
-                    {source.method.replaceAll("_", " ")} · {source.license} · {source.fields.length}{" "}
-                    recorded fields
-                  </p>
-                  {source.referenceUrl && (
-                    <a href={source.referenceUrl} target="_blank" rel="noreferrer">
-                      Open source reference ↗
-                    </a>
-                  )}
-                </article>
+                <SourceCitation key={source.id} source={source} />
               ))}
+              {!!query.data?.sources.length && (
+                <p className="field-hint">
+                  <a href={`/v1${pathname}`}>Full provenance (JSON)</a>
+                </p>
+              )}
               {query.data?.localisations.map((locale) => (
                 <p key={locale.language}>
                   <span className="badge">{locale.language}</span> {locale.name}
