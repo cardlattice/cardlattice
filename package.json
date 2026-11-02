@@ -9,7 +9,8 @@
     "test": "pnpm --filter @cardlattice/web test",
     "lint": "pnpm --filter @cardlattice/web lint",
     "format": "pnpm --filter @cardlattice/web format",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "test:e2e": "pnpm --filter @cardlattice/web test:e2e"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "test:e2e": "pnpm --filter @cardlattice/web test:e2e",
+    "format:check": "pnpm --filter @cardlattice/web format:check"
   }
 }

@@ -45,6 +45,27 @@ when contracts change. Generated files must not be hand-edited. UI work requires
 keyboard checks, accessible labels/states, both themes, responsive layouts, and
 before/after evidence in a PR where a predecessor exists.
 
+`pnpm check` runs Oxfmt, Oxlint, TypeScript, unit tests, and the production build.
+Use `pnpm format` to fix formatting, or `pnpm format:check` to check it without
+writing files. Both Oxc tools cover the whole frontend package, including tests,
+Vite/Playwright configuration and the public theme script. Generator-owned code
+and build/test artifacts are excluded; regenerate the API client instead of
+editing it manually.
+
+Oxlint enables every built-in `jsx-a11y` rule and React Doctor's recommended and
+TanStack Query rules as errors. React Doctor runs through `jsPlugins`, not a separate
+CLI. Its framework setting is `vite`, so server-action advice is not applied to this
+client-only application. There are no disabled-rule overrides or inline lint
+suppressions. Warnings and unused suppression comments fail lint. Vite also fails
+the production build if its logger reports a warning. These checks run in CI.
+
+The Zod 4.6.7 pnpm patch changes two explanatory comments that Rollup mistakes for
+purity annotations. It does not change executable code or suppress diagnostics.
+Keep `patches/` available during Docker dependency installation. Remove the patch
+when an upgraded Zod release builds cleanly without it. Jest DOM is pinned to the
+maintainer-recommended 6.9.1 release; 6.10.0 was deprecated for accidentally shipping
+breaking changes in a minor release.
+
 Capabilities are deliberately simple in this initial release. Do not expose a
 shared moderator capability publicly or embed it in a built website. A deployed
 project needs a published maintainer contact and clear role-issuance policy.

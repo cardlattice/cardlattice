@@ -31,17 +31,25 @@ const examples = {
     'import json\nfrom urllib.request import urlopen\n\nwith urlopen("http://localhost:8080/v1/games/pokemon/cards?limit=10") as response:\n    page = json.load(response)\n    print(page["data"], page["nextCursor"])',
   Rust: '// Dependencies: reqwest (json, rustls-tls), serde_json, tokio (full)\n#[tokio::main]\nasync fn main() -> Result<(), Box<dyn std::error::Error>> {\n    let page: serde_json::Value = reqwest::get(\n        "http://localhost:8080/v1/games/pokemon/cards?limit=10"\n    ).await?.error_for_status()?.json().await?;\n    println!("{}", page["data"]);\n    Ok(())\n}',
 };
+const initialResponse = {
+  output: "Run a request to see its live response.",
+  headers: "",
+  pending: false,
+};
 export function Docs() {
   const spec = useApi<Specification>("/openapi.json");
   const [path, setPath] = useState("/v1/games");
   const [values, setValues] = useState<Record<string, string>>({ game: "pokemon" });
   const [language, setLanguage] = useState<keyof typeof examples>("curl");
-  const [output, setOutput] = useState("Run a request to see its live response.");
-  const [pending, setPending] = useState(false);
-  const [headers, setHeaders] = useState("");
+  const [{ output, headers, pending }, setResponse] = useState(initialResponse);
   const operation = spec.data?.paths[path]?.get;
+  const publicEndpoints = Object.entries(spec.data?.paths || {}).flatMap(([endpoint, item]) =>
+    item.get?.security?.length === 0 && !item.get.summary.includes("Download")
+      ? [{ endpoint, summary: item.get.summary }]
+      : [],
+  );
   async function run() {
-    setPending(true);
+    setResponse({ ...initialResponse, output: "Requesting…", pending: true });
     try {
       let target = path;
       const query = new URLSearchParams();
@@ -53,21 +61,20 @@ export function Docs() {
         else if (parameter.in === "query" && value) query.set(parameter.name, value);
       }
       // This explorer deliberately inspects both success and error responses.
-      // oxlint-disable-next-line react-doctor/no-fetch-response-used-without-status-check
       const response = await fetch(`${target}${query.size ? `?${query}` : ""}`, {
         headers: values["If-None-Match"] ? { "If-None-Match": values["If-None-Match"] } : {},
       });
-      // The explorer intentionally displays error bodies alongside their HTTP status.
-      // oxlint-disable-next-line react-doctor/no-fetch-response-used-without-status-check
       const text = await response.text();
-      setOutput(text ? JSON.stringify(JSON.parse(text), null, 2) : "(empty response body)");
-      setHeaders(
-        `HTTP ${response.status}\n${["etag", "last-modified", "cache-control", "cf-cache-status"].map((name) => `${name}: ${response.headers.get(name) || "not present"}`).join("\n")}`,
-      );
+      setResponse({
+        output: text ? JSON.stringify(JSON.parse(text), null, 2) : "(empty response body)",
+        headers: `HTTP ${response.status}\n${["etag", "last-modified", "cache-control", "cf-cache-status"].map((name) => `${name}: ${response.headers.get(name) || "not present"}`).join("\n")}`,
+        pending: false,
+      });
     } catch (cause) {
-      setOutput(cause instanceof Error ? cause.message : "Request failed");
-    } finally {
-      setPending(false);
+      setResponse({
+        ...initialResponse,
+        output: cause instanceof Error ? cause.message : "Request failed",
+      });
     }
   }
   return (
@@ -110,23 +117,17 @@ export function Docs() {
                       id={id}
                       aria-labelledby={`${id}-label`}
                       value={path}
+                      disabled={pending}
                       onChange={(event) => {
                         setPath(event.target.value);
-                        setHeaders("");
-                        setOutput("Run a request to see its live response.");
+                        setResponse(initialResponse);
                       }}
                     >
-                      {Object.entries(spec.data?.paths || {})
-                        .filter(
-                          ([, item]) =>
-                            item.get?.security?.length === 0 &&
-                            !item.get?.summary.includes("Download"),
-                        )
-                        .map(([endpoint, item]) => (
-                          <option key={endpoint} value={endpoint}>
-                            GET {endpoint} — {item.get?.summary}
-                          </option>
-                        ))}
+                      {publicEndpoints.map(({ endpoint, summary }) => (
+                        <option key={endpoint} value={endpoint}>
+                          GET {endpoint} — {summary}
+                        </option>
+                      ))}
                     </select>
                   )}
                 </Field>

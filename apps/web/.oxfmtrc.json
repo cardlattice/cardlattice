@@ -1,5 +1,4 @@
 {
-  "ignorePatterns": [
-    "src/generated/**"
-  ]
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["src/generated/**", "dist/**", "test-results/**", "playwright-report/**"]
 }

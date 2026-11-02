@@ -41,7 +41,6 @@ export function ReviewCard({
       setMessage(cause instanceof Error ? cause.message : "Review failed");
     } finally {
       // Both decision buttons are disabled while this single review is pending.
-      // oxlint-disable-next-line react-doctor/no-unowned-async-error-clear
       setPending(false);
     }
   }
@@ -134,7 +133,7 @@ export function ReviewCard({
           Reject
         </Button>
       </div>
-      {message && <p role="status">{message}</p>}
+      {message && <output>{message}</output>}
     </article>
   );
 }

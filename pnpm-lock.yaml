@@ -162,6 +162,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  zod@4.6.7: 26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6
+
 importers:
 
   .: {}
@@ -194,7 +197,7 @@ importers:
         version: 19.3.1(react@19.3.1)
       zod:
         specifier: ^4.3.0
-        version: 4.6.7
+        version: 4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6)
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.0
@@ -206,8 +209,8 @@ importers:
         specifier: ^4.2.0
         version: 4.3.3(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.1))
       '@testing-library/jest-dom':
-        specifier: ^6.9.0
-        version: 6.10.0(@testing-library/dom@10.4.2)
+        specifier: 6.9.1
+        version: 6.9.1
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -228,12 +231,12 @@ importers:
         version: 28.1.0
       orval:
         specifier: ^8.5.0
-        version: 8.46.0(@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
+        version: 8.46.0(@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
       oxfmt:
-        specifier: latest
+        specifier: 0.75.0
         version: 0.75.0
       oxlint:
-        specifier: latest
+        specifier: 1.90.0
         version: 1.90.0
       oxlint-plugin-react-doctor:
         specifier: 0.5.8
@@ -1438,12 +1441,9 @@ packages:
     resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
     engines: {node: '>=18'}
 
-  '@testing-library/jest-dom@6.10.0':
-    resolution: {integrity: sha512-HQwu0KaB2zyT0iLzBL+8CLyZDL3KlZlZJ+2iyc9uCUnlJVskJU/UlPuVCyIPhtukjPQdT2QNoR5nCP5FqTmmDQ==}
-    engines: {node: '>=22', npm: '>=6', yarn: '>=1'}
-    deprecated: Incorrect minor release with breaking changes (Node >=22 and required @testing-library/dom peer). Use 6.9.1 for the 6.x line, or upgrade to 7.0.0.
-    peerDependencies:
-      '@testing-library/dom': '>=10 <11'
+  '@testing-library/jest-dom@6.9.1':
+    resolution: {integrity: sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA==}
+    engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
 
   '@testing-library/react@16.3.3':
     resolution: {integrity: sha512-Uo193NgQbPMz6lrrhtRQQFcMC6Re/ELLFbbuVL30WDlZxlpZf9/lMHTAVxPRLw1q1iu9OJmR1c2BLiENRstdBg==}
@@ -2820,21 +2820,21 @@ snapshots:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
 
-  '@orval/hono@8.46.0(zod@4.6.7)':
+  '@orval/hono@8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))':
     dependencies:
       '@orval/core': 8.46.0
-      '@orval/zod': 8.46.0(zod@4.6.7)
+      '@orval/zod': 8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
       typescript: 6.0.3
     transitivePeerDependencies:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
       - zod
 
-  '@orval/mcp@8.46.0(zod@4.6.7)':
+  '@orval/mcp@8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))':
     dependencies:
       '@orval/core': 8.46.0
       '@orval/fetch': 8.46.0
-      '@orval/zod': 8.46.0(zod@4.6.7)
+      '@orval/zod': 8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
     transitivePeerDependencies:
       - '@faker-js/faker'
       - zod
@@ -2879,14 +2879,14 @@ snapshots:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
 
-  '@orval/zod@8.46.0(zod@4.6.7)':
+  '@orval/zod@8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))':
     dependencies:
       '@orval/core': 8.46.0
       globals: 17.13.0
       jsesc: 3.1.0
       typescript: 6.0.3
     optionalDependencies:
-      zod: 4.6.7
+      zod: 4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6)
     transitivePeerDependencies:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
@@ -3209,7 +3209,7 @@ snapshots:
       '@scalar/helpers': 0.16.4
       nanoid: 5.1.16
       type-fest: 5.10.0
-      zod: 4.6.7
+      zod: 4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6)
 
   '@sec-ant/readable-stream@0.4.1': {}
 
@@ -3350,10 +3350,9 @@ snapshots:
       picocolors: 1.1.1
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@6.10.0(@testing-library/dom@10.4.2)':
+  '@testing-library/jest-dom@6.9.1':
     dependencies:
       '@adobe/css-tools': 4.5.0
-      '@testing-library/dom': 10.4.2
       aria-query: 5.3.2
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
@@ -3913,7 +3912,7 @@ snapshots:
 
   obug@2.2.1: {}
 
-  orval@8.46.0(@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7):
+  orval@8.46.0(@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6)):
     dependencies:
       '@commander-js/extra-typings': 15.0.0(commander@15.0.0)
       '@orval/angular': 8.46.0
@@ -3921,14 +3920,14 @@ snapshots:
       '@orval/core': 8.46.0
       '@orval/effect': 8.46.0
       '@orval/fetch': 8.46.0
-      '@orval/hono': 8.46.0(zod@4.6.7)
-      '@orval/mcp': 8.46.0(zod@4.6.7)
+      '@orval/hono': 8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
+      '@orval/mcp': 8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
       '@orval/mock': 8.46.0
       '@orval/pinia-colada': 8.46.0
       '@orval/query': 8.46.0(@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1))
       '@orval/solid-start': 8.46.0
       '@orval/swr': 8.46.0
-      '@orval/zod': 8.46.0(zod@4.6.7)
+      '@orval/zod': 8.46.0(zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6))
       '@scalar/json-magic': 0.16.1
       '@scalar/openapi-parser': 0.29.19
       '@scalar/openapi-types': 0.9.8
@@ -4307,4 +4306,4 @@ snapshots:
 
   yoctocolors@2.2.0: {}
 
-  zod@4.6.7: {}
+  zod@4.6.7(patch_hash=26f6d50e2d9469001b23ad6cb69652b632d5419f488d5f2e61e49045743dcba6): {}

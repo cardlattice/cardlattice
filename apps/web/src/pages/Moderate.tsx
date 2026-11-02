@@ -12,32 +12,46 @@ type Outbox = {
   last_error: string | null;
   revision: number;
 };
+type ReviewState = {
+  queue: PendingContribution[] | null;
+  outbox: Outbox[];
+  cursor: string | null;
+  error: string;
+  pending: boolean;
+};
+const initialReviewState: ReviewState = {
+  queue: null,
+  outbox: [],
+  cursor: null,
+  error: "",
+  pending: false,
+};
 export function Moderate() {
   const [token, setToken] = useState("");
-  const [queue, setQueue] = useState<PendingContribution[] | null>(null);
-  const [outbox, setOutbox] = useState<Outbox[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
+  const [{ queue, outbox, cursor, error, pending }, setReviewState] = useState(initialReviewState);
   async function load(next?: string) {
-    setPending(true);
-    setError("");
+    setReviewState((state) => ({ ...state, pending: true, error: "" }));
     try {
       const response = await request<{ data: PendingContribution[]; nextCursor: string | null }>(
         `/v1/moderation/contributions${next ? `?cursor=${next}` : ""}`,
         authorized(token),
       );
-      setQueue(response.data);
-      setCursor(response.nextCursor);
-      setOutbox(
-        (await request<{ data: Outbox[] }>("/v1/moderation/outbox", authorized(token))).data,
+      const publication = await request<{ data: Outbox[] }>(
+        "/v1/moderation/outbox",
+        authorized(token),
       );
+      setReviewState({
+        queue: response.data,
+        cursor: response.nextCursor,
+        outbox: publication.data,
+        error: "",
+        pending: false,
+      });
     } catch (cause) {
-      setQueue(null);
-      setOutbox([]);
-      setError(cause instanceof Error ? cause.message : "Could not load review queue");
-    } finally {
-      setPending(false);
+      setReviewState({
+        ...initialReviewState,
+        error: cause instanceof Error ? cause.message : "Could not load review queue",
+      });
     }
   }
   async function replay(id: string) {
@@ -45,7 +59,10 @@ export function Moderate() {
       await request(`/v1/moderation/outbox/${id}/replay`, { ...authorized(token), method: "POST" });
       await load();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Replay failed");
+      setReviewState((state) => ({
+        ...state,
+        error: cause instanceof Error ? cause.message : "Replay failed",
+      }));
     }
   }
   function submit(event: FormEvent) {
@@ -72,10 +89,10 @@ export function Moderate() {
               type="password"
               aria-describedby={hint}
               value={token}
+              disabled={pending}
               onChange={(event) => {
                 setToken(event.target.value);
-                setQueue(null);
-                setOutbox([]);
+                setReviewState(initialReviewState);
               }}
               required
               autoComplete="off"

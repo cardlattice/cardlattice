@@ -14,12 +14,12 @@ export function QueryState({
 }) {
   if (pending)
     return (
-      <div role="status" aria-label="Loading catalogue" className="skeleton-group">
-        <div className="skeleton" />
-        <div className="skeleton" />
-        <div className="skeleton" />
+      <output aria-label="Loading catalogue" className="skeleton-group">
+        <span className="skeleton" />
+        <span className="skeleton" />
+        <span className="skeleton" />
         <span className="sr-only">Loading catalogue…</span>
-      </div>
+      </output>
     );
   if (error)
     return (

@@ -38,9 +38,8 @@ export function Status() {
                 </p>
               </div>
             </section>
-            <div
+            <figure
               className="probe-chart"
-              role="img"
               aria-label={`${status.measurements.length} recent origin probes; ${status.measurements.filter((probe) => !probe.healthy).length} reported unhealthy`}
             >
               {[...status.measurements].reverse().map((probe) => (
@@ -50,7 +49,7 @@ export function Status() {
                   title={`${date(probe.measuredAt)} · ${probe.databaseLatencyMs.toFixed(2)} ms · ${probe.healthy ? "healthy" : "unhealthy"}`}
                 />
               ))}
-            </div>
+            </figure>
             <p className="field-hint">
               Up to 120 stored probes · 30-second interval · older to newer
             </p>

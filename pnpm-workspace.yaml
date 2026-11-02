@@ -2,3 +2,5 @@ packages:
   - apps/web
 allowBuilds:
   esbuild: true
+patchedDependencies:
+  zod@4.6.7: patches/zod@4.6.7.patch

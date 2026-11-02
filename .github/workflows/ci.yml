@@ -39,7 +39,7 @@ jobs:
       - run: cargo nextest run --workspace --all-features
       - run: cargo test --workspace --doc --all-features
       - run: bash scripts/audit.sh
-      - run: pnpm --filter @cardlattice/web format:check && pnpm check
+      - run: pnpm check
       - name: Verify generated API contract
         run: |
           cargo run --quiet -p cardlattice-api -- openapi > docs/openapi.json

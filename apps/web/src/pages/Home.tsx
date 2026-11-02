@@ -179,13 +179,13 @@ export function Home() {
               {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-          <p className="field-hint" role="status">
+          <output className="field-hint">
             {copyError
               ? "Clipboard unavailable. Select and copy the command above."
               : copied
                 ? "Command copied to clipboard."
                 : "Public reads work without a token."}
-          </p>
+          </output>
         </div>
       </section>
     </div>

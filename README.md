@@ -118,6 +118,11 @@ Browser tests require `CONTRIBUTOR_TOKEN` and `MODERATOR_TOKEN`; use a disposabl
 development catalogue. They test the actual API, not mocked success responses.
 They also capture light/dark phone/tablet/desktop screenshots and run axe checks.
 
+`pnpm check` includes Oxfmt formatting, Oxlint with JSX accessibility and React
+Doctor rules, TypeScript, unit tests, and the production build. Lint warnings,
+unused lint suppressions, formatting differences, and Vite build warnings fail
+the check. Run `pnpm format` to apply formatting across the frontend package.
+
 Generate the contract and TypeScript client/hooks after an API change:
 
 ```sh

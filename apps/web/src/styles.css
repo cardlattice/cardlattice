@@ -129,7 +129,11 @@ h2 {
 h3 {
   font-size: 1.15rem;
 }
-p {
+output {
+  display: block;
+}
+p,
+output {
   margin-bottom: 16px;
 }
 code,
@@ -1100,6 +1104,7 @@ progress::-webkit-progress-value {
   margin-top: 22px;
 }
 .response-headers {
+  overflow-x: auto;
   padding: 18px;
   border: 1px solid var(--border);
   font-size: 0.7rem;
@@ -1136,6 +1141,7 @@ progress::-webkit-progress-value {
   padding: 20px 0;
 }
 .skeleton {
+  display: block;
   height: 85px;
   background: var(--raised);
   border-radius: 5px;
@@ -1349,7 +1355,7 @@ progress::-webkit-progress-value {
     flex-direction: column;
   }
   .docs-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .docs-sidebar {
     position: static;
