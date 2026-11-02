@@ -43,6 +43,7 @@ services:
       db: { condition: service_healthy }
     restart: "no"
   seed:
+    profiles: [demo]
     build:
       context: .
       dockerfile: infra/Dockerfile.api
@@ -63,7 +64,7 @@ services:
       - credentials:/run/cardlattice:ro
       - datasets:/var/lib/cardlattice/datasets
     depends_on:
-      seed: { condition: service_completed_successfully }
+      migrate: { condition: service_completed_successfully }
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/readyz"]

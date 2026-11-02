@@ -20,6 +20,8 @@ appear in the external identifier relation.
 | `review_decisions` | Append-only application audit of reviewer hash, decision and reason |
 | `scan_uploads` | Original private bytes, side, media type, digest, candidate metadata, private rights state |
 | `catalogue_revisions` | Monotonic revision, before/after data and contribution reference |
+| `catalogue_imports` | Operator review identity, source-policy URL, factual input batch, SHA-256 and outcome |
+| `catalogue_import_revisions` | Exact revisions attributable to each atomic operator import |
 | `cache_invalidation_outbox` | Revision, affected URL paths, attempts, next retry, errors, completion |
 | `publication_manifests` | Unique revision and immutable filename, schema version, SHA-256, bytes and count |
 | `health_measurements` | Stored probe outcome and observed database latency; seven-day retention |

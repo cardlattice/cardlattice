@@ -401,6 +401,8 @@ kbd {
   color: var(--accent);
   font-size: 0.75rem;
   margin: 0 0 22px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .terminal-body .code-comment:last-child {
   margin: 0;
@@ -869,6 +871,7 @@ input[type="file"] {
 .source {
   border-bottom: 1px solid var(--border);
   padding: 22px 0;
+  overflow-wrap: anywhere;
 }
 .source p {
   margin-bottom: 8px;

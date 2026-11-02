@@ -21,18 +21,32 @@ docker compose ps
 - Readiness: <http://localhost:8080/readyz>
 
 Compose generates local credentials in a private Docker volume, starts PostgreSQL,
-applies versioned migrations, and explicitly imports **seven original synthetic
-development records**. The Pokémon game name identifies the first adapter; the
-series, set, cards, and printings are invented fixtures, not real Pokémon products.
-There is no third-party artwork or catalogue ingestion.
+and applies versioned migrations. New databases start empty. Import the reviewed
+initial batch of **eight real Pokémon sets** sourced directly from the official
+Pokémon press site:
+
+```sh
+docker compose run --rm --no-deps -v "$PWD/data/pokemon:/import:ro" api \
+  import-pokemon-sets /import/reviewed-2026-11-02.json
+# The first command validates and rolls back. Apply the reviewed batch:
+docker compose run --rm --no-deps -v "$PWD/data/pokemon:/import:ro" api \
+  import-pokemon-sets /import/reviewed-2026-11-02.json --apply --retire-demo
+```
+
+This is an initial set-metadata catalogue, not a complete card catalogue. It includes
+officially announced release dates (including future dates), no real card identities,
+and no artwork. See [official sourcing and imports](data/pokemon/README.md).
 
 Set `CARDLATTICE_WEB_PORT` and `CARDLATTICE_API_PORT` to change host ports. Production
-must use the separate deployment guidance; this Compose setup intentionally seeds
-development data and binds published ports to loopback.
+must use the separate deployment guidance. Published ports bind to loopback.
+Synthetic data is opt-in for disposable development databases:
+`docker compose --profile demo run --rm seed`. It is never automatically restored
+on restart, and the importer preserves retired records as audit tombstones.
 
 ## Try the complete contribution workflow
 
-1. Browse the synthetic catalogue under **Catalogue → Pokémon**.
+1. In a disposable development catalogue, run the opt-in demo seed above, then
+   browse **Catalogue → Pokémon**. Keep test contributions out of a real catalogue.
 2. Retrieve local capability tokens:
 
    ```sh
@@ -57,8 +71,8 @@ Tokens identify a role capability, not an individual; see the limitations below.
 
 ```sh
 curl -i http://localhost:8080/v1/games
-curl -i 'http://localhost:8080/v1/games/pokemon/cards?limit=1'
-curl -i 'http://localhost:8080/v1/search?q=caf%C3%A9'
+curl -i 'http://localhost:8080/v1/games/pokemon/sets?limit=1'
+curl -i 'http://localhost:8080/v1/search?q=Mega%20Evolution'
 ```
 
 ## Workspace
@@ -68,11 +82,11 @@ curl -i 'http://localhost:8080/v1/search?q=caf%C3%A9'
 | `apps/api` | Axum server, API contract, moderation, integration tests |
 | `apps/web` | Vite, React, TypeScript, Tailwind v4, TanStack Router/Query/Form |
 | `crates/catalogue` | Domain validation, Unicode normalisation, cursors |
-| `crates/ingestion` | Idempotent original fixtures, private scan validation, OCR interface |
+| `crates/ingestion` | Reviewed official set imports, demo retirement, private scans, OCR interface |
 | `crates/publishing` | Streaming snapshots, manifests, durable invalidation worker |
 | `crates/observability` | Prometheus histograms/counters, structured tracing |
 | `migrations` | Ordered PostgreSQL schema migrations and indexes |
-| `data` | Original synthetic fixtures and provenance policy |
+| `data` | Opt-in synthetic fixtures and reviewed official set facts with provenance |
 | `docs` | Architecture, operations, sourcing, API, roadmap |
 | `infra` | Production Dockerfiles, local proxy, Cloudflare examples |
 
@@ -86,7 +100,8 @@ the server does not implicitly load `.env`. Secrets can instead be supplied thro
 
 ```sh
 cargo run -p cardlattice-api -- migrate
-cargo run -p cardlattice-api -- seed
+# Choose reviewed real metadata, or `seed` only for a disposable demo database:
+cargo run -p cardlattice-api -- import-pokemon-sets data/pokemon/reviewed-2026-11-02.json --apply
 cargo run -p cardlattice-api -- serve
 # In another terminal:
 pnpm install --frozen-lockfile

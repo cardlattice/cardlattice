@@ -1,9 +1,15 @@
 # Contributing
 
 Start with `docker compose up --build -d`. The complete contributor/moderator
-walkthrough is in the README. All example data must be original and visibly
+walkthrough is in the README. Demo seeding is opt-in; use a disposable database for
+fixture-based browser tests. All example data must be original and visibly
 synthetic. Never add card artwork, catalogue dumps, or third-party API responses
 to tests, screenshots, documentation examples, or seeds.
+
+Real official-source imports follow the bounded discovery and review process in
+[`data/pokemon/README.md`](../data/pokemon/README.md). Only reviewed factual set
+metadata is imported; the scan never downloads publisher images or third-party
+catalogue data. The command defaults to a rollback-only preview.
 
 ## Metadata
 

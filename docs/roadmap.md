@@ -16,7 +16,10 @@ claim that every production requirement or every game rule is complete.
 ## Known first-release boundaries
 
 No catalogue completeness, uptime, CDN hit ratio or throughput is advertised without
-measurement. Initial data is original and synthetic. The manual scan fallback is
+measurement. Demo fixtures are opt-in. A bounded official Pokémon press-site scanner
+and reviewed importer provide an initial eight real sets, with factual names and
+announced US release dates. There are no real card or printing records yet, and no
+claim of complete set coverage. The manual scan fallback is
 operational; OCR itself is not implemented. Snapshot exports contain public core
 records; auxiliary localisation, variant, source and image-rights records remain in
 PostgreSQL and detail responses. The source acceptance policy limits exported

@@ -8,11 +8,15 @@ license.workspace = true
 catalogue = { version = "0.1.0", path = "../catalogue" }
 chrono.workspace = true
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+html5ever = "0.39"
+markup5ever_rcdom = "0.39"
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
 sqlx.workspace = true
 thiserror.workspace = true
+tokio.workspace = true
 uuid.workspace = true
 
 [lints]

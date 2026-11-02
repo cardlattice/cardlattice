@@ -10,14 +10,35 @@ import {
   Terminal,
 } from "lucide-react";
 import { useState } from "react";
-import { number, type StatsData } from "../api";
+import { number, useApi, type PageData, type StatsData } from "../api";
 import { Button } from "../components/Button";
 
 export function Home() {
   const stats = useGetV1Stats<StatsData, Error>({ query: { staleTime: 30_000, retry: 1 } });
+  const example = useApi<PageData>("/v1/games/pokemon/sets?limit=1", (stats.data?.games ?? 0) > 0);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const command = "curl http://localhost:8080/v1/games/pokemon/cards";
+  const command = `curl "${window.location.origin}/v1/games/pokemon/sets?limit=1"`;
+  const exampleText = example.data
+    ? JSON.stringify(
+        {
+          data: example.data.data.map(({ kind, name, releaseDate, synthetic }) => ({
+            kind,
+            name,
+            releaseDate,
+            synthetic,
+          })),
+          nextCursor: example.data.nextCursor,
+          limit: example.data.limit,
+        },
+        null,
+        2,
+      )
+    : example.isError
+      ? "The live example is temporarily unavailable."
+      : stats.data?.games === 0
+        ? "The catalogue is empty. Import reviewed metadata to get started."
+        : "Loading a live catalogue record…";
   async function copy() {
     try {
       await navigator.clipboard.writeText(command);
@@ -67,16 +88,12 @@ export function Home() {
           <div className="terminal-body">
             <p className="code-comment">{"// Your next project starts here."}</p>
             <p className="code-request">
-              <span>GET</span> /v1/games/pokemon/cards
+              <span>GET</span> /v1/games/pokemon/sets?limit=1
             </p>
-            <pre aria-label="Illustrative API response">
-              <code>
-                {
-                  '{\n  "data": [\n    {\n      "kind": "card",\n      "name": "Prism Seed — synthetic",\n      "synthetic": true,\n      "attributes": {\n        "category": "pokemon",\n        "hp": 40\n      }\n    }\n  ],\n  "nextCursor": null,\n  "limit": 20\n}'
-                }
-              </code>
+            <pre aria-label="Live API response excerpt">
+              <code>{exampleText}</code>
             </pre>
-            <p className="code-comment">Illustrative excerpt · original development fixture</p>
+            <p className="code-comment">Live catalogue excerpt · selected response fields</p>
           </div>
           <div className="terminal-bottom">
             <span className="protocol-dot" /> JSON in. Possibilities out.

@@ -6,6 +6,8 @@ use sqlx::{PgConnection, PgPool};
 use std::io::Cursor;
 use uuid::Uuid;
 
+pub mod official_pokemon;
+
 #[derive(Debug, thiserror::Error)]
 pub enum IngestionError {
     #[error(transparent)]
