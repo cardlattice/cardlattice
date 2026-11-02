@@ -319,14 +319,13 @@ pub async fn datasets(
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
     let manifests = sqlx::query_as::<_, publishing::Manifest>(
-        "SELECT * FROM publication_manifests ORDER BY revision DESC LIMIT 50",
+        "SELECT * FROM publication_manifests WHERE withdrawn_at IS NULL ORDER BY release_date DESC LIMIT 50",
     )
     .fetch_all(&state.pool)
     .await?;
-    let modified = manifests
-        .first()
-        .map(|m| m.created_at)
-        .unwrap_or(DateTime::UNIX_EPOCH);
+    let modified: DateTime<Utc> = sqlx::query_scalar(
+        "SELECT COALESCE(MAX(GREATEST(created_at,withdrawn_at)),'1970-01-01'::timestamptz) FROM publication_manifests",
+    ).fetch_one(&state.pool).await?;
     Ok(cached_json(
         &json!({"data":manifests,"license":"CC0-1.0","includesArtwork":false,"limit":50}),
         &headers,
@@ -340,7 +339,7 @@ pub async fn download(
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
     let manifest = sqlx::query_as::<_, publishing::Manifest>(
-        "SELECT * FROM publication_manifests WHERE filename=$1",
+        "SELECT * FROM publication_manifests WHERE filename=$1 AND withdrawn_at IS NULL",
     )
     .bind(&filename)
     .fetch_optional(&state.pool)
@@ -376,7 +375,9 @@ pub async fn download(
     );
     response.headers_mut().insert(
         "cache-control",
-        "public, max-age=31536000, immutable".parse().unwrap(),
+        "public, max-age=300, s-maxage=86400, must-revalidate"
+            .parse()
+            .unwrap(),
     );
     Ok(response)
 }
@@ -399,10 +400,11 @@ pub async fn status(State(state): State<AppState>) -> Result<Json<Value>, ApiErr
         .and_then(|v| DateTime::parse_from_rfc3339(v).ok())
         .is_some_and(|v| (Utc::now() - v.with_timezone(&Utc)).num_seconds() < 90);
     let (pending,failed):(i64,i64)=sqlx::query_as("SELECT count(*) FILTER(WHERE status='pending'),count(*) FILTER(WHERE status='failed') FROM cache_invalidation_outbox").fetch_one(&state.pool).await?;
-    let latest: Option<DateTime<Utc>> =
-        sqlx::query_scalar("SELECT MAX(created_at) FROM publication_manifests")
-            .fetch_one(&state.pool)
-            .await?;
+    let latest: Option<DateTime<Utc>> = sqlx::query_scalar(
+        "SELECT MAX(created_at) FROM publication_manifests WHERE withdrawn_at IS NULL",
+    )
+    .fetch_one(&state.pool)
+    .await?;
     Ok(Json(
         json!({"status":if !recent {"unknown"}else if measurements.first().is_some_and(|v|v["healthy"]==true)&&failed==0 {"operational"}else{"degraded"},"measurements":measurements,"pendingInvalidations":pending,"failedInvalidations":failed,"latestPublicationAt":latest,"probeIntervalSeconds":30,"note":"Origin database probes; not global uptime. Probe storage is unavailable during a complete database outage; stale measurements are unknown."}),
     ))

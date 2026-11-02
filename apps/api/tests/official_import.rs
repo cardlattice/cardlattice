@@ -142,7 +142,10 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
         public_origin: "http://localhost".into(),
         cloudflare: None,
     };
-    let manifest = publishing::publish_snapshot(&pool, &config).await.unwrap();
+    let manifest = publishing::publish_snapshot(&pool, &config)
+        .await
+        .unwrap()
+        .unwrap();
     assert_eq!(manifest.record_count, 2);
     let snapshot = tokio::fs::read_to_string(directory.path().join(manifest.filename))
         .await

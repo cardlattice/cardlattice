@@ -20,7 +20,7 @@ TanStack Query hooks from the same document.
 | `/v1/games/{game}/printings/{id}` | Printing, variants, permitted images and provenance |
 | `/v1/search` | Paginated cross-game search; optional `game` slug filter |
 | `/v1/stats` | Current record counts, missing metadata, image coverage, unknown completeness |
-| `/v1/datasets` | Latest 50 immutable manifests; old artifact URLs remain valid |
+| `/v1/datasets` | Latest 50 active daily releases; withdrawn artifacts return 404 |
 | `/v1/status` | Latest 120 persisted probes and publication health |
 | `/v1/changelog` | Latest 50 published revisions |
 | `/datasets/{filename}` | Immutable NDJSON download |
@@ -53,7 +53,11 @@ Record/list responses include ETag, Last-Modified, Cache-Control and CDN-Cache-C
 An `If-None-Match` match returns 304, supports weak request validators and lists,
 and takes precedence over If-Modified-Since. HEAD has the same representation
 validators as GET and no response body. Errors and private data are no-store.
-Downloads use digest ETags and one-year immutable caching.
+Downloads use digest ETags, five-minute browser caching and one-day edge caching.
+`releaseDate` identifies the UTC release day; `revision` is an internal source
+watermark, not a release number. At most one release is published per UTC day when
+real catalogue data changes. Synthetic records are excluded. Withdrawn manifests
+are omitted and their download URLs return 404, including conditional GET/HEAD.
 
 ## Contributions and moderation
 

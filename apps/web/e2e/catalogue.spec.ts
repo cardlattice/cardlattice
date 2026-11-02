@@ -113,7 +113,7 @@ test("contribute, review, publish and invalidate through the UI", async ({ page 
     )
     .toBe(0);
   await page.goto("/datasets");
-  await expect(page.getByRole("link", { name: "Download NDJSON" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "No snapshots published yet" })).toBeVisible();
 });
 
 for (const theme of ["light", "dark"] as const) {

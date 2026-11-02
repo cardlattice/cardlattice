@@ -29,6 +29,23 @@ publication time and invalidation counts. Probes older than 90 seconds are unkno
 During a complete database outage the status endpoint can return 503 rather than
 fake healthy data. External probes are needed for a global availability/SLO claim.
 
+## Dataset releases and withdrawal
+
+The first release is published when real metadata becomes available. Thereafter,
+the minute-based check permits at most one new release per UTC day, only when
+non-synthetic data changed. Internal revision gaps are normal; revision lag during
+a release day is expected and must not be treated as an immediate alert. Check
+publication errors in structured logs and verify a pending change is exported
+after the next UTC boundary. Daily publication retries independently of cache
+invalidation; it cannot block immediate public API corrections.
+
+Migration 0005 reconstructs old snapshot contents from historical revisions,
+withdraws demo snapshots, collapses legacy same-day releases, and queues purges.
+Withdrawn files may remain on the private dataset volume for audit but cannot be
+downloaded through the API. A backup may retain them too. Do not re-serve the
+volume directly from Caddy/R2 without applying the same withdrawal policy. Copies
+already downloaded or held in old immutable browser caches cannot be recalled.
+
 ## Initial security review boundaries
 
 - All user SQL values are bound. Dynamic identifiers/sort fragments are code-owned.

@@ -1,5 +1,5 @@
 use catalogue::Record;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use futures_util::TryStreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -37,6 +37,7 @@ pub enum PublishError {
 pub struct Manifest {
     pub id: Uuid,
     pub revision: i64,
+    pub release_date: NaiveDate,
     pub schema_version: i32,
     pub sha256: String,
     pub byte_size: i64,
@@ -49,27 +50,48 @@ pub fn retry_delay(attempt: i32) -> i64 {
     (5_i64 * 2_i64.pow(attempt.clamp(0, 10) as u32)).min(3600)
 }
 
-/// Repeatable-read snapshot, streamed from PostgreSQL. Artifacts are renamed atomically.
+/// At most one immutable release per UTC day, only after catalogue changes.
+/// Acquire the publication lock before opening the repeatable-read snapshot.
 pub async fn publish_snapshot(
     pool: &PgPool,
     config: &PublishingConfig,
-) -> Result<Manifest, PublishError> {
+) -> Result<Option<Manifest>, PublishError> {
     tokio::fs::create_dir_all(&config.directory).await?;
+    let mut guard = pool.begin().await?;
+    let acquired: bool = sqlx::query_scalar("SELECT pg_try_advisory_xact_lock(71002)")
+        .fetch_one(&mut *guard)
+        .await?;
+    if !acquired {
+        return Ok(None);
+    }
     let mut tx = pool.begin().await?;
     sqlx::query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
         .execute(&mut *tx)
         .await?;
     let revision: i64 =
-        sqlx::query_scalar("SELECT COALESCE(MAX(revision),0) FROM catalogue_revisions")
+        sqlx::query_scalar("SELECT COALESCE(MAX(revision),0) FROM catalogue_revisions WHERE after_data->>'synthetic'='false' OR before_data->>'synthetic'='false'")
             .fetch_one(&mut *tx)
             .await?;
-    if let Some(manifest) =
-        sqlx::query_as::<_, Manifest>("SELECT * FROM publication_manifests WHERE revision=$1")
-            .bind(revision)
-            .fetch_optional(&mut *tx)
-            .await?
-    {
-        return Ok(manifest);
+    let release_date: NaiveDate =
+        sqlx::query_scalar("SELECT (transaction_timestamp() AT TIME ZONE 'UTC')::date")
+            .fetch_one(&mut *tx)
+            .await?;
+    let latest = sqlx::query_as::<_, Manifest>("SELECT * FROM publication_manifests WHERE withdrawn_at IS NULL ORDER BY release_date DESC LIMIT 1")
+        .fetch_optional(&mut *tx).await?;
+    if latest.as_ref().is_some_and(|manifest| {
+        manifest.release_date >= release_date || manifest.revision >= revision
+    }) {
+        return Ok(None);
+    }
+    // Demo-only/empty installations have no public dataset. Later deletions from
+    // a real catalogue must still be published, even when its last record is gone.
+    let real_records: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM catalogue_records WHERE deleted_at IS NULL AND NOT synthetic)",
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    if latest.is_none() && !real_records {
+        return Ok(None);
     }
     let id = Uuid::now_v7();
     let temporary = config.directory.join(format!(".{id}.tmp"));
@@ -79,7 +101,7 @@ pub async fn publish_snapshot(
     let mut byte_size = 0_i64;
     {
         let mut rows = sqlx::query_as::<_, Record>(
-            "SELECT * FROM catalogue_records WHERE deleted_at IS NULL ORDER BY id",
+            "SELECT * FROM catalogue_records WHERE deleted_at IS NULL AND NOT synthetic ORDER BY id",
         )
         .fetch(&mut *tx);
         while let Some(record) = rows.try_next().await? {
@@ -94,12 +116,13 @@ pub async fn publish_snapshot(
     file.sync_all().await?;
     drop(file);
     let digest = format!("{:x}", hasher.finalize());
-    let filename = format!("catalogue-r{revision}-{digest}.ndjson");
+    let filename = format!("catalogue-{release_date}-{digest}.ndjson");
     tokio::fs::rename(&temporary, config.directory.join(&filename)).await?;
-    let manifest = sqlx::query_as::<_, Manifest>("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(revision) DO UPDATE SET revision=EXCLUDED.revision RETURNING *")
-        .bind(id).bind(revision).bind(digest).bind(byte_size).bind(count).bind(filename).fetch_one(&mut *tx).await?;
+    let manifest = sqlx::query_as::<_, Manifest>("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename,release_date) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *")
+        .bind(id).bind(revision).bind(digest).bind(byte_size).bind(count).bind(filename).bind(release_date).fetch_one(&mut *tx).await?;
     tx.commit().await?;
-    Ok(manifest)
+    guard.commit().await?;
+    Ok(Some(manifest))
 }
 
 pub async fn purge(config: &PublishingConfig, paths: &[String]) -> Result<(), PublishError> {
@@ -157,7 +180,7 @@ impl CachePurger for ConfiguredPurger {
 
 pub async fn process_one_using(
     pool: &PgPool,
-    config: &PublishingConfig,
+    _config: &PublishingConfig,
     purger: &impl CachePurger,
 ) -> Result<bool, PublishError> {
     let mut tx = pool.begin().await?;
@@ -166,7 +189,6 @@ pub async fn process_one_using(
         return Ok(false);
     };
     let result = async {
-        publish_snapshot(pool, config).await?;
         let paths: Vec<String> = serde_json::from_value(paths)?;
         purger.purge(&paths).await
     }

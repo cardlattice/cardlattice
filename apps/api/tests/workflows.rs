@@ -422,28 +422,15 @@ async fn submission_review_publication_and_download(pool: PgPool) {
         .await
         .unwrap()
     {}
-    let manifest = publishing::publish_snapshot(&pool, &state.config.publishing)
-        .await
-        .unwrap();
-    assert_eq!(manifest.revision, 8);
-    assert_eq!(manifest.record_count, 8);
-    let response = router(state.clone())
-        .oneshot(
-            Request::builder()
-                .uri(format!("/datasets/{}", manifest.filename))
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    assert_eq!(response.status(), 200);
-    let bytes = response.into_body().collect().await.unwrap().to_bytes();
-    assert_eq!(cardlattice_api::auth::hash(&bytes), manifest.sha256);
-    assert_eq!(bytes.len() as i64, manifest.byte_size);
-    assert_eq!(
-        String::from_utf8(bytes.to_vec()).unwrap().lines().count(),
-        8
+    assert!(
+        publishing::publish_snapshot(&pool, &state.config.publishing)
+            .await
+            .unwrap()
+            .is_none(),
+        "demo-only catalogues must not publish datasets"
     );
+    let (_, datasets, _) = call(&state, "GET", "/v1/datasets", None, None, None).await;
+    assert_eq!(datasets["data"], json!([]));
     assert_eq!(
         sqlx::query_scalar::<_, i64>(
             "SELECT count(*) FROM cache_invalidation_outbox WHERE status='completed'"
@@ -878,4 +865,191 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
     )
     .await;
     assert_eq!(status, 404);
+}
+
+// Isolated policy simulation: an original fixture exercises a reviewed real record.
+async fn update_release_test_game(pool: &PgPool, name: &str) {
+    let fixtures: Vec<ingestion::Fixture> = serde_json::from_str(FIXTURES).unwrap();
+    let fixture = fixtures.into_iter().next().unwrap();
+    let mut draft = fixture.draft;
+    draft.synthetic = false;
+    draft.name = name.into();
+    let mut tx = pool.begin().await.unwrap();
+    let before: Option<Value> = sqlx::query_scalar(
+        "SELECT to_jsonb(r)-'search_document' FROM catalogue_records r WHERE id=$1",
+    )
+    .bind(fixture.id)
+    .fetch_optional(&mut *tx)
+    .await
+    .unwrap();
+    ingestion::write_record(&mut tx, fixture.id, &draft)
+        .await
+        .unwrap();
+    ingestion::revision_and_outbox(&mut tx, fixture.id, None, before)
+        .await
+        .unwrap();
+    tx.commit().await.unwrap();
+}
+
+#[sqlx::test(migrations = "../../migrations")]
+async fn daily_releases_are_serialized_and_independent_of_invalidation(pool: PgPool) {
+    let (state, directory) = state(pool.clone());
+    let config = &state.config.publishing;
+    assert!(
+        publishing::publish_snapshot(&pool, config)
+            .await
+            .unwrap()
+            .is_none()
+    );
+    ingestion::seed(&pool, FIXTURES).await.unwrap();
+    assert!(
+        publishing::publish_snapshot(&pool, config)
+            .await
+            .unwrap()
+            .is_none()
+    );
+    update_release_test_game(&pool, "Original release policy fixture").await;
+    let (a, b) = tokio::join!(
+        publishing::publish_snapshot(&pool, config),
+        publishing::publish_snapshot(&pool, config)
+    );
+    let mut results = [a.unwrap(), b.unwrap()];
+    assert_eq!(results.iter().filter(|r| r.is_some()).count(), 1);
+    let first = results.iter_mut().find_map(Option::take).unwrap();
+    assert_eq!(first.record_count, 1);
+    let bytes = tokio::fs::read(directory.path().join(&first.filename))
+        .await
+        .unwrap();
+    assert_eq!(cardlattice_api::auth::hash(&bytes), first.sha256);
+    assert_eq!(
+        serde_json::from_slice::<Value>(&bytes).unwrap()["synthetic"],
+        false
+    );
+    let (status, _, headers) = call(
+        &state,
+        "GET",
+        &format!("/datasets/{}", first.filename),
+        None,
+        None,
+        None,
+    )
+    .await;
+    assert_eq!(status, 200);
+    assert!(
+        headers["cache-control"]
+            .to_str()
+            .unwrap()
+            .contains("max-age=300")
+    );
+    update_release_test_game(&pool, "Updated original release policy fixture").await;
+    assert!(
+        publishing::publish_snapshot(&pool, config)
+            .await
+            .unwrap()
+            .is_none()
+    );
+    while publishing::process_one(&pool, config).await.unwrap() {}
+    assert_eq!(
+        sqlx::query_scalar::<_, i64>(
+            "SELECT count(*) FROM cache_invalidation_outbox WHERE status!='completed'"
+        )
+        .fetch_one(&pool)
+        .await
+        .unwrap(),
+        0
+    );
+    assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM publication_manifests")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        1
+    );
+    // Advance the daily gate without sleeping or changing the process clock.
+    sqlx::query("UPDATE publication_manifests SET release_date=release_date-1")
+        .execute(&pool)
+        .await
+        .unwrap();
+    let second = publishing::publish_snapshot(&pool, config)
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(second.revision > first.revision);
+    assert_ne!(second.sha256, first.sha256);
+    assert_eq!(
+        tokio::fs::read(directory.path().join(&first.filename))
+            .await
+            .unwrap(),
+        bytes
+    );
+    sqlx::query("UPDATE publication_manifests SET release_date=release_date-2")
+        .execute(&pool)
+        .await
+        .unwrap();
+    assert!(
+        publishing::publish_snapshot(&pool, config)
+            .await
+            .unwrap()
+            .is_none(),
+        "unchanged days produce no release"
+    );
+}
+
+#[sqlx::test(migrations = false)]
+async fn legacy_demo_releases_are_withdrawn_even_after_game_promotion(pool: PgPool) {
+    for migration in [
+        include_str!("../../../migrations/0001_catalogue.sql"),
+        include_str!("../../../migrations/0002_search.sql"),
+        include_str!("../../../migrations/0003_auxiliary_integrity.sql"),
+        include_str!("../../../migrations/0004_catalogue_imports.sql"),
+    ] {
+        sqlx::raw_sql(migration).execute(&pool).await.unwrap();
+    }
+    let fixtures: Vec<Value> = serde_json::from_str(FIXTURES).unwrap();
+    ingestion::seed(&pool, &json!([fixtures[0]]).to_string())
+        .await
+        .unwrap();
+    let old_id = Uuid::now_v7();
+    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,1,'old',1,1,'old-demo.ndjson')").bind(old_id).execute(&pool).await.unwrap();
+    update_release_test_game(&pool, "Original migration fixture").await;
+    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,2,'new',1,1,'real.ndjson')").bind(Uuid::now_v7()).execute(&pool).await.unwrap();
+    sqlx::raw_sql(include_str!("../../../migrations/0005_daily_releases.sql"))
+        .execute(&pool)
+        .await
+        .unwrap();
+    let (state, directory) = state(pool.clone());
+    tokio::fs::write(
+        directory.path().join("old-demo.ndjson"),
+        "private retained bytes",
+    )
+    .await
+    .unwrap();
+    for method in ["GET", "HEAD"] {
+        let response = router(state.clone())
+            .oneshot(
+                Request::builder()
+                    .method(method)
+                    .uri("/datasets/old-demo.ndjson")
+                    .header("if-none-match", "*")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), 404);
+    }
+    let (_, listing, _) = call(&state, "GET", "/v1/datasets", None, None, None).await;
+    assert_eq!(listing["data"].as_array().unwrap().len(), 1);
+    assert_eq!(listing["data"][0]["filename"], "real.ndjson");
+    assert_eq!(
+        sqlx::query_scalar::<_, String>(
+            "SELECT withdrawal_reason FROM publication_manifests WHERE id=$1"
+        )
+        .bind(old_id)
+        .fetch_one(&pool)
+        .await
+        .unwrap(),
+        "Contains synthetic development records"
+    );
+    assert_eq!(sqlx::query_scalar::<_,i64>("SELECT count(*) FROM cache_invalidation_outbox WHERE paths @> '[\"/datasets/old-demo.ndjson\"]'").fetch_one(&pool).await.unwrap(),1);
 }

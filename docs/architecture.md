@@ -17,8 +17,9 @@ flowchart LR
   Review --> DB
   API --> DB
   DB --> Worker[In-process durable worker]
-  Worker --> Snapshot[Immutable metadata snapshot]
-  Snapshot --> Purge[URL purge or local no-op]
+  Worker --> Purge[URL purge or local no-op]
+  DB --> Daily[Daily release check]
+  Daily --> Snapshot[Immutable metadata snapshot]
   Purge --> CDN
 ```
 
@@ -60,17 +61,27 @@ absent. Cursor ordering uses canonical names even when display names are transla
    commit. Approve/reject decisions are auditable.
 3. Approval commits metadata, provenance, revision, decision, contribution status,
    and outbox event atomically. No submitted image is promoted by this transaction.
-4. A worker claims an event using `FOR UPDATE SKIP LOCKED`. A repeatable-read export
-   streams rows to a temporary file, hashes them, atomically renames it, and commits
-   its manifest. The snapshot can include newer committed revisions than the event.
-5. Only after export succeeds does URL purge run. The event completes after purge
-   succeeds. Without Cloudflare, purge is an explicit successful no-op.
+4. Committed records are immediately available at the origin. A worker claims an
+   invalidation event using `FOR UPDATE SKIP LOCKED` and purges affected URLs.
+5. The event completes after purge succeeds. Without Cloudflare, purge is an
+   explicit successful no-op. Daily export failures never hold up API invalidation.
 6. Errors persist attempts and next-attempt time. Backoff starts at five seconds,
    doubles, and caps at one hour. Ten failures move an event to `failed`; the
    moderator can replay it. A process crash rolls back the claim, permitting retry.
 
+A separate check runs on startup and every minute, publishing at most once per UTC
+day when non-synthetic catalogue data has changed. The first release is available
+as soon as real metadata exists; subsequent changes wait until the next UTC day.
+Unchanged days produce no release. A database advisory lock and unique active
+release-date index prevent concurrent duplicate releases. Export uses repeatable
+read, streaming, checksums and atomic rename; failures retry the next minute.
+Internal revision IDs are audit watermarks, not release counts; PostgreSQL sequence
+gaps from rollback are expected. Public releases are identified by date.
+
 Snapshots are immutable, schema-versioned NDJSON containing public core metadata,
-never private scans, credentials, contributor identities, or internal audit details.
+never synthetic fixtures, private scans, credentials, contributor identities, or
+internal audit details. Withdrawn manifests remain private audit records; both
+listing and download endpoints exclude them, even for conditional GET/HEAD.
 Supplementary localisation/variant/source exports are not yet included. Metadata
 accepted by this first release must be CC0-compatible; artwork is separate.
 

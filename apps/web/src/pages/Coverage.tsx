@@ -61,7 +61,8 @@ export function Coverage() {
                 <p>{stats.completenessNote}</p>
                 <p>{stats.syntheticRecords} records are synthetic development fixtures.</p>
                 <p className="field-hint">
-                  Catalogue revision {stats.revision}. Counts may be cached for up to 60 seconds.
+                  Counts may be cached for up to 60 seconds. Downloads are released daily when the
+                  catalogue changes.
                 </p>
               </article>
             </section>

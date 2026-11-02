@@ -109,6 +109,39 @@ completeness. See the roadmap for unimplemented features.
 - Gitleaks 8.30.1 scanned an exported copy of the staged source: no leaks found.
 - No PR or remote CI run was possible because the repository has no Git remote.
 
+## Daily releases and demo withdrawal on 2026-11-02
+
+- Separated the five-second invalidation worker from the minute-based daily
+  publisher. Public releases use UTC dates; internal revision IDs remain audit
+  watermarks with normal PostgreSQL sequence gaps. Synthetic records are excluded.
+- `cargo fmt --all --check`, Clippy with `-D warnings`, and workspace doctests
+  passed. `cargo nextest run --workspace --all-features`: 25 passed, one opt-in
+  benchmark skipped. Added tests for concurrent publishers, same-day deferral,
+  unchanged days, immediate invalidation, immutable earlier bytes, demo exclusion,
+  historical withdrawal after a game is promoted, and withdrawn GET/HEAD with ETags.
+- `pnpm check` passed Oxfmt, Oxlint/JSX accessibility/React Doctor, TypeScript,
+  four unit tests and production build without warnings/errors. Regenerated
+  OpenAPI and the TypeScript client for the additive `releaseDate` manifest field.
+- Ten browser tests passed against a separate disposable database. The initial
+  runner reported conflicting `NO_COLOR`/`FORCE_COLOR` environment variables;
+  rerunning without the inherited `NO_COLOR` passed all ten without warnings.
+  Fixture submissions no longer expect public dataset downloads.
+- `bash scripts/audit.sh` passed. API/web Docker builds passed. Saved a private
+  PostgreSQL backup before migration 0005. The migration withdrew six historical
+  demo manifests and queued six URL invalidations, all subsequently completed.
+  Files/manifests remain private audit evidence; they are not public downloads.
+  Gitleaks 8.30.1 found no leaks in an exported copy of the staged source.
+- HTTPS verification found one active release dated 2026-11-02, containing nine
+  non-synthetic records with an unchanged, verified SHA-256. Every withdrawn URL
+  returns 404 for GET and HEAD, including `If-None-Match: *`. Cloudflare is not
+  configured locally, so external CDN purge behaviour remains unverified.
+- Captured 12 before and 12 after screenshots of datasets/coverage in both themes
+  at 390, 768 and 1440 pixels. Final checks found no axe WCAG 2/2.1/2.2 AA
+  violations, horizontal overflow, browser warnings or errors. The release-page
+  data intentionally changes from seven old manifests to one active release.
+  Local evidence is in `.local/daily-releases/`.
+- No PR or remote CI run: no Git remote is configured.
+
 ## Measured benchmark
 
 `cargo test --release -p cardlattice-api --test performance -- --ignored --nocapture`

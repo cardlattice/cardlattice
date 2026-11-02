@@ -267,10 +267,10 @@ async fn metrics(
             "cardlattice_catalogue_records{{kind=\"{kind}\"}} {count}\n"
         ));
     }
-    let (latest_revision,published_revision):(i64,i64)=sqlx::query_as("SELECT (SELECT COALESCE(MAX(revision),0) FROM catalogue_revisions),(SELECT COALESCE(MAX(revision),0) FROM publication_manifests)").fetch_one(&state.pool).await?;
+    let (latest_revision,published_revision):(i64,i64)=sqlx::query_as("SELECT (SELECT COALESCE(MAX(revision),0) FROM catalogue_revisions WHERE after_data->>'synthetic'='false' OR before_data->>'synthetic'='false'),(SELECT COALESCE(MAX(revision),0) FROM publication_manifests WHERE withdrawn_at IS NULL)").fetch_one(&state.pool).await?;
     output.push_str(&format!(
         "cardlattice_publication_revision_lag {}\n",
-        latest_revision - published_revision
+        (latest_revision - published_revision).max(0)
     ));
     Ok((
         [("content-type", "text/plain; version=0.0.4; charset=utf-8")],
@@ -279,13 +279,26 @@ async fn metrics(
         .into_response())
 }
 
+pub async fn dataset_background(state: AppState) {
+    let mut interval = tokio::time::interval(std::time::Duration::from_secs(60));
+    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+    loop {
+        interval.tick().await;
+        if let Err(error) =
+            publishing::publish_snapshot(&state.pool, &state.config.publishing).await
+        {
+            tracing::error!(%error, "daily dataset publication failed; retrying next minute");
+        }
+    }
+}
+
 pub async fn background(state: AppState) {
     let mut interval = tokio::time::interval(std::time::Duration::from_secs(5));
     let mut tick = 0_u64;
     loop {
         interval.tick().await;
         if let Err(error) = publishing::process_one(&state.pool, &state.config.publishing).await {
-            tracing::error!(%error,"publication worker failure");
+            tracing::error!(%error,"cache invalidation worker failure");
         }
         if tick.is_multiple_of(6) {
             let start = Instant::now();

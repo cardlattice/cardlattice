@@ -80,6 +80,7 @@ export interface Manifest {
   filename: string;
   id: string;
   recordCount: number;
+  releaseDate: string;
   revision: number;
   schemaVersion: number;
   sha256: string;

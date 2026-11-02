@@ -23,7 +23,7 @@ appear in the external identifier relation.
 | `catalogue_imports` | Operator review identity, source-policy URL, factual input batch, SHA-256 and outcome |
 | `catalogue_import_revisions` | Exact revisions attributable to each atomic operator import |
 | `cache_invalidation_outbox` | Revision, affected URL paths, attempts, next retry, errors, completion |
-| `publication_manifests` | Unique revision and immutable filename, schema version, SHA-256, bytes and count |
+| `publication_manifests` | UTC release date (unique while public), source revision, immutable filename, SHA-256, bytes/count and withdrawal audit |
 | `health_measurements` | Stored probe outcome and observed database latency; seven-day retention |
 | `rate_limits` | Durable minute buckets; expired buckets removed hourly |
 

@@ -41,7 +41,9 @@ when installing it.
    contributions, moderation, status, health or metrics.
 
 Origin headers: records use `max-age=15, s-maxage=86400`; collections/statistics/
-manifest listings use `max-age=15, s-maxage=60`; immutable artifacts use one year.
+manifest listings use `max-age=15, s-maxage=60`; artifacts use five-minute browser and one-day edge TTLs. Contents remain immutable,
+but bounded caching permits withdrawal. Already downloaded/cached copies cannot
+be recalled; purge withdrawn URLs at the CDN and allow browser TTLs to expire.
 Errors and private responses use no-store. Cache headers and ETags also work without
 Cloudflare. Long shared TTLs assume a working purge worker; monitor its outbox.
 
@@ -60,8 +62,10 @@ semantic parameter from a cache key while continuing to cache the response.
 
 ## Invalidation and verification
 
-Approvals atomically create outbox events. The worker first publishes a snapshot,
-then purges exact query-free URLs in batches of at most 30. It checks both HTTP
+Approvals atomically create outbox events. Once origin data is committed, the worker
+purges exact query-free URLs in batches of at most 30. Daily dataset releases run
+independently and do not delay API invalidation. Withdrawal migrations enqueue the
+withdrawn download URLs and manifest listing through the same durable outbox. It checks both HTTP
 success and Cloudflare's JSON success flag. Failures remain pending with backoff,
 then enter a visible failed state after ten attempts. A moderator can replay failed
 events in the web UI or with `POST /v1/moderation/outbox/{id}/replay`.
@@ -74,7 +78,8 @@ are also bounded by TTL. If strict freshness is needed, reduce record TTLs.
 After deployment, make two requests to an eligible URL and inspect `CF-Cache-Status`
 and `Age`. Confirm the second can be HIT, a query-bearing request is BYPASS/DYNAMIC,
 and all private responses remain uncached. Approve a synthetic staging correction,
-verify the worker completion, ETag change, and snapshot digest. Do not report a CDN
+verify worker completion and the API ETag change. Verify the next eligible daily
+release separately using non-synthetic staging metadata and its snapshot digest. Do not report a CDN
 hit rate without actual edge measurements. Test purge credentials and negative
 cases on a staging zone before relying on long TTLs.
 

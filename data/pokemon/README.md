@@ -68,14 +68,15 @@ conflicting or retired source identity aborts the whole transaction for review.
 game and retires all remaining active records marked `synthetic`, children first.
 It also rejects pending synthetic contributions with a recorded decision. It does
 not physically erase provenance, prior approvals, private scans, revisions or old
-immutable datasets. Those historical snapshots can still contain demo data; the
-latest snapshot and active read API contain the new catalogue. If any non-demo
+dataset files. The daily-release migration withdraws historical demo manifests
+from public listings and downloads while retaining private audit evidence. If any non-demo
 record depends on a demo parent, the whole operation rolls back for manual repair.
 
 Back up PostgreSQL before retiring existing records (see `docs/operations.md`).
-Every change, revision and invalidation event commits atomically. The publication
-worker produces a fresh immutable snapshot and then processes the invalidation
-outbox; Cloudflare remains optional. Reimporting identical facts produces no new
+Every change, revision and invalidation event commits atomically. The invalidation
+worker immediately purges affected API URLs; a separate daily release check exports
+non-synthetic records. Downloads may lag until the next UTC day. Cloudflare remains
+optional. Reimporting identical facts produces no new
 records, revisions or source duplicates. `seed` also skips tombstoned fixture IDs,
 so a later demo seed does not resurrect retired fixtures.
 

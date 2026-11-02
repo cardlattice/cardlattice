@@ -421,6 +421,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "releaseDate": {
+            "format": "date",
+            "type": "string"
+          },
           "revision": {
             "format": "int64",
             "type": "integer"
@@ -436,6 +440,7 @@
         "required": [
           "id",
           "revision",
+          "releaseDate",
           "schemaVersion",
           "sha256",
           "byteSize",

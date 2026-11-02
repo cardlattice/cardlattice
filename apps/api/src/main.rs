@@ -84,6 +84,7 @@ async fn main() -> anyhow::Result<()> {
         metrics: observability::Metrics::default(),
     };
     let worker = tokio::spawn(cardlattice_api::background(state.clone()));
+    let dataset_worker = tokio::spawn(cardlattice_api::dataset_background(state.clone()));
     tracing::info!(address=%listener.local_addr()?,"Cardlattice API listening");
     axum::serve(
         listener,
@@ -95,5 +96,6 @@ async fn main() -> anyhow::Result<()> {
     })
     .await?;
     worker.abort();
+    dataset_worker.abort();
     Ok(())
 }

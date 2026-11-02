@@ -60,9 +60,10 @@ on restart, and the importer preserves retired records as audit tombstones.
 4. Open `/moderate`, enter the moderator token, inspect the draft, give a reason,
    and approve. Rejection also records an audit decision.
 5. The approved record becomes readable immediately. The transaction also creates
-   a revision and invalidation event. Within the worker's five-second tick a
-   versioned dataset is published, then affected URLs are purged (a successful
-   no-op locally). Check `/datasets`, `/changelog`, `/status`, and the moderator
+   a revision and invalidation event. The worker purges affected URLs on its
+   five-second tick (a successful no-op locally). A separate daily release includes
+   only non-synthetic records; demo-only catalogues have no public downloads.
+   Check `/datasets`, `/changelog`, `/status`, and the moderator
    outbox. Failed invalidations have bounded exponential retries and manual replay.
 
 All public GET/HEAD requests remain unauthenticated. The initial contribution
