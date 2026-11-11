@@ -27,14 +27,14 @@ TanStack Query hooks from the same document.
 | `/healthz`, `/readyz` | Process liveness and database readiness |
 
 All public reads are anonymous. `game` is a slug such as `pokemon`; record IDs
-are Cardlattice UUIDs. JSON uses camelCase. Errors are always
+are Cardlattice semantic identifiers. JSON uses camelCase. Errors are always
 `{"error":{"code":"...","message":"..."}}`, including extractor/body-limit errors.
 
 ## Collection parameters
 
 - `limit`: 1–100, default 20. Lists always have `data`, `nextCursor`, and `limit`.
 - `cursor`: opaque continuation from the previous response. Keep filters unchanged.
-- `sort`: `name` ascending or `newest` descending; UUID breaks ties.
+- `sort`: `name` ascending or `newest` descending; identifier breaks ties.
 - `q`: at most 120 Unicode characters and 8 whitespace-delimited terms.
 - `language`: language tag; translations fall back to canonical names. Printing
   lists also filter to the requested printing language.
@@ -61,7 +61,7 @@ are omitted and their download URLs return 404, including conditional GET/HEAD.
 
 ## Contributions and moderation
 
-`POST /v1/contributions` requires the contributor bearer capability, a UUID
+`POST /v1/contributions` requires the contributor bearer capability, an identifier
 `Idempotency-Key`, and a `Submission`. Accepted operations are `create`, `update`,
 and `delete`; updates/removals require `targetId` and `baseUpdatedAt`. The draft
 contains typed core fields, bounded attributes and a source. `termsAccepted` must
@@ -78,7 +78,7 @@ account implementation before inviting untrusted contributors at scale.
 fetching. Accepted uploads retain private review-only rights. A moderator retrieves
 the original from `/v1/moderation/scans/{id}` as an attachment.
 
-Moderator endpoints: `GET /v1/moderation/contributions?cursor=UUID`,
+Moderator endpoints: `GET /v1/moderation/contributions?cursor=identifier`,
 `POST /v1/moderation/contributions/{id}/review` with `decision` and `reason`,
 `GET /v1/moderation/outbox`, and `POST /v1/moderation/outbox/{id}/replay`.
 Approvals are transactional and optimistic updates reject stale bases. Rejections

@@ -2,12 +2,15 @@
 
 Migrations are ordered, versioned SQL under `migrations/`. Apply using
 `cardlattice-api migrate`; production upgrades must be a dedicated release step.
-Migrations do not seed data. UUIDs are internally assigned; upstream IDs can only
-appear in the external identifier relation.
+Migrations do not seed data. Catalogue identities are semantic text keys based on
+game, set, language, region and collector number. Upstream identifiers appear only
+in the external identifier relation. Operational audit/request tokens use random
+hexadecimal strings. This unreleased schema requires a fresh database; no UUID
+migration or compatibility aliases are provided.
 
 | Relation | Meaning and constraints |
 | --- | --- |
-| `catalogue_records` | UUID identity, constrained kind, game, name, canonical search name, optional parent series/set/card, printing metadata, bounded application attributes, synthetic flag, duplicate fingerprint, timestamps and tombstone |
+| `catalogue_records` | Semantic text identity, constrained kind, game, name, canonical search name, optional parent series/set/card, printing metadata, bounded application attributes, synthetic flag, duplicate fingerprint, timestamps and tombstone |
 | `games`, `series`, `sets`, `card_identities`, `printings` | Typed views of active records; not duplicate data stores |
 | `printing_variants` | Printing, finish, stamp and game attributes; unique combination |
 | `localisations` | Record + BCP 47 tag, name, original text, normalised name and search vector |
@@ -16,12 +19,13 @@ appear in the external identifier relation.
 | `external_identifiers` | Namespace/value mappings; never canonical identity |
 | `sources` | Original contribution, physical inspection, or permitted reference; description, URL, licence |
 | `provenance` | Record, source and JSON field path; each accepted draft field has a source link |
-| `contributions` | Capability hash, idempotency UUID and request digest, operation, base timestamp, draft JSON, status |
+| `contributions` | Capability hash, idempotency token and request digest, operation, base timestamp, draft JSON, status |
 | `review_decisions` | Append-only application audit of reviewer hash, decision and reason |
 | `scan_uploads` | Original private bytes, side, media type, digest, candidate metadata, private rights state |
 | `catalogue_revisions` | Monotonic revision, before/after data and contribution reference |
 | `catalogue_imports` | Operator review identity, source-policy URL, factual input batch, SHA-256 and outcome |
 | `catalogue_import_revisions` | Exact revisions attributable to each atomic operator import |
+| `catalogue_index_records` | Last indexed record snapshot and data source commit, for idempotency and local conflict detection |
 | `cache_invalidation_outbox` | Revision, affected URL paths, attempts, next retry, errors, completion |
 | `publication_manifests` | UTC release date (unique while public), source revision, immutable filename, SHA-256, bytes/count and withdrawal audit |
 | `health_measurements` | Stored probe outcome and observed database latency; seven-day retention |
@@ -32,9 +36,9 @@ game, and game slug cannot change in place. Tombstoning a parent with active
 dependents fails. The write path serialises catalogue mutations with an advisory
 lock; production application roles should not permit arbitrary direct writes.
 
-Indexes cover game/kind/canonical-name/UUID pages, created time, printing card/set,
+Indexes cover game/kind/canonical-name/identifier pages, created time, printing card/set,
 rarity, pending review/outbox queues, health timestamps, full-text GIN, and trigram
-GIN searches. Public list cursors retain canonical sort key and UUID, and bind to a
+GIN searches. Public list cursors retain canonical sort key and identifier, and bind to a
 hash of the request's path and filters. Cursor data is not a secret or authority.
 
 Supplementary tables have foundational foreign keys; image/variant references also

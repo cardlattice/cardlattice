@@ -10,7 +10,6 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::{collections::HashSet, time::Duration};
-use uuid::Uuid;
 
 pub const TERMS_URL: &str = "https://press.pokemon.com/en/Assets-Use-Terms";
 const PRODUCT_PREFIX: &str = "https://press.pokemon.com/en/products/";
@@ -222,11 +221,11 @@ fn source(candidate: &SetCandidate) -> SourceInput {
     }
 }
 
-fn draft(candidate: &SetCandidate, game_id: Uuid) -> Draft {
+fn draft(candidate: &SetCandidate, game_id: &str) -> Draft {
     Draft {
         kind: Kind::Set,
         name: candidate.name.clone(),
-        game_id: Some(game_id),
+        game_id: Some(game_id.into()),
         slug: None,
         series_id: None,
         set_id: None,
@@ -294,10 +293,10 @@ pub async fn import(
             .await?;
     let game_id = existing
         .as_ref()
-        .map(|record| record.id)
-        .unwrap_or_else(Uuid::now_v7);
+        .map(|record| record.id.clone())
+        .unwrap_or_else(|| "pokemon".into());
     if existing.as_ref().is_none_or(|record| record.synthetic) {
-        let mut game = draft(&batch.sets[0], game_id);
+        let mut game = draft(&batch.sets[0], &game_id);
         game.kind = Kind::Game;
         game.name = existing
             .as_ref()
@@ -315,30 +314,42 @@ pub async fn import(
         let before: Option<Value> = sqlx::query_scalar(
             "SELECT to_jsonb(r)-'search_document' FROM catalogue_records r WHERE id=$1",
         )
-        .bind(game_id)
+        .bind(&game_id)
         .fetch_optional(&mut *tx)
         .await?;
-        write_record(&mut tx, game_id, &game).await?;
-        revisions.push(revision_and_outbox(&mut tx, game_id, None, before).await?);
+        write_record(&mut tx, &game_id, &game).await?;
+        revisions.push(revision_and_outbox(&mut tx, &game_id, None, before).await?);
         summary.game_created = existing.is_none();
         summary.game_promoted = existing.is_some();
     }
     for candidate in &batch.sets {
-        let desired = draft(candidate, game_id);
+        let desired = draft(candidate, &game_id);
         let existing: Option<Record> = sqlx::query_as("SELECT r.* FROM catalogue_records r JOIN external_identifiers e ON e.record_id=r.id WHERE e.namespace=$1 AND e.value=$2 FOR UPDATE OF r")
             .bind(EXTERNAL_NAMESPACE).bind(&candidate.source_url).fetch_optional(&mut *tx).await?;
         let id = existing
             .as_ref()
-            .map(|record| record.id)
-            .unwrap_or_else(Uuid::now_v7);
+            .map(|record| record.id.clone())
+            .unwrap_or(desired.record_id().map_err(|e| invalid(&e.to_string()))?);
+        if existing.is_none()
+            && sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM catalogue_records WHERE id=$1)",
+            )
+            .bind(&id)
+            .fetch_one(&mut *tx)
+            .await?
+        {
+            return Err(invalid(
+                "Semantic set identity exists without its expected source mapping",
+            ));
+        }
         if let Some(record) = &existing {
             let deleted: bool = sqlx::query_scalar(
                 "SELECT deleted_at IS NOT NULL FROM catalogue_records WHERE id=$1",
             )
-            .bind(id)
+            .bind(&id)
             .fetch_one(&mut *tx)
             .await?;
-            if deleted || record.kind != "set" || record.game_id != Some(game_id) {
+            if deleted || record.kind != "set" || record.game_id != Some(game_id.clone()) {
                 return Err(invalid(
                     "Existing source identity conflicts with an active Pokémon set",
                 ));
@@ -358,18 +369,18 @@ pub async fn import(
         let mut desired = desired;
         if let Some(record) = &existing {
             desired.attributes = record.attributes.clone();
-            desired.series_id = record.series_id;
+            desired.series_id = record.series_id.clone();
             desired.rarity = record.rarity.clone();
         }
         let before: Option<Value> = sqlx::query_scalar(
             "SELECT to_jsonb(r)-'search_document' FROM catalogue_records r WHERE id=$1",
         )
-        .bind(id)
+        .bind(&id)
         .fetch_optional(&mut *tx)
         .await?;
-        write_record(&mut tx, id, &desired).await?;
-        sqlx::query("INSERT INTO external_identifiers(record_id,namespace,value) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(id).bind(EXTERNAL_NAMESPACE).bind(&candidate.source_url).execute(&mut *tx).await?;
-        revisions.push(revision_and_outbox(&mut tx, id, None, before).await?);
+        write_record(&mut tx, &id, &desired).await?;
+        sqlx::query("INSERT INTO external_identifiers(record_id,namespace,value) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(&id).bind(EXTERNAL_NAMESPACE).bind(&candidate.source_url).execute(&mut *tx).await?;
+        revisions.push(revision_and_outbox(&mut tx, &id, None, before).await?);
         if existing.is_some() {
             summary.updated_sets += 1;
         } else {
@@ -379,37 +390,37 @@ pub async fn import(
     if retire_demo {
         // Children first. Existing DB constraints abort the whole transaction if any
         // real record still depends on a demo parent; nothing unrelated is cascaded away.
-        let records: Vec<(Uuid, Value)> = sqlx::query_as("SELECT id,to_jsonb(r)-'search_document' FROM catalogue_records r WHERE synthetic AND deleted_at IS NULL ORDER BY CASE kind WHEN 'printing' THEN 0 WHEN 'card' THEN 1 WHEN 'set' THEN 2 WHEN 'series' THEN 3 ELSE 4 END,id FOR UPDATE")
+        let records: Vec<(String, Value)> = sqlx::query_as("SELECT id,to_jsonb(r)-'search_document' FROM catalogue_records r WHERE synthetic AND deleted_at IS NULL ORDER BY CASE kind WHEN 'printing' THEN 0 WHEN 'card' THEN 1 WHEN 'set' THEN 2 WHEN 'series' THEN 3 ELSE 4 END,id FOR UPDATE")
             .fetch_all(&mut *tx).await?;
         for (id, before) in records {
-            sqlx::query("UPDATE catalogue_records SET deleted_at=clock_timestamp(),updated_at=clock_timestamp() WHERE id=$1").bind(id).execute(&mut *tx).await?;
-            revisions.push(revision_and_outbox(&mut tx, id, None, Some(before)).await?);
+            sqlx::query("UPDATE catalogue_records SET deleted_at=clock_timestamp(),updated_at=clock_timestamp() WHERE id=$1").bind(&id).execute(&mut *tx).await?;
+            revisions.push(revision_and_outbox(&mut tx, &id, None, Some(before)).await?);
             summary.retired_synthetic_records += 1;
         }
-        let pending: Vec<Uuid> = sqlx::query_scalar("SELECT id FROM contributions WHERE status='pending' AND payload->>'synthetic'='true' FOR UPDATE").fetch_all(&mut *tx).await?;
+        let pending: Vec<String> = sqlx::query_scalar("SELECT id FROM contributions WHERE status='pending' AND payload->>'synthetic'='true' FOR UPDATE").fetch_all(&mut *tx).await?;
         for id in pending {
             let reviewer = format!(
                 "{:x}",
                 Sha256::digest(batch.reviewed_by.as_deref().unwrap_or("dry-run").as_bytes())
             );
             sqlx::query("INSERT INTO review_decisions(id,contribution_id,reviewer_hash,decision,reason) VALUES($1,$2,$3,'reject','Operator retired synthetic development data during official set import')")
-                .bind(Uuid::now_v7()).bind(id).bind(reviewer).execute(&mut *tx).await?;
-            sqlx::query("UPDATE contributions SET status='rejected',reviewed_at=clock_timestamp() WHERE id=$1").bind(id).execute(&mut *tx).await?;
+                .bind(catalogue::operation_id()).bind(&id).bind(reviewer).execute(&mut *tx).await?;
+            sqlx::query("UPDATE contributions SET status='rejected',reviewed_at=clock_timestamp() WHERE id=$1").bind(&id).execute(&mut *tx).await?;
             summary.rejected_synthetic_contributions += 1;
         }
     }
     if apply {
         if !revisions.is_empty() || summary.rejected_synthetic_contributions > 0 {
-            let import_id = Uuid::now_v7();
+            let import_id = catalogue::operation_id();
             let batch_value = json!(batch);
             let digest = format!("{:x}", Sha256::digest(batch_value.to_string().as_bytes()));
             sqlx::query("INSERT INTO catalogue_imports(id,batch_sha256,reviewed_by,source_policy_url,batch,summary) VALUES($1,$2,$3,$4,$5,$6)")
-                .bind(import_id).bind(digest).bind(&batch.reviewed_by).bind(&batch.terms_url).bind(batch_value).bind(json!(summary)).execute(&mut *tx).await?;
+                .bind(&import_id).bind(digest).bind(&batch.reviewed_by).bind(&batch.terms_url).bind(batch_value).bind(json!(summary)).execute(&mut *tx).await?;
             for revision in revisions {
                 sqlx::query(
                     "INSERT INTO catalogue_import_revisions(import_id,revision) VALUES($1,$2)",
                 )
-                .bind(import_id)
+                .bind(&import_id)
                 .bind(revision)
                 .execute(&mut *tx)
                 .await?;

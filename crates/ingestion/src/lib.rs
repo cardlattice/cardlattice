@@ -4,8 +4,8 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::{PgConnection, PgPool};
 use std::io::Cursor;
-use uuid::Uuid;
 
+pub mod bundle;
 pub mod official_pokemon;
 pub mod pokemon_cards;
 
@@ -23,7 +23,7 @@ pub enum IngestionError {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Fixture {
-    pub id: Uuid,
+    pub id: String,
     pub draft: Draft,
 }
 
@@ -74,10 +74,11 @@ pub fn validate_scan(bytes: &[u8]) -> Result<(&'static str, String), IngestionEr
 
 pub async fn write_record(
     connection: &mut PgConnection,
-    id: Uuid,
+    id: &str,
     draft: &Draft,
 ) -> Result<(), IngestionError> {
-    let game_slug: Option<String> = match draft.game_id {
+    catalogue::parse_id(id)?;
+    let game_slug: Option<String> = match &draft.game_id {
         Some(game) => {
             sqlx::query_scalar("SELECT slug FROM games WHERE id = $1")
                 .bind(game)
@@ -91,12 +92,12 @@ pub async fn write_record(
     }
     draft.validate(game_slug.as_deref())?;
     sqlx::query("INSERT INTO catalogue_records (id,kind,game_id,slug,name,normalized_name,series_id,set_id,card_id,collector_number,language,region,rarity,release_date,attributes,synthetic,duplicate_key) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,normalized_name=EXCLUDED.normalized_name,series_id=EXCLUDED.series_id,set_id=EXCLUDED.set_id,card_id=EXCLUDED.card_id,collector_number=EXCLUDED.collector_number,language=EXCLUDED.language,region=EXCLUDED.region,rarity=EXCLUDED.rarity,release_date=EXCLUDED.release_date,attributes=EXCLUDED.attributes,synthetic=EXCLUDED.synthetic,duplicate_key=EXCLUDED.duplicate_key,updated_at=clock_timestamp()")
-        .bind(id).bind(draft.kind.as_str()).bind(draft.game_id).bind(&draft.slug).bind(draft.name.trim()).bind(normalize(&draft.name)).bind(draft.series_id).bind(draft.set_id).bind(draft.card_id).bind(&draft.collector_number).bind(&draft.language).bind(&draft.region).bind(&draft.rarity).bind(draft.release_date).bind(&draft.attributes).bind(draft.synthetic).bind(draft.duplicate_key()).execute(&mut *connection).await?;
-    let source = Uuid::now_v7();
+        .bind(id).bind(draft.kind.as_str()).bind(&draft.game_id).bind(&draft.slug).bind(draft.name.trim()).bind(normalize(&draft.name)).bind(&draft.series_id).bind(&draft.set_id).bind(&draft.card_id).bind(&draft.collector_number).bind(&draft.language).bind(&draft.region).bind(&draft.rarity).bind(draft.release_date).bind(&draft.attributes).bind(draft.synthetic).bind(draft.duplicate_key()).execute(&mut *connection).await?;
+    let source = catalogue::operation_id();
     sqlx::query(
         "INSERT INTO sources(id,description,reference_url,method,license) VALUES ($1,$2,$3,$4,$5)",
     )
-    .bind(source)
+    .bind(&source)
     .bind(&draft.source.description)
     .bind(&draft.source.reference_url)
     .bind(serde_json::to_value(&draft.source.method)?.as_str())
@@ -112,7 +113,7 @@ pub async fn write_record(
     {
         sqlx::query("INSERT INTO provenance(record_id,source_id,field_path) VALUES($1,$2,$3)")
             .bind(id)
-            .bind(source)
+            .bind(&source)
             .bind(format!("$.{field}"))
             .execute(&mut *connection)
             .await?;
@@ -122,8 +123,8 @@ pub async fn write_record(
 
 pub async fn revision_and_outbox(
     connection: &mut PgConnection,
-    id: Uuid,
-    contribution: Option<Uuid>,
+    id: &str,
+    contribution: Option<String>,
     before: Option<Value>,
 ) -> Result<i64, sqlx::Error> {
     let after: Value = sqlx::query_scalar(
@@ -166,7 +167,7 @@ pub async fn revision_and_outbox(
     paths.sort();
     paths.dedup();
     sqlx::query("INSERT INTO cache_invalidation_outbox(id,revision,paths) VALUES($1,$2,$3)")
-        .bind(Uuid::now_v7())
+        .bind(catalogue::operation_id())
         .bind(revision)
         .bind(json!(paths))
         .execute(connection)
@@ -185,14 +186,14 @@ pub async fn seed(pool: &PgPool, content: &str) -> Result<usize, IngestionError>
         if sqlx::query_scalar::<_, bool>(
             "SELECT EXISTS(SELECT 1 FROM catalogue_records WHERE id=$1)",
         )
-        .bind(fixture.id)
+        .bind(&fixture.id)
         .fetch_one(&mut *tx)
         .await?
         {
             continue;
         }
-        write_record(&mut tx, fixture.id, &fixture.draft).await?;
-        revision_and_outbox(&mut tx, fixture.id, None, None).await?;
+        write_record(&mut tx, &fixture.id, &fixture.draft).await?;
+        revision_and_outbox(&mut tx, &fixture.id, None, None).await?;
         inserted += 1;
     }
     tx.commit().await?;

@@ -8,7 +8,6 @@ use sqlx::PgPool;
 use std::path::PathBuf;
 use tokio::io::AsyncWriteExt;
 use utoipa::ToSchema;
-use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct PublishingConfig {
@@ -35,7 +34,7 @@ pub enum PublishError {
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Manifest {
-    pub id: Uuid,
+    pub id: String,
     pub revision: i64,
     pub release_date: NaiveDate,
     pub schema_version: i32,
@@ -93,7 +92,7 @@ pub async fn publish_snapshot(
     if latest.is_none() && !real_records {
         return Ok(None);
     }
-    let id = Uuid::now_v7();
+    let id = catalogue::operation_id();
     let temporary = config.directory.join(format!(".{id}.tmp"));
     let mut file = tokio::fs::File::create(&temporary).await?;
     let mut hasher = Sha256::new();
@@ -119,7 +118,7 @@ pub async fn publish_snapshot(
     let filename = format!("catalogue-{release_date}-{digest}.ndjson");
     tokio::fs::rename(&temporary, config.directory.join(&filename)).await?;
     let manifest = sqlx::query_as::<_, Manifest>("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename,release_date) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *")
-        .bind(id).bind(revision).bind(digest).bind(byte_size).bind(count).bind(filename).bind(release_date).fetch_one(&mut *tx).await?;
+        .bind(&id).bind(revision).bind(digest).bind(byte_size).bind(count).bind(filename).bind(release_date).fetch_one(&mut *tx).await?;
     tx.commit().await?;
     guard.commit().await?;
     Ok(Some(manifest))
@@ -184,7 +183,7 @@ pub async fn process_one_using(
     purger: &impl CachePurger,
 ) -> Result<bool, PublishError> {
     let mut tx = pool.begin().await?;
-    let row: Option<(Uuid, Value, i32)> = sqlx::query_as("SELECT id,paths,attempts FROM cache_invalidation_outbox WHERE status='pending' AND next_attempt_at <= now() ORDER BY revision FOR UPDATE SKIP LOCKED LIMIT 1").fetch_optional(&mut *tx).await?;
+    let row: Option<(String, Value, i32)> = sqlx::query_as("SELECT id,paths,attempts FROM cache_invalidation_outbox WHERE status='pending' AND next_attempt_at <= now() ORDER BY revision FOR UPDATE SKIP LOCKED LIMIT 1").fetch_optional(&mut *tx).await?;
     let Some((id, paths, attempts)) = row else {
         return Ok(false);
     };
@@ -195,20 +194,20 @@ pub async fn process_one_using(
     .await;
     match result {
         Ok(()) => {
-            sqlx::query("UPDATE cache_invalidation_outbox SET status='completed',attempts=attempts+1,last_error=NULL,completed_at=clock_timestamp() WHERE id=$1").bind(id).execute(&mut *tx).await?;
+            sqlx::query("UPDATE cache_invalidation_outbox SET status='completed',attempts=attempts+1,last_error=NULL,completed_at=clock_timestamp() WHERE id=$1").bind(&id).execute(&mut *tx).await?;
         }
         Err(error) => {
             tracing::warn!(outbox_id=%id, %error, "publication or invalidation failed");
             sqlx::query("UPDATE cache_invalidation_outbox SET status=$2,attempts=attempts+1,last_error=$3,next_attempt_at=clock_timestamp()+make_interval(secs=>$4) WHERE id=$1")
-                .bind(id).bind(if attempts + 1 >= 10 { "failed" } else { "pending" }).bind(error.to_string()).bind(retry_delay(attempts) as f64).execute(&mut *tx).await?;
+                .bind(&id).bind(if attempts + 1 >= 10 { "failed" } else { "pending" }).bind(error.to_string()).bind(retry_delay(attempts) as f64).execute(&mut *tx).await?;
         }
     }
     tx.commit().await?;
     Ok(true)
 }
 
-pub async fn replay(pool: &PgPool, id: Uuid) -> Result<bool, sqlx::Error> {
-    Ok(sqlx::query("UPDATE cache_invalidation_outbox SET status='pending',attempts=0,next_attempt_at=clock_timestamp(),last_error=NULL WHERE id=$1 AND status='failed'").bind(id).execute(pool).await?.rows_affected() == 1)
+pub async fn replay(pool: &PgPool, id: String) -> Result<bool, sqlx::Error> {
+    Ok(sqlx::query("UPDATE cache_invalidation_outbox SET status='pending',attempts=0,next_attempt_at=clock_timestamp(),last_error=NULL WHERE id=$1 AND status='failed'").bind(&id).execute(pool).await?.rows_affected() == 1)
 }
 
 #[cfg(test)]

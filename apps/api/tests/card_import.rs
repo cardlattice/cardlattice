@@ -5,7 +5,6 @@ use ingestion::{
 };
 use serde_json::Value;
 use sqlx::PgPool;
-use uuid::Uuid;
 
 const SET_URL: &str = "https://press.pokemon.com/en/products/Original-checklist-test";
 fn batch() -> CardBatch {
@@ -18,7 +17,7 @@ fn batch() -> CardBatch {
         }],
     }
 }
-async fn count(pool: &PgPool, sql: &str) -> i64 {
+async fn count(pool: &PgPool, sql: &'static str) -> i64 {
     sqlx::query_scalar(sql).fetch_one(pool).await.unwrap()
 }
 #[sqlx::test(migrations = "../../migrations")]
@@ -67,7 +66,7 @@ async fn checklist_import_preserves_identity_is_atomic_and_idempotent(pool: PgPo
         count(&pool, "SELECT count(*) FROM catalogue_import_revisions").await,
         6
     );
-    let records: Vec<(Uuid, Uuid)> =
+    let records: Vec<(String, String)> =
         sqlx::query_as("SELECT id,card_id FROM printings ORDER BY collector_number")
             .fetch_all(&pool)
             .await
@@ -150,22 +149,4 @@ fn checklist_validation_fails_closed() {
     let mut bad = input;
     bad.sets[0].scope = "classic-collection".into();
     assert!(bad.validate().is_err());
-}
-#[test]
-fn committed_checklists_have_exact_bounded_coverage() {
-    let batch: CardBatch = serde_json::from_str(include_str!(
-        "../../../data/pokemon/cards-reviewed-2026-11-02.json"
-    ))
-    .unwrap();
-    batch.validate().unwrap();
-    assert_eq!(
-        batch.sets.iter().map(|s| s.cards.len()).collect::<Vec<_>>(),
-        vec![188, 130, 295, 124, 122, 120, 158, 141]
-    );
-    assert_eq!(
-        batch.sets.iter().map(|s| s.cards.len()).sum::<usize>(),
-        1278
-    );
-    assert_eq!(batch.sets[2].cards[17].name, "Team Rocket’s Tarountula");
-    assert_eq!(batch.sets[7].cards[54].name, "Nidoran♀");
 }

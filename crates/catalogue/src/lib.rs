@@ -5,11 +5,43 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use unicode_normalization::UnicodeNormalization;
 use utoipa::ToSchema;
-use uuid::Uuid;
 
 #[derive(Debug, thiserror::Error)]
 #[error("{0}")]
 pub struct ValidationError(pub String);
+
+/// URL-safe semantic keys; no identifier aliases or legacy lookup path.
+pub fn parse_id(value: &str) -> Result<String, ValidationError> {
+    if value.is_empty()
+        || value.len() > 200
+        || !value
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
+    {
+        return Err(ValidationError(
+            "Identifiers must use 1–200 letters, numbers, hyphens, dots or underscores".into(),
+        ));
+    }
+    Ok(value.into())
+}
+
+/// Opaque request/audit tokens have no catalogue identity semantics.
+pub fn operation_id() -> String {
+    let mut bytes = [0_u8; 16];
+    getrandom::fill(&mut bytes).expect("operating system entropy");
+    format!(
+        "event-{}",
+        bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()
+    )
+}
+
+pub fn slug(value: &str) -> String {
+    normalize(value)
+        .split(|c: char| !c.is_ascii_alphanumeric())
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
+}
 
 pub fn normalize(value: &str) -> String {
     value
@@ -47,14 +79,14 @@ impl Kind {
 #[serde(rename_all = "camelCase")]
 #[schema(as = CatalogueRecord)]
 pub struct Record {
-    pub id: Uuid,
+    pub id: String,
     pub kind: String,
-    pub game_id: Option<Uuid>,
+    pub game_id: Option<String>,
     pub slug: Option<String>,
     pub name: String,
-    pub series_id: Option<Uuid>,
-    pub set_id: Option<Uuid>,
-    pub card_id: Option<Uuid>,
+    pub series_id: Option<String>,
+    pub set_id: Option<String>,
+    pub card_id: Option<String>,
     pub collector_number: Option<String>,
     pub language: Option<String>,
     pub region: Option<String>,
@@ -88,11 +120,11 @@ pub enum SourceMethod {
 pub struct Draft {
     pub kind: Kind,
     pub name: String,
-    pub game_id: Option<Uuid>,
+    pub game_id: Option<String>,
     pub slug: Option<String>,
-    pub series_id: Option<Uuid>,
-    pub set_id: Option<Uuid>,
-    pub card_id: Option<Uuid>,
+    pub series_id: Option<String>,
+    pub set_id: Option<String>,
+    pub card_id: Option<String>,
     pub collector_number: Option<String>,
     pub language: Option<String>,
     pub region: Option<String>,
@@ -112,8 +144,8 @@ fn empty_object() -> Value {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PokemonAttributes {
     pub category: Option<String>,
-    /// Provisional identity bounded to an internal printing UUID until rules are reviewed.
-    pub identity_scope: Option<Uuid>,
+    /// Provisional identity bounded to an internal printing identifier until rules are reviewed.
+    pub identity_scope: Option<String>,
     pub hp: Option<u16>,
     #[serde(default)]
     pub types: Vec<String>,
@@ -121,8 +153,37 @@ pub struct PokemonAttributes {
 }
 
 impl Draft {
+    /// New catalogue identities are readable. Existing edits retain their explicit key.
+    pub fn record_id(&self) -> Result<String, ValidationError> {
+        let game = self.game_id.as_deref().unwrap_or_default();
+        let id = match self.kind {
+            Kind::Game => self.slug.clone().unwrap_or_default(),
+            Kind::Series => format!("{game}-series-{}", slug(&self.name)),
+            Kind::Set => format!("{game}-{}", slug(&self.name)),
+            Kind::Card => self
+                .attributes
+                .get("identityScope")
+                .and_then(Value::as_str)
+                .map(|scope| format!("card-{scope}"))
+                .unwrap_or_else(|| format!("{game}-card-{}", slug(&self.name))),
+            Kind::Printing => format!(
+                "{}-{}-{}-{}",
+                self.set_id.as_deref().unwrap_or_default(),
+                self.language.as_deref().unwrap_or_default(),
+                self.region.as_deref().unwrap_or("global"),
+                self.collector_number.as_deref().unwrap_or_default()
+            ),
+        };
+        parse_id(&id)
+    }
     pub fn validate(&self, game_slug: Option<&str>) -> Result<(), ValidationError> {
         let fail = |s: &str| Err(ValidationError(s.into()));
+        for id in [&self.game_id, &self.series_id, &self.set_id, &self.card_id]
+            .into_iter()
+            .flatten()
+        {
+            parse_id(id)?;
+        }
         if self.name.trim().is_empty()
             || self.name.chars().count() > 200
             || self.name.chars().any(char::is_control)
@@ -281,8 +342,8 @@ pub struct ListQuery {
     pub q: Option<String>,
     pub language: Option<String>,
     pub sort: Option<String>,
-    pub set_id: Option<Uuid>,
-    pub card_id: Option<Uuid>,
+    pub set_id: Option<String>,
+    pub card_id: Option<String>,
     pub rarity: Option<String>,
     pub game: Option<String>,
 }
@@ -290,12 +351,15 @@ pub struct ListQuery {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Cursor {
     pub key: String,
-    pub id: Uuid,
+    pub id: String,
     pub scope: String,
 }
 
 impl ListQuery {
     pub fn validate(&self) -> Result<(), ValidationError> {
+        for id in [&self.set_id, &self.card_id].into_iter().flatten() {
+            parse_id(id)?;
+        }
         if self.limit.is_some_and(|v| v == 0 || v > 100) {
             return Err(ValidationError("limit must be between 1 and 100".into()));
         }
@@ -349,6 +413,7 @@ impl ListQuery {
                     .map_err(|_| ValidationError("Invalid cursor".into()))?;
                 let cursor: Cursor = serde_json::from_slice(&bytes)
                     .map_err(|_| ValidationError("Invalid cursor".into()))?;
+                parse_id(&cursor.id)?;
                 if cursor.scope != self.scope(path) || cursor.key.len() > 400 {
                     return Err(ValidationError(
                         "Cursor does not belong to this query".into(),
@@ -360,7 +425,7 @@ impl ListQuery {
     }
 }
 
-pub fn encode_cursor(key: String, id: Uuid, scope: String) -> String {
+pub fn encode_cursor(key: String, id: String, scope: String) -> String {
     URL_SAFE_NO_PAD
         .encode(serde_json::to_vec(&Cursor { key, id, scope }).expect("serializable cursor"))
 }
@@ -379,7 +444,7 @@ mod tests {
     #[test]
     fn same_name_card_attributes_preserve_identity() {
         let mut draft: Draft = serde_json::from_value(serde_json::json!({
-            "kind":"card","name":"Synthetic shared name","gameId":Uuid::now_v7(),
+            "kind":"card","name":"Synthetic shared name","gameId":operation_id(),
             "attributes":{"category":"pokemon","hp":40},"synthetic":true,
             "source":{"description":"Original synthetic identity test","method":"original_contribution","license":"CC0-1.0"}
         })).unwrap();
@@ -399,7 +464,7 @@ mod tests {
         let mut query = ListQuery::default();
         query.cursor = Some(encode_cursor(
             "café".into(),
-            Uuid::now_v7(),
+            operation_id(),
             query.scope("/cards"),
         ));
         assert!(query.decode_cursor("/cards").unwrap().is_some());

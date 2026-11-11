@@ -20,7 +20,7 @@ async fn measured_catalogue_workloads(pool: PgPool) {
     ingestion::seed(&pool, include_str!("../../../data/development.json"))
         .await
         .unwrap();
-    sqlx::query("INSERT INTO catalogue_records(id,kind,game_id,name,normalized_name,synthetic,duplicate_key) SELECT ('01910000-0000-7000-8000-'||lpad(n::text,12,'0'))::uuid,'card','01900000-0000-7000-8000-000000000001','Original benchmark prism '||n,'original benchmark prism '||n,true,'original-benchmark-'||n FROM generate_series(1,20000) n").execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO catalogue_records(id,kind,game_id,name,normalized_name,synthetic,duplicate_key) SELECT ('01910000-0000-7000-8000-'||lpad(n::text,12,'0'))::text,'card','pokemon','Original benchmark prism '||n,'original benchmark prism '||n,true,'original-benchmark-'||n FROM generate_series(1,20000) n").execute(&pool).await.unwrap();
     sqlx::query("VACUUM (ANALYZE) catalogue_records")
         .execute(&pool)
         .await

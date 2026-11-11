@@ -1,14 +1,14 @@
 -- A common identity table preserves cross-game semantics; typed views are read models.
 CREATE TABLE catalogue_records (
-    id uuid PRIMARY KEY,
+    id text PRIMARY KEY CHECK (length(id) BETWEEN 1 AND 200 AND id ~ '^[A-Za-z0-9_.-]+$'),
     kind text NOT NULL CHECK (kind IN ('game','series','set','card','printing')),
-    game_id uuid REFERENCES catalogue_records(id),
+    game_id text REFERENCES catalogue_records(id),
     slug text,
     name text NOT NULL CHECK (length(name) BETWEEN 1 AND 200),
     normalized_name text NOT NULL,
-    series_id uuid REFERENCES catalogue_records(id),
-    set_id uuid REFERENCES catalogue_records(id),
-    card_id uuid REFERENCES catalogue_records(id),
+    series_id text REFERENCES catalogue_records(id),
+    set_id text REFERENCES catalogue_records(id),
+    card_id text REFERENCES catalogue_records(id),
     collector_number text,
     language text,
     region text,
@@ -62,15 +62,15 @@ CREATE VIEW card_identities AS SELECT * FROM catalogue_records WHERE kind = 'car
 CREATE VIEW printings AS SELECT * FROM catalogue_records WHERE kind = 'printing' AND deleted_at IS NULL;
 
 CREATE TABLE printing_variants (
-    id uuid PRIMARY KEY,
-    printing_id uuid NOT NULL REFERENCES catalogue_records(id),
+    id text PRIMARY KEY,
+    printing_id text NOT NULL REFERENCES catalogue_records(id),
     finish text NOT NULL,
     stamp text NOT NULL DEFAULT '',
     attributes jsonb NOT NULL DEFAULT '{}',
     UNIQUE(printing_id, finish, stamp)
 );
 CREATE TABLE localisations (
-    record_id uuid NOT NULL REFERENCES catalogue_records(id),
+    record_id text NOT NULL REFERENCES catalogue_records(id),
     language text NOT NULL,
     name text NOT NULL,
     normalized_name text NOT NULL,
@@ -80,14 +80,14 @@ CREATE TABLE localisations (
 );
 CREATE INDEX localisation_search ON localisations USING gin(search_document);
 CREATE TABLE external_identifiers (
-    record_id uuid NOT NULL REFERENCES catalogue_records(id),
+    record_id text NOT NULL REFERENCES catalogue_records(id),
     namespace text NOT NULL,
     value text NOT NULL,
     PRIMARY KEY(record_id, namespace, value),
     UNIQUE(namespace, value)
 );
 CREATE TABLE sources (
-    id uuid PRIMARY KEY,
+    id text PRIMARY KEY,
     description text NOT NULL,
     reference_url text,
     method text NOT NULL,
@@ -95,23 +95,23 @@ CREATE TABLE sources (
     recorded_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE TABLE provenance (
-    record_id uuid NOT NULL REFERENCES catalogue_records(id),
-    source_id uuid NOT NULL REFERENCES sources(id),
+    record_id text NOT NULL REFERENCES catalogue_records(id),
+    source_id text NOT NULL REFERENCES sources(id),
     field_path text NOT NULL DEFAULT '$',
     PRIMARY KEY(record_id, source_id, field_path)
 );
 CREATE TABLE contributions (
-    id uuid PRIMARY KEY,
+    id text PRIMARY KEY,
     owner_hash text NOT NULL,
-    idempotency_key uuid NOT NULL,
+    idempotency_key text NOT NULL,
     request_hash text NOT NULL,
     operation text NOT NULL CHECK(operation IN ('create','update','delete')),
-    target_id uuid REFERENCES catalogue_records(id),
+    target_id text REFERENCES catalogue_records(id),
     base_updated_at timestamptz,
     payload jsonb NOT NULL,
     duplicate_key text NOT NULL,
     status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
-    record_id uuid REFERENCES catalogue_records(id),
+    record_id text REFERENCES catalogue_records(id),
     created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
     reviewed_at timestamptz,
     UNIQUE(owner_hash, idempotency_key),
@@ -120,16 +120,16 @@ CREATE TABLE contributions (
 CREATE UNIQUE INDEX pending_duplicate ON contributions(duplicate_key) WHERE status = 'pending';
 CREATE INDEX contribution_queue ON contributions(created_at, id) WHERE status = 'pending';
 CREATE TABLE review_decisions (
-    id uuid PRIMARY KEY,
-    contribution_id uuid NOT NULL REFERENCES contributions(id),
+    id text PRIMARY KEY,
+    contribution_id text NOT NULL REFERENCES contributions(id),
     reviewer_hash text NOT NULL,
     decision text NOT NULL CHECK(decision IN ('approve','reject')),
     reason text NOT NULL,
     created_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE TABLE scan_uploads (
-    id uuid PRIMARY KEY,
-    contribution_id uuid NOT NULL REFERENCES contributions(id),
+    id text PRIMARY KEY,
+    contribution_id text NOT NULL REFERENCES contributions(id),
     side text NOT NULL CHECK(side IN ('front','back')),
     media_type text NOT NULL,
     sha256 text NOT NULL,
@@ -141,8 +141,8 @@ CREATE TABLE scan_uploads (
     UNIQUE(contribution_id, sha256)
 );
 CREATE TABLE image_rights (
-    id uuid PRIMARY KEY,
-    source_id uuid NOT NULL REFERENCES sources(id),
+    id text PRIMARY KEY,
+    source_id text NOT NULL REFERENCES sources(id),
     license text NOT NULL,
     permission_evidence text NOT NULL,
     attribution text,
@@ -150,23 +150,23 @@ CREATE TABLE image_rights (
     approved_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE TABLE images (
-    id uuid PRIMARY KEY,
-    printing_id uuid NOT NULL REFERENCES catalogue_records(id),
-    rights_id uuid NOT NULL REFERENCES image_rights(id),
+    id text PRIMARY KEY,
+    printing_id text NOT NULL REFERENCES catalogue_records(id),
+    rights_id text NOT NULL REFERENCES image_rights(id),
     public_url text NOT NULL CHECK(public_url LIKE 'https://%'),
     side text NOT NULL CHECK(side IN ('front','back')),
     sha256 text NOT NULL
 );
 CREATE TABLE catalogue_revisions (
     revision bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    record_id uuid NOT NULL REFERENCES catalogue_records(id),
-    contribution_id uuid REFERENCES contributions(id),
+    record_id text NOT NULL REFERENCES catalogue_records(id),
+    contribution_id text REFERENCES contributions(id),
     before_data jsonb,
     after_data jsonb,
     created_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE TABLE cache_invalidation_outbox (
-    id uuid PRIMARY KEY,
+    id text PRIMARY KEY,
     revision bigint NOT NULL REFERENCES catalogue_revisions(revision),
     paths jsonb NOT NULL,
     status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','processing','completed','failed')),
@@ -178,7 +178,7 @@ CREATE TABLE cache_invalidation_outbox (
 );
 CREATE INDEX outbox_pending ON cache_invalidation_outbox(next_attempt_at) WHERE status = 'pending';
 CREATE TABLE publication_manifests (
-    id uuid PRIMARY KEY,
+    id text PRIMARY KEY,
     revision bigint NOT NULL UNIQUE,
     schema_version integer NOT NULL DEFAULT 1,
     sha256 text NOT NULL,

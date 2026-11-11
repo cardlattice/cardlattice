@@ -1,6 +1,6 @@
 [advisories]
-# SQLx's optional MySQL backend remains in Cargo.lock, but is not enabled or built.
-# `scripts/audit.sh` fails if rsa becomes reachable under any target/all features.
-# cargo-deny separately audits the active graph without an advisory exception.
-# Remove this exception if SQLx removes the lock-only dependency or a fix is released.
-ignore = ["RUSTSEC-2023-0071"]
+# SQLx 0.9 still locks its disabled SQLite backend, which constrains libsqlite3-sys
+# below the fixed version. No SQLite crate is compiled for any target/features.
+# scripts/audit.sh fails if it becomes reachable; cargo-deny audits the active graph.
+# Remove when SQLx permits libsqlite3-sys >=0.39 or drops the optional lock entry.
+ignore = ["RUSTSEC-2026-0459"]

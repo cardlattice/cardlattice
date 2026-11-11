@@ -7,7 +7,6 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::collections::HashSet;
-use uuid::Uuid;
 
 pub const TERMS_URL: &str = "https://www.pokemon.com/us/legal/";
 const NAMESPACE: &str = "pokemon-official-numbered-checklist";
@@ -142,7 +141,7 @@ pub async fn import(
                 .bind(NAMESPACE).bind(&key).fetch_optional(&mut *tx).await?;
             if let Some(existing) = existing {
                 if existing.kind != "printing"
-                    || existing.set_id != Some(set.id)
+                    || existing.set_id != Some(set.id.clone())
                     || existing.name != candidate.name
                     || existing.collector_number.as_ref() != Some(&candidate.collector_number)
                     || existing.language.as_deref() != Some("en")
@@ -156,12 +155,24 @@ pub async fn import(
                 summary.unchanged_printings += 1;
                 continue;
             }
-            let card_id = Uuid::now_v7();
-            let printing_id = Uuid::now_v7();
+            let printing_id = format!("{}-en-US-{}", set.id, candidate.collector_number);
+            let card_id = format!("card-{printing_id}");
+            let exists: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM catalogue_records WHERE id=$1 OR id=$2)",
+            )
+            .bind(&card_id)
+            .bind(&printing_id)
+            .fetch_one(&mut *tx)
+            .await?;
+            if exists {
+                return Err(invalid(
+                    "Semantic identity already exists without the expected source mapping",
+                ));
+            }
             let mut draft = Draft {
                 kind: Kind::Card,
                 name: candidate.name.clone(),
-                game_id: set.game_id,
+                game_id: set.game_id.clone(),
                 slug: None,
                 series_id: None,
                 set_id: None,
@@ -175,20 +186,20 @@ pub async fn import(
                 synthetic: false,
                 source: source.clone(),
             };
-            write_record(&mut tx, card_id, &draft).await?;
-            revisions.push(revision_and_outbox(&mut tx, card_id, None, None).await?);
+            write_record(&mut tx, &card_id, &draft).await?;
+            revisions.push(revision_and_outbox(&mut tx, &card_id, None, None).await?);
             draft.kind = Kind::Printing;
-            draft.set_id = Some(set.id);
-            draft.card_id = Some(card_id);
+            draft.set_id = Some(set.id.clone());
+            draft.card_id = Some(card_id.clone());
             draft.collector_number = Some(candidate.collector_number.clone());
             draft.release_date = set.release_date;
             draft.attributes = json!({});
-            write_record(&mut tx, printing_id, &draft).await?;
-            revisions.push(revision_and_outbox(&mut tx, printing_id, None, None).await?);
+            write_record(&mut tx, &printing_id, &draft).await?;
+            revisions.push(revision_and_outbox(&mut tx, &printing_id, None, None).await?);
             sqlx::query(
                 "INSERT INTO external_identifiers(record_id,namespace,value) VALUES($1,$2,$3)",
             )
-            .bind(printing_id)
+            .bind(&printing_id)
             .bind(NAMESPACE)
             .bind(key)
             .execute(&mut *tx)
@@ -208,16 +219,16 @@ pub async fn import(
             .execute(&mut *tx)
             .await?;
         sqlx::query("INSERT INTO cache_invalidation_outbox(id,revision,paths) VALUES($1,$2,$3)")
-            .bind(Uuid::now_v7())
+            .bind(catalogue::operation_id())
             .bind(revisions.last())
             .bind(paths)
             .execute(&mut *tx)
             .await?;
-        let import_id = Uuid::now_v7();
+        let import_id = catalogue::operation_id();
         let value = json!(batch);
         let digest = format!("{:x}", Sha256::digest(value.to_string().as_bytes()));
-        sqlx::query("INSERT INTO catalogue_imports(id,batch_sha256,reviewed_by,source_policy_url,batch,summary) VALUES($1,$2,$3,$4,$5,$6)").bind(import_id).bind(digest).bind(&batch.reviewed_by).bind(&batch.terms_url).bind(value).bind(json!(summary)).execute(&mut *tx).await?;
-        sqlx::query("INSERT INTO catalogue_import_revisions(import_id,revision) SELECT $1,unnest($2::bigint[])").bind(import_id).bind(&revisions).execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO catalogue_imports(id,batch_sha256,reviewed_by,source_policy_url,batch,summary) VALUES($1,$2,$3,$4,$5,$6)").bind(&import_id).bind(digest).bind(&batch.reviewed_by).bind(&batch.terms_url).bind(value).bind(json!(summary)).execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO catalogue_import_revisions(import_id,revision) SELECT $1,unnest($2::bigint[])").bind(&import_id).bind(&revisions).execute(&mut *tx).await?;
     }
     if apply {
         tx.commit().await?;

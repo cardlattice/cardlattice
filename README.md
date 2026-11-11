@@ -22,20 +22,21 @@ docker compose ps
 
 Compose generates local credentials in a private Docker volume, starts PostgreSQL,
 and applies versioned migrations. New databases start empty. Import the reviewed
-initial batch of **eight real Pokémon sets** sourced directly from the official
-Pokémon press site:
+catalogue artifact from [cardlattice-data](https://github.com/cardlattice/cardlattice-data):
 
 ```sh
-docker compose run --rm --no-deps -v "$PWD/data/pokemon:/import:ro" api \
-  import-pokemon-sets /import/reviewed-2026-11-02.json
-# The first command validates and rolls back. Apply the reviewed batch:
-docker compose run --rm --no-deps -v "$PWD/data/pokemon:/import:ro" api \
-  import-pokemon-sets /import/reviewed-2026-11-02.json --apply --retire-demo
+docker compose run --rm --no-deps -v "$PWD/.local/catalogue:/import:ro" api \
+  index-catalogue /import/manifest.json
+# Apply after inspecting the dry-run summary:
+docker compose run --rm --no-deps -v "$PWD/.local/catalogue:/import:ro" api \
+  index-catalogue /import/manifest.json --apply
 ```
 
-This is an initial set-metadata catalogue, not a complete card catalogue. It includes
-officially announced release dates (including future dates), no real card identities,
-and no artwork. See [official sourcing and imports](data/pokemon/README.md).
+Download both the release manifest and its catalogue JSON into `.local/catalogue`.
+The initial catalogue contains eight sets and 1,278 provisional card identities and
+printings, with no artwork. See [CI builds and indexing](docs/data-pipeline.md).
+Catalogue IDs are readable game/set/language/collector keys; this unreleased schema
+requires a fresh database rather than an upgrade from the earlier UUID experiment.
 
 Set `CARDLATTICE_WEB_PORT` and `CARDLATTICE_API_PORT` to change host ports. Production
 must use the separate deployment guidance. Published ports bind to loopback.
@@ -61,8 +62,7 @@ on restart, and the importer preserves retired records as audit tombstones.
    and approve. Rejection also records an audit decision.
 5. The approved record becomes readable immediately. The transaction also creates
    a revision and invalidation event. The worker purges affected URLs on its
-   five-second tick (a successful no-op locally). A separate daily release includes
-   only non-synthetic records; demo-only catalogues have no public downloads.
+   five-second tick (a successful no-op locally). Datasets are built in the data repository CI and registered when an approved artifact is indexed; demo-only catalogues have no public downloads.
    Check `/datasets`, `/changelog`, `/status`, and the moderator
    outbox. Failed invalidations have bounded exponential retries and manual replay.
 
@@ -87,7 +87,7 @@ curl -i 'http://localhost:8080/v1/search?q=Mega%20Evolution'
 | `crates/publishing` | Streaming snapshots, manifests, durable invalidation worker |
 | `crates/observability` | Prometheus histograms/counters, structured tracing |
 | `migrations` | Ordered PostgreSQL schema migrations and indexes |
-| `data` | Opt-in synthetic fixtures and reviewed official set facts with provenance |
+| `data` | Opt-in synthetic test fixtures; reviewed facts live in cardlattice-data |
 | `docs` | Architecture, operations, sourcing, API, roadmap |
 | `infra` | Production Dockerfiles, local proxy, Cloudflare examples |
 
@@ -102,7 +102,7 @@ the server does not implicitly load `.env`. Secrets can instead be supplied thro
 ```sh
 cargo run -p cardlattice-api -- migrate
 # Choose reviewed real metadata, or `seed` only for a disposable demo database:
-cargo run -p cardlattice-api -- import-pokemon-sets data/pokemon/reviewed-2026-11-02.json --apply
+cargo run -p cardlattice-api -- index-catalogue .local/catalogue/manifest.json --apply
 cargo run -p cardlattice-api -- serve
 # In another terminal:
 pnpm install --frozen-lockfile
@@ -167,7 +167,7 @@ verification and outstanding work. In particular:
   filesystem and scans use private PostgreSQL bytea storage.
 - Live Cloudflare purging requires an operator's zone and secret. Local semantics
   and injected purge failures are tested; a real zone is not required for development.
-- No remote repository or production deployment is created by this checkout.
+- Production deployment and automatic consumption of approved data releases require operator setup.
 
 Read [architecture](docs/architecture.md), [schema](docs/schema.md),
 [API](docs/api.md), [contributing](docs/contributing.md),

@@ -169,8 +169,8 @@ test("forms and resource screens meet automated accessibility checks", async ({ 
 });
 
 test("detail links keep printing collections scoped to their parent", async ({ page }) => {
-  const setId = "01900000-0000-7000-8000-000000000003";
-  const cardId = "01900000-0000-7000-8000-000000000004";
+  const setId = "pokemon-set-lattice-laboratory-synthetic";
+  const cardId = "pokemon-card-prism-seed-synthetic";
   for (const [collection, id, filter] of [
     ["sets", setId, "setId"],
     ["cards", cardId, "cardId"],
@@ -187,11 +187,11 @@ test("detail links keep printing collections scoped to their parent", async ({ p
 });
 
 test("long provisional identity metadata fits a phone", async ({ page }) => {
-  const path = "/v1/games/pokemon/cards/01900000-0000-7000-8000-000000000004";
+  const path = "/v1/games/pokemon/cards/pokemon-card-prism-seed-synthetic";
   await page.route(`**${path}`, async (route) => {
     const response = await route.fetch();
     const body = await response.json();
-    body.data.attributes.identityScope = "01900000-0000-7000-8000-000000000005";
+    body.data.attributes.identityScope = "pokemon-card-caf-lantern-synthetic";
     await route.fulfill({ response, json: body });
   });
   await page.setViewportSize({ width: 390, height: 844 });

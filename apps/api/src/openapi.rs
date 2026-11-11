@@ -113,7 +113,8 @@ pub fn document() -> Value {
             parameters.push(json!({"name":"game","in":"path","required":true,"schema":{"type":"string"},"example":"pokemon"}));
         }
         if path.contains("{id}") {
-            parameters.push(json!({"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}));
+            parameters
+                .push(json!({"name":"id","in":"path","required":true,"schema":{"type":"string"}}));
         }
         if list {
             for (name, schema) in [
@@ -128,8 +129,8 @@ pub fn document() -> Value {
                     json!({"type":"string","enum":["name","newest"],"default":"name"}),
                 ),
                 ("language", json!({"type":"string","example":"en"})),
-                ("setId", json!({"type":"string","format":"uuid"})),
-                ("cardId", json!({"type":"string","format":"uuid"})),
+                ("setId", json!({"type":"string"})),
+                ("cardId", json!({"type":"string"})),
                 ("rarity", json!({"type":"string"})),
                 ("game", json!({"type":"string"})),
             ] {
@@ -206,15 +207,14 @@ pub fn document() -> Value {
     ] {
         let mut parameters = Vec::new();
         if path.contains("{id}") {
-            parameters.push(json!({"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}));
+            parameters
+                .push(json!({"name":"id","in":"path","required":true,"schema":{"type":"string"}}));
         }
         if path == "/v1/contributions" {
-            parameters.push(json!({"name":"Idempotency-Key","in":"header","required":true,"schema":{"type":"string","format":"uuid"}}));
+            parameters.push(json!({"name":"Idempotency-Key","in":"header","required":true,"schema":{"type":"string"}}));
         }
         if path == "/v1/moderation/contributions" {
-            parameters.push(
-                json!({"name":"cursor","in":"query","schema":{"type":"string","format":"uuid"}}),
-            );
+            parameters.push(json!({"name":"cursor","in":"query","schema":{"type":"string"}}));
         }
         let mut operation = json!({"summary":summary,"tags":["Contributions"],"security":[{role:[]}],"parameters":parameters,"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object"}}}},"400":{"$ref":"#/components/responses/Error"},"401":{"$ref":"#/components/responses/Error"},"409":{"$ref":"#/components/responses/Error"},"429":{"$ref":"#/components/responses/Error"}}});
         if !request.is_empty() {
@@ -222,8 +222,8 @@ pub fn document() -> Value {
         }
         paths.insert(path.into(), json!({method:operation}));
     }
-    paths.insert("/v1/contributions/{id}/scans/{side}".into(),json!({"post":{"summary":"Upload a private review scan","security":[{"contributorToken":[]}],"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"side","in":"path","required":true,"schema":{"type":"string","enum":["front","back"]}}],"requestBody":{"required":true,"content":{"image/png":{"schema":{"type":"string","format":"binary"}},"image/jpeg":{"schema":{"type":"string","format":"binary"}}}},"responses":{"200":{"description":"Stored privately"},"400":{"$ref":"#/components/responses/Error"},"401":{"$ref":"#/components/responses/Error"},"413":{"$ref":"#/components/responses/Error"}}}}));
-    paths.insert("/v1/moderation/scans/{id}".into(),json!({"get":{"summary":"Download private scan for moderation","security":[{"moderatorToken":[]}],"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"Private attachment; never cache","content":{"image/png":{"schema":{"type":"string","format":"binary"}},"image/jpeg":{"schema":{"type":"string","format":"binary"}}}},"401":{"$ref":"#/components/responses/Error"},"404":{"$ref":"#/components/responses/Error"}}}}));
+    paths.insert("/v1/contributions/{id}/scans/{side}".into(),json!({"post":{"summary":"Upload a private review scan","security":[{"contributorToken":[]}],"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}},{"name":"side","in":"path","required":true,"schema":{"type":"string","enum":["front","back"]}}],"requestBody":{"required":true,"content":{"image/png":{"schema":{"type":"string","format":"binary"}},"image/jpeg":{"schema":{"type":"string","format":"binary"}}}},"responses":{"200":{"description":"Stored privately"},"400":{"$ref":"#/components/responses/Error"},"401":{"$ref":"#/components/responses/Error"},"413":{"$ref":"#/components/responses/Error"}}}}));
+    paths.insert("/v1/moderation/scans/{id}".into(),json!({"get":{"summary":"Download private scan for moderation","security":[{"moderatorToken":[]}],"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Private attachment; never cache","content":{"image/png":{"schema":{"type":"string","format":"binary"}},"image/jpeg":{"schema":{"type":"string","format":"binary"}}}},"401":{"$ref":"#/components/responses/Error"},"404":{"$ref":"#/components/responses/Error"}}}}));
     paths.insert("/datasets/{filename}".into(),json!({"get":{"summary":"Download immutable metadata snapshot","security":[],"parameters":[{"name":"filename","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Newline-delimited JSON records; no artwork","content":{"application/x-ndjson":{"schema":{"type":"string","format":"binary"}}}},"304":{"description":"Unchanged"},"404":{"$ref":"#/components/responses/Error"}}}}));
     document["components"]["responses"] = json!({"Error":{"description":"Consistent error response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorBody"}}}}});
     let schemas = document["components"]["schemas"].as_object_mut().unwrap();

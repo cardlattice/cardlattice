@@ -8,14 +8,13 @@ use serde_json::{Value, json};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tower::ServiceExt;
-use uuid::Uuid;
 
 const CONTRIBUTOR: &str = "integration-contributor-token-not-for-production";
 const MODERATOR: &str = "integration-moderator-token-not-for-production";
 const METRICS: &str = "integration-metrics-token-not-for-production";
-const GAME: &str = "01900000-0000-7000-8000-000000000001";
-const CARD: &str = "01900000-0000-7000-8000-000000000004";
-const SET: &str = "01900000-0000-7000-8000-000000000003";
+const GAME: &str = "pokemon";
+const CARD: &str = "pokemon-card-prism-seed-synthetic";
+const SET: &str = "pokemon-set-lattice-laboratory-synthetic";
 const FIXTURES: &str = include_str!("../../../data/development.json");
 
 fn state(pool: PgPool) -> (AppState, tempfile::TempDir) {
@@ -47,7 +46,7 @@ async fn call(
     path: &str,
     token: Option<&str>,
     body: Option<Value>,
-    key: Option<Uuid>,
+    key: Option<String>,
 ) -> (StatusCode, Value, HeaderMap) {
     let mut request = Request::builder().method(method).uri(path);
     if let Some(token) = token {
@@ -74,20 +73,20 @@ async fn call(
 fn submission(name: &str) -> Value {
     json!({"operation":"create","termsAccepted":true,"draft":{"kind":"card","name":name,"gameId":GAME,"attributes":{"category":"pokemon","hp":40,"types":["grass"]},"synthetic":true,"source":{"description":"Original synthetic integration test contribution; not a real card.","method":"original_contribution","license":"CC0-1.0"}}})
 }
-async fn submit(state: &AppState, name: &str) -> Uuid {
+async fn submit(state: &AppState, name: &str) -> String {
     let (status, value, _) = call(
         state,
         "POST",
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(submission(name)),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, StatusCode::OK, "{value}");
-    Uuid::parse_str(value["id"].as_str().unwrap()).unwrap()
+    catalogue::parse_id(value["id"].as_str().unwrap()).unwrap()
 }
-async fn approve(state: &AppState, id: Uuid) -> Value {
+async fn approve(state: &AppState, id: String) -> Value {
     let (status,value,_)=call(state,"POST",&format!("/v1/moderation/contributions/{id}/review"),Some(MODERATOR),Some(json!({"decision":"approve","reason":"Verified original synthetic metadata and provenance"})),None).await;
     assert_eq!(status, StatusCode::OK, "{value}");
     value
@@ -188,7 +187,7 @@ async fn idempotent_seed_pagination_unicode_and_filters(pool: PgPool) {
     )
     .await;
     assert!(printings["data"].as_array().unwrap().is_empty());
-    sqlx::query("INSERT INTO localisations(record_id,language,name,normalized_name) VALUES($1,'ja','プリズムの種','プリズムの種')").bind(Uuid::parse_str(CARD).unwrap()).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO localisations(record_id,language,name,normalized_name) VALUES($1,'ja','プリズムの種','プリズムの種')").bind(catalogue::parse_id(CARD).unwrap()).execute(&pool).await.unwrap();
     let (_, localized, _) = call(
         &state,
         "GET",
@@ -319,14 +318,14 @@ async fn submission_review_publication_and_download(pool: PgPool) {
     ingestion::seed(&pool, FIXTURES).await.unwrap();
     let (state, _directory) = state(pool.clone());
     let body = submission("Integration prism — synthetic");
-    let key = Uuid::now_v7();
+    let key = catalogue::operation_id();
     let (status, _, _) = call(
         &state,
         "POST",
         "/v1/contributions",
         None,
         Some(body.clone()),
-        Some(key),
+        Some(key.clone()),
     )
     .await;
     assert_eq!(status, 401);
@@ -336,18 +335,18 @@ async fn submission_review_publication_and_download(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(body.clone()),
-        Some(key),
+        Some(key.clone()),
     )
     .await;
     assert_eq!(status, 200, "{result}");
-    let id = Uuid::parse_str(result["id"].as_str().unwrap()).unwrap();
+    let id = catalogue::parse_id(result["id"].as_str().unwrap()).unwrap();
     let (_, replayed, _) = call(
         &state,
         "POST",
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(body.clone()),
-        Some(key),
+        Some(key.clone()),
     )
     .await;
     assert_eq!(replayed["replayed"], true);
@@ -358,7 +357,7 @@ async fn submission_review_publication_and_download(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(submission("Different — synthetic")),
-        Some(key),
+        Some(key.clone()),
     )
     .await;
     assert_eq!(status, 409);
@@ -368,7 +367,7 @@ async fn submission_review_publication_and_download(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(body),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 409);
@@ -384,7 +383,7 @@ async fn submission_review_publication_and_download(pool: PgPool) {
     assert_eq!(status, 401);
     let (_, before, _) = call(&state, "GET", "/v1/stats", None, None, None).await;
     assert_eq!(before["cards"], 2);
-    let reviewed = approve(&state, id).await;
+    let reviewed = approve(&state, id.clone()).await;
     assert_eq!(reviewed["revision"], 8);
     let (_, record, _) = call(
         &state,
@@ -455,14 +454,14 @@ async fn invalidation_failure_backoff_and_manual_replay(pool: PgPool) {
     publishing::process_one_using(&pool, &state.config.publishing, &FailingPurger)
         .await
         .unwrap();
-    let(id,status,attempts,delayed):(Uuid,String,i32,bool)=sqlx::query_as("SELECT id,status,attempts,next_attempt_at>now() FROM cache_invalidation_outbox ORDER BY revision LIMIT 1").fetch_one(&pool).await.unwrap();
+    let(id,status,attempts,delayed):(String,String,i32,bool)=sqlx::query_as("SELECT id,status,attempts,next_attempt_at>now() FROM cache_invalidation_outbox ORDER BY revision LIMIT 1").fetch_one(&pool).await.unwrap();
     assert_eq!(status, "pending");
     assert_eq!(attempts, 1);
     assert!(delayed);
     sqlx::query(
         "UPDATE cache_invalidation_outbox SET attempts=9,next_attempt_at=now() WHERE id=$1",
     )
-    .bind(id)
+    .bind(&id)
     .execute(&pool)
     .await
     .unwrap();
@@ -471,7 +470,7 @@ async fn invalidation_failure_backoff_and_manual_replay(pool: PgPool) {
         .unwrap();
     assert_eq!(
         sqlx::query_scalar::<_, String>("SELECT status FROM cache_invalidation_outbox WHERE id=$1")
-            .bind(id)
+            .bind(&id)
             .fetch_one(&pool)
             .await
             .unwrap(),
@@ -502,7 +501,7 @@ async fn invalidation_failure_backoff_and_manual_replay(pool: PgPool) {
         .unwrap();
     assert_eq!(
         sqlx::query_scalar::<_, String>("SELECT status FROM cache_invalidation_outbox WHERE id=$1")
-            .bind(id)
+            .bind(&id)
             .fetch_one(&pool)
             .await
             .unwrap(),
@@ -533,12 +532,12 @@ async fn stale_correction_and_atomic_validation(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(body),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{contribution}");
     sqlx::query("UPDATE catalogue_records SET updated_at=clock_timestamp() WHERE id=$1")
-        .bind(Uuid::parse_str(CARD).unwrap())
+        .bind(catalogue::parse_id(CARD).unwrap())
         .execute(&pool)
         .await
         .unwrap();
@@ -569,7 +568,7 @@ async fn stale_correction_and_atomic_validation(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(invalid_printing),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{pending}");
@@ -665,7 +664,7 @@ async fn uploads_are_private_and_validated(pool: PgPool) {
         .await
         .unwrap();
     assert_eq!(response.status(), 400);
-    approve(&state, id).await;
+    approve(&state, id.clone()).await;
     assert_eq!(
         sqlx::query_scalar::<_, i64>("SELECT count(*) FROM images")
             .fetch_one(&pool)
@@ -715,7 +714,7 @@ async fn rejection_permissions_and_budget(pool: PgPool) {
             "/v1/contributions",
             Some(CONTRIBUTOR),
             Some(submission("Budget test")),
-            Some(Uuid::now_v7()),
+            Some(catalogue::operation_id()),
         )
         .await;
     }
@@ -725,7 +724,7 @@ async fn rejection_permissions_and_budget(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(submission("Beyond budget")),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 429);
@@ -737,7 +736,7 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
     ingestion::seed(&pool, FIXTURES).await.unwrap();
     let (state, _directory) = state(pool.clone());
     let id = submit(&state, "Editable original — synthetic").await;
-    let published = approve(&state, id).await;
+    let published = approve(&state, id.clone()).await;
     let record_id = published["recordId"].as_str().unwrap();
     let (_, record, headers) = call(
         &state,
@@ -758,13 +757,13 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(correction.clone()),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{pending}");
     approve(
         &state,
-        Uuid::parse_str(pending["id"].as_str().unwrap()).unwrap(),
+        catalogue::parse_id(pending["id"].as_str().unwrap()).unwrap(),
     )
     .await;
     let (_, updated, new_headers) = call(
@@ -786,13 +785,13 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(correction),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{pending}");
     approve(
         &state,
-        Uuid::parse_str(pending["id"].as_str().unwrap()).unwrap(),
+        catalogue::parse_id(pending["id"].as_str().unwrap()).unwrap(),
     )
     .await;
     let (status, _, _) = call(
@@ -816,13 +815,13 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(game),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{pending}");
     let published = approve(
         &state,
-        Uuid::parse_str(pending["id"].as_str().unwrap()).unwrap(),
+        catalogue::parse_id(pending["id"].as_str().unwrap()).unwrap(),
     )
     .await;
     let game_id = published["recordId"].as_str().unwrap();
@@ -835,13 +834,13 @@ async fn reviewed_updates_deletion_and_other_games(pool: PgPool) {
         "/v1/contributions",
         Some(CONTRIBUTOR),
         Some(other_card),
-        Some(Uuid::now_v7()),
+        Some(catalogue::operation_id()),
     )
     .await;
     assert_eq!(status, 200, "{pending}");
     approve(
         &state,
-        Uuid::parse_str(pending["id"].as_str().unwrap()).unwrap(),
+        catalogue::parse_id(pending["id"].as_str().unwrap()).unwrap(),
     )
     .await;
     let (status, records, _) = call(
@@ -878,14 +877,14 @@ async fn update_release_test_game(pool: &PgPool, name: &str) {
     let before: Option<Value> = sqlx::query_scalar(
         "SELECT to_jsonb(r)-'search_document' FROM catalogue_records r WHERE id=$1",
     )
-    .bind(fixture.id)
+    .bind(&fixture.id)
     .fetch_optional(&mut *tx)
     .await
     .unwrap();
-    ingestion::write_record(&mut tx, fixture.id, &draft)
+    ingestion::write_record(&mut tx, &fixture.id, &draft)
         .await
         .unwrap();
-    ingestion::revision_and_outbox(&mut tx, fixture.id, None, before)
+    ingestion::revision_and_outbox(&mut tx, &fixture.id, None, before)
         .await
         .unwrap();
     tx.commit().await.unwrap();
@@ -1009,10 +1008,10 @@ async fn legacy_demo_releases_are_withdrawn_even_after_game_promotion(pool: PgPo
     ingestion::seed(&pool, &json!([fixtures[0]]).to_string())
         .await
         .unwrap();
-    let old_id = Uuid::now_v7();
-    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,1,'old',1,1,'old-demo.ndjson')").bind(old_id).execute(&pool).await.unwrap();
+    let old_id = catalogue::operation_id();
+    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,1,'old',1,1,'old-demo.ndjson')").bind(&old_id).execute(&pool).await.unwrap();
     update_release_test_game(&pool, "Original migration fixture").await;
-    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,2,'new',1,1,'real.ndjson')").bind(Uuid::now_v7()).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO publication_manifests(id,revision,sha256,byte_size,record_count,filename) VALUES($1,2,'new',1,1,'real.ndjson')").bind(catalogue::operation_id()).execute(&pool).await.unwrap();
     sqlx::raw_sql(include_str!("../../../migrations/0005_daily_releases.sql"))
         .execute(&pool)
         .await
@@ -1045,7 +1044,7 @@ async fn legacy_demo_releases_are_withdrawn_even_after_game_promotion(pool: PgPo
         sqlx::query_scalar::<_, String>(
             "SELECT withdrawal_reason FROM publication_manifests WHERE id=$1"
         )
-        .bind(old_id)
+        .bind(&old_id)
         .fetch_one(&pool)
         .await
         .unwrap(),

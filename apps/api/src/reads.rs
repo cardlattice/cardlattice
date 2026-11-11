@@ -11,7 +11,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::{Postgres, QueryBuilder};
 use utoipa::ToSchema;
-use uuid::Uuid;
 
 pub async fn modified(state: &AppState) -> Result<DateTime<Utc>, ApiError> {
     Ok(sqlx::query_scalar(
@@ -49,7 +48,7 @@ pub async fn catalogue(
     } else {
         segments.get(2).copied()
     };
-    let game_id: Option<Uuid> = if let Some(slug) = game_slug {
+    let game_id: Option<String> = if let Some(slug) = game_slug {
         Some(
             sqlx::query_scalar("SELECT id FROM games WHERE slug=$1 OR id::text=$1")
                 .bind(slug)
@@ -62,7 +61,7 @@ pub async fn catalogue(
     };
     if segments.len() == 3 && !is_search {
         let record = sqlx::query_as::<_, Record>("SELECT * FROM games WHERE id=$1")
-            .bind(game_id)
+            .bind(&game_id)
             .fetch_one(&state.pool)
             .await?;
         return Ok(cached_json(
@@ -73,24 +72,24 @@ pub async fn catalogue(
         ));
     }
     if let Some(id) = segments.get(4) {
-        let id = Uuid::parse_str(id).map_err(|_| ApiError::bad("Record ID must be a UUID"))?;
-        let mut record=sqlx::query_as::<_,Record>("SELECT * FROM catalogue_records WHERE id=$1 AND kind=$2 AND game_id=$3 AND deleted_at IS NULL").bind(id).bind(kind).bind(game_id).fetch_optional(&state.pool).await?.ok_or_else(ApiError::not_found)?;
+        let id = catalogue::parse_id(id).map_err(|_| ApiError::bad("Invalid record identifier"))?;
+        let mut record=sqlx::query_as::<_,Record>("SELECT * FROM catalogue_records WHERE id=$1 AND kind=$2 AND game_id=$3 AND deleted_at IS NULL").bind(&id).bind(kind).bind(&game_id).fetch_optional(&state.pool).await?.ok_or_else(ApiError::not_found)?;
         if let Some(language) = &query.language
             && let Some(name) = sqlx::query_scalar::<_, String>(
                 "SELECT name FROM localisations WHERE record_id=$1 AND language=$2",
             )
-            .bind(id)
+            .bind(&id)
             .bind(language)
             .fetch_optional(&state.pool)
             .await?
         {
             record.name = name;
         }
-        let related=sqlx::query_as::<_,Record>("SELECT * FROM printings WHERE card_id=$1 OR set_id=$1 ORDER BY normalized_name,id LIMIT 20").bind(id).fetch_all(&state.pool).await?;
-        let sources: Vec<SourceView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',s.id,'description',s.description,'referenceUrl',s.reference_url,'method',s.method,'license',s.license,'fields',jsonb_agg(p.field_path ORDER BY p.field_path)) FROM sources s JOIN provenance p ON p.source_id=s.id WHERE p.record_id=$1 GROUP BY s.id ORDER BY s.recorded_at LIMIT 100").bind(id).fetch_all(&state.pool).await?)?;
-        let images: Vec<ImageView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',i.id,'url',i.public_url,'side',i.side,'license',r.license,'attribution',r.attribution) FROM images i JOIN image_rights r ON r.id=i.rights_id WHERE printing_id=$1 ORDER BY i.id LIMIT 20").bind(id).fetch_all(&state.pool).await?)?;
-        let variants: Vec<VariantView> = typed_rows(sqlx::query_scalar("SELECT to_jsonb(v) FROM printing_variants v WHERE printing_id=$1 ORDER BY id LIMIT 100").bind(id).fetch_all(&state.pool).await?)?;
-        let localisations: Vec<LocalisationView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('language',language,'name',name,'textContent',text_content) FROM localisations WHERE record_id=$1 ORDER BY language LIMIT 100").bind(id).fetch_all(&state.pool).await?)?;
+        let related=sqlx::query_as::<_,Record>("SELECT * FROM printings WHERE card_id=$1 OR set_id=$1 ORDER BY normalized_name,id LIMIT 20").bind(&id).fetch_all(&state.pool).await?;
+        let sources: Vec<SourceView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',s.id,'description',s.description,'referenceUrl',s.reference_url,'method',s.method,'license',s.license,'fields',jsonb_agg(p.field_path ORDER BY p.field_path)) FROM sources s JOIN provenance p ON p.source_id=s.id WHERE p.record_id=$1 GROUP BY s.id ORDER BY s.recorded_at LIMIT 100").bind(&id).fetch_all(&state.pool).await?)?;
+        let images: Vec<ImageView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',i.id,'url',i.public_url,'side',i.side,'license',r.license,'attribution',r.attribution) FROM images i JOIN image_rights r ON r.id=i.rights_id WHERE printing_id=$1 ORDER BY i.id LIMIT 20").bind(&id).fetch_all(&state.pool).await?)?;
+        let variants: Vec<VariantView> = typed_rows(sqlx::query_scalar("SELECT to_jsonb(v) FROM printing_variants v WHERE printing_id=$1 ORDER BY id LIMIT 100").bind(&id).fetch_all(&state.pool).await?)?;
+        let localisations: Vec<LocalisationView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('language',language,'name',name,'textContent',text_content) FROM localisations WHERE record_id=$1 ORDER BY language LIMIT 100").bind(&id).fetch_all(&state.pool).await?)?;
         let printings_url = match kind {
             Some("card") => Some(format!(
                 "/v1/games/{}/printings?cardId={id}",
@@ -135,10 +134,10 @@ pub async fn catalogue(
     if let Some(game_id) = game_id {
         sql.push(" AND r.game_id=").push_bind(game_id);
     }
-    if let Some(id) = query.set_id {
+    if let Some(id) = &query.set_id {
         sql.push(" AND r.set_id=").push_bind(id);
     }
-    if let Some(id) = query.card_id {
+    if let Some(id) = &query.card_id {
         sql.push(" AND r.card_id=").push_bind(id);
     }
     if let Some(rarity) = &query.rarity {
@@ -204,11 +203,11 @@ pub async fn catalogue(
             last.created_at.format("%Y-%m-%d %H:%M:%S%.6f").to_string()
         } else {
             sqlx::query_scalar("SELECT normalized_name FROM catalogue_records WHERE id=$1")
-                .bind(last.id)
+                .bind(&last.id)
                 .fetch_one(&state.pool)
                 .await?
         };
-        Some(encode_cursor(key, last.id, query.scope(path)))
+        Some(encode_cursor(key, last.id.clone(), query.scope(path)))
     } else {
         None
     };
@@ -239,7 +238,7 @@ pub struct RecordDetail {
 #[derive(Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceView {
-    pub id: Uuid,
+    pub id: String,
     pub description: String,
     pub reference_url: Option<String>,
     pub method: String,
@@ -249,7 +248,7 @@ pub struct SourceView {
 #[derive(Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ImageView {
-    pub id: Uuid,
+    pub id: String,
     pub url: String,
     pub side: String,
     pub license: String,
@@ -258,7 +257,7 @@ pub struct ImageView {
 #[derive(Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct VariantView {
-    pub id: Uuid,
+    pub id: String,
     pub finish: String,
     pub stamp: String,
     pub attributes: Value,
@@ -364,9 +363,16 @@ pub async fn download(
         ))
     };
     response.headers_mut().insert("etag", etag.parse().unwrap());
-    response
-        .headers_mut()
-        .insert("content-type", "application/x-ndjson".parse().unwrap());
+    response.headers_mut().insert(
+        "content-type",
+        if manifest.filename.ends_with(".json") {
+            "application/json"
+        } else {
+            "application/x-ndjson"
+        }
+        .parse()
+        .unwrap(),
+    );
     response.headers_mut().insert(
         "content-disposition",
         format!("attachment; filename=\"{}\"", manifest.filename)

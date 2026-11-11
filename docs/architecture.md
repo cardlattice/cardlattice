@@ -1,7 +1,10 @@
 # Architecture
 
 Cardlattice is one Axum/Tokio service, PostgreSQL, and a static React website.
-The API process runs a durable publication worker and periodic health probes.
+The API process runs a durable invalidation worker and periodic health probes.
+Reviewed catalogue artifacts are built by the data repository CI and indexed at
+deployment; see [the data pipeline](data-pipeline.md). The origin serves those
+exact bytes and no longer runs the daily dataset-building worker.
 Cloudflare CDN is optional. There is no Redis, per-request Worker, external
 catalogue dependency, commerce, pricing, or inventory subsystem.
 
@@ -18,14 +21,16 @@ flowchart LR
   API --> DB
   DB --> Worker[In-process durable worker]
   Worker --> Purge[URL purge or local no-op]
-  DB --> Daily[Daily release check]
-  Daily --> Snapshot[Immutable metadata snapshot]
+  Git[Data repository] --> CI[Validate and compile]
+  CI --> Snapshot[Immutable daily catalogue]
+  Snapshot --> Index[Index artifact]
+  Index --> DB
   Purge --> CDN
 ```
 
 ## Identity and games
 
-UUIDv7 identifiers belong to Cardlattice. Games, series, sets, card identities, and
+Semantic identifiers use game, set, language, region and collector number. Games, series, sets, card identities, and
 printings use a common identity table with constrained discriminators and typed
 read views. This is single-table inheritance, not a claim that every game has the
 same concepts. A printing belongs to exactly one game, card identity, and set;
@@ -41,7 +46,7 @@ The first adapter is intentionally small and does not model every Pokémon rule.
 
 Queries bind user values through SQLx; dynamic query fragments come only from fixed
 code branches. Requests use bounded limits (default 20, maximum 100), opaque
-query-scoped keyset cursors, stable canonical-name/UUID ordering, and a three-second
+query-scoped keyset cursors, stable canonical-name/identifier ordering, and a three-second
 database statement timeout. Full-text search uses `simple` tokenisation plus a GIN
 trigram substring fallback for scripts where word tokenisation is insufficient.
 NFKC normalisation and Unicode lowercasing preserve multilingual input. This is
@@ -64,26 +69,26 @@ absent. Cursor ordering uses canonical names even when display names are transla
 4. Committed records are immediately available at the origin. A worker claims an
    invalidation event using `FOR UPDATE SKIP LOCKED` and purges affected URLs.
 5. The event completes after purge succeeds. Without Cloudflare, purge is an
-   explicit successful no-op. Daily export failures never hold up API invalidation.
+   explicit successful no-op. Data CI builds daily artifacts independently.
 6. Errors persist attempts and next-attempt time. Backoff starts at five seconds,
    doubles, and caps at one hour. Ten failures move an event to `failed`; the
    moderator can replay it. A process crash rolls back the claim, permitting retry.
 
-A separate check runs on startup and every minute, publishing at most once per UTC
-day when non-synthetic catalogue data has changed. The first release is available
-as soon as real metadata exists; subsequent changes wait until the next UTC day.
-Unchanged days produce no release. A database advisory lock and unique active
-release-date index prevent concurrent duplicate releases. Export uses repeatable
-read, streaming, checksums and atomic rename; failures retry the next minute.
+The data repository compiles and validates immutable JSON artifacts in CI. Its
+scheduled release job publishes at most once per UTC day. The origin verifies and
+indexes approved artifacts, then registers their exact bytes for downloads;
+unchanged records create no new audit revisions.
 Internal revision IDs are audit watermarks, not release counts; PostgreSQL sequence
 gaps from rollback are expected. Public releases are identified by date.
 
-Snapshots are immutable, schema-versioned NDJSON containing public core metadata,
+Snapshots are immutable, schema-versioned JSON containing public core metadata and provenance,
 never synthetic fixtures, private scans, credentials, contributor identities, or
 internal audit details. Withdrawn manifests remain private audit records; both
 listing and download endpoints exclude them, even for conditional GET/HEAD.
-Supplementary localisation/variant/source exports are not yet included. Metadata
+Supplementary localisation/variant/image exports are not yet included. Metadata
 accepted by this first release must be CC0-compatible; artwork is separate.
+The previous database export library remains available for tests and development,
+but the API no longer schedules exports.
 
 The local worker is intentionally conservative: one event per five-second tick,
 12 database connections, bounded purge batches, a 15-second HTTP timeout. Batch
@@ -124,9 +129,9 @@ PostgreSQL. They are served to moderators as attachments with no-store and nosni
 ### Checklist-based provisional identities
 
 Official Pokémon checklist imports (`ingestion::pokemon_cards`) resolve existing
-sets by secondary official product URLs and assign new internal UUIDs to cards and
+sets by secondary official product URLs and assign new internal semantic identifiers to cards and
 printings. Checklist names do not prove rules equivalence: a nullable typed Pokémon
-category and UUID `identityScope` permit provisional card identities without guessed
+category and identifier `identityScope` permit provisional card identities without guessed
 attributes or name-based merging. Numbered alternate illustrations remain distinct
 printings. The insert-only batch operation, provenance, audit revisions and a
 consolidated invalidation event commit atomically. See `data/pokemon/README.md` for

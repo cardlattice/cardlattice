@@ -204,7 +204,7 @@ export interface PokemonAttributes {
      */
   hp?: number | null;
   /**
-     * Provisional identity bounded to an internal printing UUID until rules are reviewed.
+     * Provisional identity bounded to an internal printing identifier until rules are reviewed.
      * @nullable
      */
   identityScope?: string | null;

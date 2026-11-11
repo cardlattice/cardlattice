@@ -30,7 +30,7 @@ CREATE UNIQUE INDEX one_public_release_per_day ON publication_manifests(release_
 
 -- Withdrawals also invalidate any configured CDN; use the existing durable retry path.
 INSERT INTO cache_invalidation_outbox(id,revision,paths)
-SELECT gen_random_uuid(),m.revision,
+SELECT 'withdrawal-' || m.id,m.revision,
        jsonb_build_array('/datasets/'||m.filename,'/v1/datasets','/v1/status')
 FROM publication_manifests m JOIN catalogue_revisions r ON r.revision=m.revision
 WHERE m.withdrawn_at IS NOT NULL;

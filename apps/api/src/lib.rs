@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod cache;
+pub mod catalogue_index;
 pub mod config;
 pub mod contributions;
 pub mod error;

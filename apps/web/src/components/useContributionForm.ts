@@ -17,7 +17,12 @@ export function useContributionForm({
   const series = useApi<PageData>(`/v1/games/${gameIdentifier}/series?limit=100`);
   const [error, setError] = useState("");
   const [submissionId, setSubmissionId] = useState("");
-  const idempotency = useRef({ body: "", key: crypto.randomUUID() });
+  const idempotency = useRef({
+    body: "",
+    key: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join(""),
+  });
   const schema = z.object({
     name: z.string().trim().min(1, "Provide a name").max(200),
     token: z.string().min(32, "Enter your contributor token"),
@@ -96,7 +101,12 @@ export function useContributionForm({
         };
         const serialized = JSON.stringify(body);
         if (idempotency.current.body !== serialized)
-          idempotency.current = { body: serialized, key: crypto.randomUUID() };
+          idempotency.current = {
+            body: serialized,
+            key: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+              byte.toString(16).padStart(2, "0"),
+            ).join(""),
+          };
         const options = authorized(value.token, body);
         const response = await request<{ id: string }>("/v1/contributions", {
           ...options,

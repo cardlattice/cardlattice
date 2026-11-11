@@ -3,12 +3,11 @@ use chrono::{NaiveDate, Utc};
 use ingestion::official_pokemon::{OfficialBatch, SetCandidate, TERMS_URL, import};
 use serde_json::{Value, json};
 use sqlx::PgPool;
-use uuid::Uuid;
 
 const FIXTURES: &str = include_str!("../../../data/development.json");
-const GAME: &str = "01900000-0000-7000-8000-000000000001";
-const DEMO_SET: &str = "01900000-0000-7000-8000-000000000003";
-const DEMO_CARD: &str = "01900000-0000-7000-8000-000000000004";
+const GAME: &str = "pokemon";
+const DEMO_SET: &str = "pokemon-set-lattice-laboratory-synthetic";
+const DEMO_CARD: &str = "pokemon-card-prism-seed-synthetic";
 
 // Original parser/import fixtures only; these are not claims about real products.
 fn batch() -> OfficialBatch {
@@ -26,7 +25,7 @@ fn batch() -> OfficialBatch {
     }
 }
 
-async fn scalar(pool: &PgPool, query: &str) -> i64 {
+async fn scalar(pool: &PgPool, query: &'static str) -> i64 {
     sqlx::query_scalar(query).fetch_one(pool).await.unwrap()
 }
 
@@ -75,7 +74,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
         .await,
         2
     );
-    let set_id: Uuid = sqlx::query_scalar("SELECT id FROM sets")
+    let set_id: String = sqlx::query_scalar("SELECT id FROM sets")
         .fetch_one(&pool)
         .await
         .unwrap();
@@ -97,7 +96,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
         15
     );
     assert_eq!(scalar(&pool, "SELECT count(*) FROM provenance p JOIN sources s ON s.id=p.source_id WHERE s.method='permitted_official_reference' AND p.field_path='$.releaseDate'").await, 2);
-    let before: Value = sqlx::query_scalar("SELECT before_data FROM catalogue_revisions WHERE record_id=$1 AND before_data IS NOT NULL").bind(Uuid::parse_str(DEMO_SET).unwrap()).fetch_one(&pool).await.unwrap();
+    let before: Value = sqlx::query_scalar("SELECT before_data FROM catalogue_revisions WHERE record_id=$1 AND before_data IS NOT NULL").bind(catalogue::parse_id(DEMO_SET).unwrap()).fetch_one(&pool).await.unwrap();
     assert_eq!(before["synthetic"], true);
 
     let repeated = import(&pool, &reviewed, true, true).await.unwrap();
@@ -116,7 +115,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
 
     sqlx::query("UPDATE catalogue_records SET attributes=$1 WHERE id=$2")
         .bind(json!({"independentlyRecorded":true}))
-        .bind(set_id)
+        .bind(&set_id)
         .execute(&pool)
         .await
         .unwrap();
@@ -129,7 +128,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
             .updated_sets,
         1
     );
-    let actual: (Uuid, Value) = sqlx::query_as("SELECT id,attributes FROM sets")
+    let actual: (String, Value) = sqlx::query_as("SELECT id,attributes FROM sets")
         .fetch_one(&pool)
         .await
         .unwrap();
@@ -192,28 +191,28 @@ async fn demo_retirement_preserves_unrelated_records_and_rejects_pending_demo_dr
     ingestion::seed(&pool, FIXTURES).await.unwrap();
     let payload = json!({"kind":"card","name":"Original independent test observation","gameId":GAME,"attributes":{},"synthetic":false,"source":{"description":"Independently authored integration test observation","method":"original_contribution","license":"CC0-1.0"}});
     let original: Draft = serde_json::from_value(payload.clone()).unwrap();
-    let id = Uuid::now_v7();
+    let id = catalogue::operation_id();
     let mut connection = pool.acquire().await.unwrap();
-    ingestion::write_record(&mut connection, id, &original)
+    ingestion::write_record(&mut connection, &id, &original)
         .await
         .unwrap();
     drop(connection);
     let mut pending = payload;
     pending["synthetic"] = json!(true);
-    let contribution = Uuid::now_v7();
+    let contribution = catalogue::operation_id();
     sqlx::query("INSERT INTO contributions(id,owner_hash,idempotency_key,request_hash,operation,payload,duplicate_key) VALUES($1,'test-owner',$2,'test-request','create',$3,'test-pending-demo')")
-        .bind(contribution).bind(Uuid::now_v7()).bind(pending).execute(&pool).await.unwrap();
+        .bind(&contribution).bind(catalogue::operation_id()).bind(pending).execute(&pool).await.unwrap();
     let result = import(&pool, &batch(), true, true).await.unwrap();
     assert_eq!(result.rejected_synthetic_contributions, 1);
     let retained: bool =
         sqlx::query_scalar("SELECT deleted_at IS NULL FROM catalogue_records WHERE id=$1")
-            .bind(id)
+            .bind(&id)
             .fetch_one(&pool)
             .await
             .unwrap();
     assert!(retained);
     let status: String = sqlx::query_scalar("SELECT status FROM contributions WHERE id=$1")
-        .bind(contribution)
+        .bind(&contribution)
         .fetch_one(&pool)
         .await
         .unwrap();
@@ -238,10 +237,10 @@ async fn demo_retirement_preserves_unrelated_records_and_rejects_pending_demo_dr
 #[sqlx::test(migrations = "../../migrations")]
 async fn a_real_dependent_prevents_demo_retirement_and_rolls_back_import(pool: PgPool) {
     ingestion::seed(&pool, FIXTURES).await.unwrap();
-    let id = Uuid::now_v7();
+    let id = catalogue::operation_id();
     let printing: Draft = serde_json::from_value(json!({"kind":"printing","name":"Independent original test printing","gameId":GAME,"setId":DEMO_SET,"cardId":DEMO_CARD,"collectorNumber":"TEST-REAL","language":"en","synthetic":false,"attributes":{},"source":{"description":"Independently authored fixture for dependency protection","method":"original_contribution","license":"CC0-1.0"}})).unwrap();
     let mut connection = pool.acquire().await.unwrap();
-    ingestion::write_record(&mut connection, id, &printing)
+    ingestion::write_record(&mut connection, &id, &printing)
         .await
         .unwrap();
     drop(connection);

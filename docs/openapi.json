@@ -17,7 +17,6 @@
         "properties": {
           "attributes": {},
           "cardId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -34,14 +33,12 @@
             "type": "string"
           },
           "gameId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
             ]
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "kind": {
@@ -76,14 +73,12 @@
             ]
           },
           "seriesId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
             ]
           },
           "setId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -146,7 +141,6 @@
             "type": "string"
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "operation": {
@@ -154,7 +148,6 @@
           },
           "payload": {},
           "recordId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -171,7 +164,6 @@
             "type": "string"
           },
           "targetId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -218,7 +210,6 @@
         "properties": {
           "attributes": {},
           "cardId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -231,7 +222,6 @@
             ]
           },
           "gameId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -269,14 +259,12 @@
             ]
           },
           "seriesId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
             ]
           },
           "setId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -348,7 +336,6 @@
             ]
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "license": {
@@ -414,7 +401,6 @@
             "type": "string"
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "recordCount": {
@@ -502,8 +488,7 @@
             ]
           },
           "identityScope": {
-            "description": "Provisional identity bounded to an internal printing UUID until rules are reviewed.",
-            "format": "uuid",
+            "description": "Provisional identity bounded to an internal printing identifier until rules are reviewed.",
             "type": [
               "string",
               "null"
@@ -638,7 +623,6 @@
             "type": "array"
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "license": {
@@ -772,7 +756,6 @@
             "$ref": "#/components/schemas/Operation"
           },
           "targetId": {
-            "format": "uuid",
             "type": [
               "string",
               "null"
@@ -802,7 +785,6 @@
             "type": "string"
           },
           "id": {
-            "format": "uuid",
             "type": "string"
           },
           "stamp": {
@@ -1247,7 +1229,6 @@
             "name": "Idempotency-Key",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -1305,7 +1286,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -1353,7 +1333,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -1589,7 +1568,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -1598,7 +1576,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -1729,7 +1706,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -1738,7 +1714,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2020,7 +1995,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2029,7 +2003,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2169,7 +2142,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2178,7 +2150,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2262,7 +2233,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2350,7 +2320,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2484,7 +2453,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2493,7 +2461,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2633,7 +2600,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2642,7 +2608,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2726,7 +2691,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2814,7 +2778,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2948,7 +2911,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2957,7 +2919,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3097,7 +3058,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3106,7 +3066,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3190,7 +3149,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3278,7 +3236,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3412,7 +3369,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3421,7 +3377,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3561,7 +3516,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3570,7 +3524,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3654,7 +3607,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3742,7 +3694,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3815,7 +3766,6 @@
             "in": "query",
             "name": "cursor",
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -3863,7 +3813,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -3959,7 +3908,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -4007,7 +3955,6 @@
             "name": "id",
             "required": true,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -4104,7 +4051,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -4113,7 +4059,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -4252,7 +4197,6 @@
             "name": "setId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -4261,7 +4205,6 @@
             "name": "cardId",
             "required": false,
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },

@@ -1,9 +1,7 @@
 # Catalogue data
 
-`pokemon/` contains a reviewed initial batch of factual set metadata collected
-directly from the official publisher's press site. See its sourcing policy and
-bounded scan/import commands in [pokemon/README.md](pokemon/README.md). There are
-no third-party catalogue records, upstream API dumps, or artwork.
+Reviewed real catalogue data lives in [cardlattice-data](https://github.com/cardlattice/cardlattice-data).
+See [the CI pipeline](../docs/data-pipeline.md) for building and indexing it.
 
 ## Original development fixtures
 
@@ -14,7 +12,7 @@ and explicitly marked `synthetic: true`. These are not real Pokémon products.
 No artwork, provider IDs, catalogue dumps or API responses are included.
 
 The factual metadata in these fixtures is dedicated to the public domain under
-CC0-1.0. Fixture IDs are stable internal UUIDs. `cardlattice-api seed` is explicit
+CC0-1.0. Fixture IDs are stable internal semantic identifiers. `cardlattice-api seed` is explicit
 and idempotent; migrations never insert development data. Compose only exposes the
 seed service through the opt-in `demo` profile. Keep these fixtures in disposable
 test databases; they are not the default running catalogue.

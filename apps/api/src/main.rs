@@ -6,6 +6,19 @@ async fn main() -> anyhow::Result<()> {
     observability::init();
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let command = arguments.first().map(String::as_str).unwrap_or("serve");
+    if command == "build-catalogue" {
+        anyhow::ensure!(
+            arguments.len() == 4,
+            "Usage: build-catalogue <source-directory> <output-directory> <git-commit>"
+        );
+        let manifest = ingestion::bundle::build(
+            std::path::Path::new(&arguments[1]),
+            std::path::Path::new(&arguments[2]),
+            &arguments[3],
+        )?;
+        println!("{}", serde_json::to_string_pretty(&manifest)?);
+        return Ok(());
+    }
     if command == "openapi" {
         println!(
             "{}",
@@ -40,6 +53,23 @@ async fn main() -> anyhow::Result<()> {
     let database_url = cardlattice_api::config::database_url()?;
     let pool = cardlattice_api::connect(&database_url).await?;
     match command {
+        "index-catalogue" => {
+            anyhow::ensure!(
+                arguments.len() == 2 || (arguments.len() == 3 && arguments[2] == "--apply"),
+                "Usage: index-catalogue <manifest.json> [--apply]"
+            );
+            let directory =
+                std::env::var("DATASET_DIRECTORY").unwrap_or_else(|_| ".local/datasets".into());
+            let summary = cardlattice_api::catalogue_index::import(
+                &pool,
+                std::path::Path::new(&arguments[1]),
+                std::path::Path::new(&directory),
+                arguments.len() == 3,
+            )
+            .await?;
+            println!("{}", serde_json::to_string_pretty(&summary)?);
+            return Ok(());
+        }
         "migrate" => {
             sqlx::migrate!("../../migrations").run(&pool).await?;
             return Ok(());
@@ -86,7 +116,7 @@ async fn main() -> anyhow::Result<()> {
         }
         "serve" => {}
         _ => anyhow::bail!(
-            "Commands: serve, migrate, seed, openapi, scan-pokemon-sets, import-pokemon-sets, import-pokemon-cards"
+            "Commands: serve, migrate, seed, openapi, build-catalogue, index-catalogue, scan-pokemon-sets, import-pokemon-sets, import-pokemon-cards"
         ),
     }
     let config = Arc::new(Config::from_env()?);
@@ -97,7 +127,6 @@ async fn main() -> anyhow::Result<()> {
         metrics: observability::Metrics::default(),
     };
     let worker = tokio::spawn(cardlattice_api::background(state.clone()));
-    let dataset_worker = tokio::spawn(cardlattice_api::dataset_background(state.clone()));
     tracing::info!(address=%listener.local_addr()?,"Cardlattice API listening");
     axum::serve(
         listener,
@@ -109,6 +138,5 @@ async fn main() -> anyhow::Result<()> {
     })
     .await?;
     worker.abort();
-    dataset_worker.abort();
     Ok(())
 }
