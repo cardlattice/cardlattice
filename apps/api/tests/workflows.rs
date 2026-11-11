@@ -1052,3 +1052,52 @@ async fn legacy_demo_releases_are_withdrawn_even_after_game_promotion(pool: PgPo
     );
     assert_eq!(sqlx::query_scalar::<_,i64>("SELECT count(*) FROM cache_invalidation_outbox WHERE paths @> '[\"/datasets/old-demo.ndjson\"]'").fetch_one(&pool).await.unwrap(),1);
 }
+
+#[sqlx::test(migrations = "../../migrations")]
+async fn contribution_enum_typos_are_rejected_before_storage(pool: PgPool) {
+    ingestion::seed(&pool, FIXTURES).await.unwrap();
+    let (state, _directory) = state(pool.clone());
+    for attributes in [
+        json!({"stage":"Stage1"}),
+        json!({"subtypes":["item"]}),
+        json!({"types":["Electric"]}),
+    ] {
+        let mut body = submission("Synthetic enum validation");
+        body["draft"]["attributes"] = attributes;
+        let (status, error, _) = call(
+            &state,
+            "POST",
+            "/v1/contributions",
+            Some(CONTRIBUTOR),
+            Some(body),
+            Some(catalogue::operation_id()),
+        )
+        .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "{error}");
+        assert!(
+            error["error"]["message"]
+                .as_str()
+                .unwrap()
+                .contains("unknown variant"),
+            "{error}"
+        );
+    }
+    let count: i64 = sqlx::query_scalar("SELECT count(*) FROM contributions")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    assert_eq!(count, 0);
+    let mut body = submission("Synthetic enum validation");
+    body["draft"]["attributes"]["stage"] = json!("Stage 1");
+    body["draft"]["attributes"]["subtypes"] = json!(["ex"]);
+    let (status, response, _) = call(
+        &state,
+        "POST",
+        "/v1/contributions",
+        Some(CONTRIBUTOR),
+        Some(body),
+        Some(catalogue::operation_id()),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{response}");
+}

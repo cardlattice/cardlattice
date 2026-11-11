@@ -33,6 +33,14 @@ async fn main() -> anyhow::Result<()> {
         println!("{}", serde_json::to_string_pretty(&manifest)?);
         return Ok(());
     }
+    if command == "pokemon-vocabulary" {
+        anyhow::ensure!(arguments.len() == 1, "Usage: pokemon-vocabulary");
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&catalogue::pokemon::vocabulary::document())?
+        );
+        return Ok(());
+    }
     if command == "openapi" {
         println!(
             "{}",

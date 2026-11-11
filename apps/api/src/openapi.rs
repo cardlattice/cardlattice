@@ -16,6 +16,8 @@ use utoipa::OpenApi;
         catalogue::SourceInput,
         catalogue::SourceMethod,
         catalogue::PokemonAttributes,
+        catalogue::pokemon::PrintingMetadata,
+        catalogue::pokemon::vocabulary::Rarity,
         crate::reads::RecordDetail,
         crate::reads::SourceView,
         crate::reads::ImageView,

@@ -51,9 +51,9 @@ struct PrintingFile {
     #[serde(default = "object")]
     printing_attributes: Value,
     pokemon: Option<catalogue::PokemonAttributes>,
-    finishes: Option<Vec<String>>,
+    finishes: Option<Vec<catalogue::pokemon::vocabulary::Finish>>,
     stamps: Option<Vec<String>>,
-    regulation_mark: Option<String>,
+    regulation_mark: Option<catalogue::pokemon::vocabulary::RegulationMark>,
     printed_total: Option<u16>,
     illustrators: Option<Vec<String>>,
     #[serde(default)]

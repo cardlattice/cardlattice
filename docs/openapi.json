@@ -17,7 +17,7 @@
         "additionalProperties": false,
         "properties": {
           "kind": {
-            "type": "string"
+            "$ref": "#/components/schemas/AbilityKind"
           },
           "name": {
             "type": "string"
@@ -33,13 +33,22 @@
         ],
         "type": "object"
       },
+      "AbilityKind": {
+        "enum": [
+          "Ability",
+          "Pokémon Power",
+          "Poké-Power",
+          "Poké-Body"
+        ],
+        "type": "string"
+      },
       "Attack": {
         "additionalProperties": false,
         "properties": {
           "cost": {
             "description": "Ordered energy symbols; an empty list means a printed free attack.",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/EnergyType"
             },
             "type": "array"
           },
@@ -160,6 +169,14 @@
           "updatedAt"
         ],
         "type": "object"
+      },
+      "Category": {
+        "enum": [
+          "pokemon",
+          "trainer",
+          "energy"
+        ],
+        "type": "string"
       },
       "Changelog": {
         "properties": {
@@ -348,6 +365,22 @@
         ],
         "type": "object"
       },
+      "EnergyType": {
+        "enum": [
+          "Grass",
+          "Fire",
+          "Water",
+          "Lightning",
+          "Psychic",
+          "Fighting",
+          "Darkness",
+          "Metal",
+          "Colorless",
+          "Dragon",
+          "Fairy"
+        ],
+        "type": "string"
+      },
       "ErrorBody": {
         "properties": {
           "error": {
@@ -373,6 +406,14 @@
           "message"
         ],
         "type": "object"
+      },
+      "Finish": {
+        "enum": [
+          "non-holo",
+          "holo",
+          "reverse-holo"
+        ],
+        "type": "string"
       },
       "Health": {
         "properties": {
@@ -550,9 +591,13 @@
             ]
           },
           "category": {
-            "type": [
-              "string",
-              "null"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Category"
+              }
             ]
           },
           "evolvesFrom": {
@@ -614,14 +659,18 @@
             ]
           },
           "stage": {
-            "type": [
-              "string",
-              "null"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Stage"
+              }
             ]
           },
           "subtypes": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/Subtype"
             },
             "type": [
               "array",
@@ -639,7 +688,7 @@
           },
           "types": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/EnergyType"
             },
             "type": "array"
           },
@@ -654,6 +703,76 @@
           }
         },
         "type": "object"
+      },
+      "PrintingMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "finishes": {
+            "items": {
+              "$ref": "#/components/schemas/Finish"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "illustrators": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "printedTotal": {
+            "format": "int32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "regulationMark": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RegulationMark"
+              }
+            ]
+          },
+          "stamps": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "Rarity": {
+        "enum": [
+          "Common",
+          "Uncommon",
+          "Rare",
+          "Double Rare",
+          "Ultra Rare",
+          "Illustration Rare",
+          "Special Illustration Rare",
+          "Hyper Rare",
+          "Shiny Rare",
+          "Shiny Ultra Rare",
+          "Mega Hyper Rare",
+          "Futuristic Rare",
+          "Pikachu Rare",
+          "ACE SPEC Rare"
+        ],
+        "type": "string"
       },
       "RecordDetail": {
         "properties": {
@@ -706,6 +825,21 @@
           "localisations"
         ],
         "type": "object"
+      },
+      "RegulationMark": {
+        "enum": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J"
+        ],
+        "type": "string"
       },
       "Review": {
         "additionalProperties": false,
@@ -792,6 +926,20 @@
           "fields"
         ],
         "type": "object"
+      },
+      "Stage": {
+        "enum": [
+          "Basic",
+          "Stage 1",
+          "Stage 2",
+          "Restored",
+          "BREAK",
+          "MEGA",
+          "VMAX",
+          "VSTAR",
+          "V-UNION"
+        ],
+        "type": "string"
       },
       "Stats": {
         "properties": {
@@ -924,11 +1072,42 @@
         ],
         "type": "object"
       },
+      "Subtype": {
+        "enum": [
+          "ex",
+          "EX",
+          "GX",
+          "V",
+          "VMAX",
+          "VSTAR",
+          "V-UNION",
+          "BREAK",
+          "Mega",
+          "TAG TEAM",
+          "Tera",
+          "Radiant",
+          "Prism Star",
+          "Ultra Beast",
+          "Single Strike",
+          "Rapid Strike",
+          "Fusion Strike",
+          "Ancient",
+          "Future",
+          "Item",
+          "Supporter",
+          "Stadium",
+          "Pokémon Tool",
+          "ACE SPEC",
+          "Basic Energy",
+          "Special Energy"
+        ],
+        "type": "string"
+      },
       "TypeModifier": {
         "additionalProperties": false,
         "properties": {
           "type": {
-            "type": "string"
+            "$ref": "#/components/schemas/EnergyType"
           },
           "value": {
             "type": "string"

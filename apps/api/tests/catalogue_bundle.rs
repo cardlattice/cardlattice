@@ -526,3 +526,52 @@ fn source_tree_rejects_invalid_rules_and_printing_metadata() {
     );
     assert!(ingestion::source_tree::load(source.path()).is_err());
 }
+
+#[test]
+fn openapi_exposes_the_same_enum_values_as_the_compiler() {
+    let spec = cardlattice_api::openapi::document();
+    let vocabulary = catalogue::pokemon::vocabulary::document();
+    for (definition, schema) in [
+        ("category", "Category"),
+        ("energyType", "EnergyType"),
+        ("stage", "Stage"),
+        ("subtype", "Subtype"),
+        ("rarity", "Rarity"),
+        ("finish", "Finish"),
+        ("abilityKind", "AbilityKind"),
+        ("regulationMark", "RegulationMark"),
+    ] {
+        assert_eq!(
+            spec["components"]["schemas"][schema]["enum"], vocabulary[definition],
+            "{schema}"
+        );
+    }
+}
+
+#[test]
+fn source_tree_enum_validation_cannot_be_bypassed_by_attribute_locations() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    let path = "pokemon/cards/laboratory/en/US/001.yaml";
+    for fields in [
+        "rarity: Comon",
+        "rarity: common",
+        "rarity: SIR",
+        "pokemon: {stage: Stage1}",
+        "attributes: {stage: basic}",
+        "pokemon: {subtypes: [Suporter]}",
+        "attributes: {subtypes: [item]}",
+        "printingAttributes: {finishes: [normal]}",
+        "printingAttributes: {regulationMark: Z}",
+    ] {
+        write(
+            source.path(),
+            path,
+            &format!("name: Prism Seed\n{fields}\n"),
+        );
+        let error = ingestion::source_tree::load(source.path())
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains(path), "{fields}: {error}");
+    }
+}

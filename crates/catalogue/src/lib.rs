@@ -241,8 +241,25 @@ impl Draft {
             && self.attributes != empty_object()
         {
             let attributes: PokemonAttributes = serde_json::from_value(self.attributes.clone())
-                .map_err(|_| ValidationError("Invalid typed Pokémon attributes".into()))?;
+                .map_err(|error| {
+                    ValidationError(format!("Invalid typed Pokémon attributes: {error}"))
+                })?;
             attributes.validate()?;
+        }
+        if game_slug == Some("pokemon") {
+            if let Some(rarity) = &self.rarity {
+                serde_json::from_value::<pokemon::vocabulary::Rarity>(Value::String(
+                    rarity.clone(),
+                ))
+                .map_err(|error| ValidationError(format!("Invalid Pokémon rarity: {error}")))?;
+            }
+            if self.kind == Kind::Printing {
+                let attributes: pokemon::PrintingMetadata =
+                    serde_json::from_value(self.attributes.clone()).map_err(|error| {
+                        ValidationError(format!("Invalid Pokémon printing attributes: {error}"))
+                    })?;
+                attributes.validate()?;
+            }
         }
         if let Some(source) = &self.source {
             if source.description.trim().len() < 10

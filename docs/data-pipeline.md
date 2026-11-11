@@ -99,3 +99,19 @@ registers it for `/v1/datasets` and downloads, at most once per UTC day. It does
 regenerate the bytes. Registration can be retried safely after an interruption;
 record indexing is already committed and remains idempotent. The old daily export
 library remains covered by tests, but the running API no longer schedules it.
+
+Pokémon category, energy type, stage, subtype, rarity, finish, ability kind and
+regulation mark use case-sensitive vocabularies. The Rust enums in
+`crates/catalogue/src/pokemon/vocabulary.rs` generate parsing and OpenAPI enum
+schemas; `pokemon-vocabulary` exports the exact spellings. The data build compares
+its schema enums with this export from its pinned compiler without scanning any
+card files. A vocabulary extension requires updating both repositories and the
+compiler pin. There are no permissive aliases or `Other` fallbacks. Optional
+unknown fields stay omitted; supported vocabularies do not claim historical or
+regional completeness.
+
+Pokémon rarity is validated through its enum at the game-specific draft boundary;
+the multi-game record's rarity field remains a string so other games can use their
+own taxonomy. Contribution submissions, YAML imports (including shared identities)
+and compiled bundle validation all use the same domain checks. Product stamp IDs,
+trainer affiliations, names and prose remain open-ended text.

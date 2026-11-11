@@ -21,15 +21,42 @@ import type {
 } from '@tanstack/react-query';
 
 import { request } from '../api';
+export type AbilityKind = typeof AbilityKind[keyof typeof AbilityKind];
+
+
+export const AbilityKind = {
+  Ability: 'Ability',
+  Pokémon_Power: 'Pokémon Power',
+  'Poké-Power': 'Poké-Power',
+  'Poké-Body': 'Poké-Body',
+} as const;
+
 export interface Ability {
-  kind: string;
+  kind: AbilityKind;
   name: string;
   text: string;
 }
 
+export type EnergyType = typeof EnergyType[keyof typeof EnergyType];
+
+
+export const EnergyType = {
+  Grass: 'Grass',
+  Fire: 'Fire',
+  Water: 'Water',
+  Lightning: 'Lightning',
+  Psychic: 'Psychic',
+  Fighting: 'Fighting',
+  Darkness: 'Darkness',
+  Metal: 'Metal',
+  Colorless: 'Colorless',
+  Dragon: 'Dragon',
+  Fairy: 'Fairy',
+} as const;
+
 export interface Attack {
   /** Ordered energy symbols; an empty list means a printed free attack. */
-  cost: string[];
+  cost: EnergyType[];
   /** @nullable */
   damage?: string | null;
   name: string;
@@ -66,6 +93,15 @@ export interface CatalogueRecord {
   synthetic: boolean;
   updatedAt: string;
 }
+
+export type Category = typeof Category[keyof typeof Category];
+
+
+export const Category = {
+  pokemon: 'pokemon',
+  trainer: 'trainer',
+  energy: 'energy',
+} as const;
 
 export type ChangelogDataItem = { [key: string]: unknown };
 
@@ -174,6 +210,15 @@ export interface ErrorBody {
   error: ErrorDetail;
 }
 
+export type Finish = typeof Finish[keyof typeof Finish];
+
+
+export const Finish = {
+  'non-holo': 'non-holo',
+  holo: 'holo',
+  'reverse-holo': 'reverse-holo',
+} as const;
+
 export interface Health {
   status: string;
 }
@@ -212,17 +257,63 @@ export interface Page {
 }
 
 export interface TypeModifier {
-  type: string;
+  type: EnergyType;
   value: string;
 }
+
+export type Stage = typeof Stage[keyof typeof Stage];
+
+
+export const Stage = {
+  Basic: 'Basic',
+  Stage_1: 'Stage 1',
+  Stage_2: 'Stage 2',
+  Restored: 'Restored',
+  BREAK: 'BREAK',
+  MEGA: 'MEGA',
+  VMAX: 'VMAX',
+  VSTAR: 'VSTAR',
+  'V-UNION': 'V-UNION',
+} as const;
+
+export type Subtype = typeof Subtype[keyof typeof Subtype];
+
+
+export const Subtype = {
+  ex: 'ex',
+  EX: 'EX',
+  GX: 'GX',
+  V: 'V',
+  VMAX: 'VMAX',
+  VSTAR: 'VSTAR',
+  'V-UNION': 'V-UNION',
+  BREAK: 'BREAK',
+  Mega: 'Mega',
+  TAG_TEAM: 'TAG TEAM',
+  Tera: 'Tera',
+  Radiant: 'Radiant',
+  Prism_Star: 'Prism Star',
+  Ultra_Beast: 'Ultra Beast',
+  Single_Strike: 'Single Strike',
+  Rapid_Strike: 'Rapid Strike',
+  Fusion_Strike: 'Fusion Strike',
+  Ancient: 'Ancient',
+  Future: 'Future',
+  Item: 'Item',
+  Supporter: 'Supporter',
+  Stadium: 'Stadium',
+  Pokémon_Tool: 'Pokémon Tool',
+  ACE_SPEC: 'ACE SPEC',
+  Basic_Energy: 'Basic Energy',
+  Special_Energy: 'Special Energy',
+} as const;
 
 export interface PokemonAttributes {
   /** @nullable */
   abilities?: Ability[] | null;
   /** @nullable */
   attacks?: Attack[] | null;
-  /** @nullable */
-  category?: string | null;
+  category?: null | Category;
   /** @nullable */
   evolvesFrom?: string | null;
   /**
@@ -249,16 +340,66 @@ export interface PokemonAttributes {
   retreatCost?: number | null;
   /** @nullable */
   rules?: string[] | null;
+  stage?: null | Stage;
   /** @nullable */
-  stage?: string | null;
-  /** @nullable */
-  subtypes?: string[] | null;
+  subtypes?: Subtype[] | null;
   /** @nullable */
   trainers?: string[] | null;
-  types?: string[];
+  types?: EnergyType[];
   /** @nullable */
   weaknesses?: TypeModifier[] | null;
 }
+
+export type RegulationMark = typeof RegulationMark[keyof typeof RegulationMark];
+
+
+export const RegulationMark = {
+  A: 'A',
+  B: 'B',
+  C: 'C',
+  D: 'D',
+  E: 'E',
+  F: 'F',
+  G: 'G',
+  H: 'H',
+  I: 'I',
+  J: 'J',
+} as const;
+
+export interface PrintingMetadata {
+  /** @nullable */
+  finishes?: Finish[] | null;
+  /** @nullable */
+  illustrators?: string[] | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  printedTotal?: number | null;
+  regulationMark?: null | RegulationMark;
+  /** @nullable */
+  stamps?: string[] | null;
+}
+
+export type Rarity = typeof Rarity[keyof typeof Rarity];
+
+
+export const Rarity = {
+  Common: 'Common',
+  Uncommon: 'Uncommon',
+  Rare: 'Rare',
+  Double_Rare: 'Double Rare',
+  Ultra_Rare: 'Ultra Rare',
+  Illustration_Rare: 'Illustration Rare',
+  Special_Illustration_Rare: 'Special Illustration Rare',
+  Hyper_Rare: 'Hyper Rare',
+  Shiny_Rare: 'Shiny Rare',
+  Shiny_Ultra_Rare: 'Shiny Ultra Rare',
+  Mega_Hyper_Rare: 'Mega Hyper Rare',
+  Futuristic_Rare: 'Futuristic Rare',
+  Pikachu_Rare: 'Pikachu Rare',
+  ACE_SPEC_Rare: 'ACE SPEC Rare',
+} as const;
 
 export interface SourceView {
   description: string;
