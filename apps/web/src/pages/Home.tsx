@@ -16,6 +16,7 @@ import { Button } from "../components/Button";
 export function Home() {
   const stats = useGetV1Stats<StatsData, Error>({ query: { staleTime: 30_000, retry: 1 } });
   const example = useApi<PageData>("/v1/games/pokemon/sets?limit=1", (stats.data?.games ?? 0) > 0);
+  const featured = useApi<PageData>("/v1/games/pokemon/sets?limit=3");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const command = `curl "${window.location.origin}/v1/games/pokemon/sets?limit=1"`;
@@ -28,7 +29,6 @@ export function Home() {
             releaseDate,
             synthetic,
           })),
-          nextCursor: example.data.nextCursor,
           limit: example.data.limit,
         },
         null,
@@ -58,8 +58,7 @@ export function Home() {
           <h1>
             Card data.
             <br />
-            Without the
-            <br /> <span className="accent">barriers.</span>
+            <span className="accent">Open to everyone.</span>
           </h1>
           <p className="hero-description">
             A free, independently curated catalogue and public API for trading cards. Built for the
@@ -77,6 +76,54 @@ export function Home() {
             <Check size={14} aria-hidden="true" /> No API keys <span>·</span> No subscriptions{" "}
             <span>·</span> Open source
           </p>
+        </div>
+      </section>
+      <section className="home-workbench" aria-label="Explore the catalogue and API">
+        <div className="catalogue-preview">
+          <p className="eyebrow">ONE CATALOGUE. EVERY POSSIBILITY.</p>
+          <h2>
+            From the collection
+            <br />
+            to your next creation.
+          </h2>
+          <p>
+            Browse independently sourced sets, explore individual printings, or plug the same data
+            into your project.
+          </p>
+          <div className="preview-records">
+            {featured.isPending ? (
+              <output>Loading the catalogue…</output>
+            ) : featured.isError ? (
+              <p>
+                Catalogue preview unavailable.{" "}
+                <button type="button" onClick={() => void featured.refetch()}>
+                  Try again
+                </button>
+              </p>
+            ) : featured.data?.data.length ? (
+              featured.data.data.map((set) => (
+                <Link key={set.id} to={`/games/pokemon/sets/${set.id}`} className="preview-record">
+                  <span className="preview-record-icon" aria-hidden="true">
+                    <Database size={19} />
+                  </span>
+                  <span>
+                    <strong>{set.name}</strong>
+                    <small>
+                      {set.synthetic
+                        ? "Synthetic development fixture"
+                        : "Pokémon · English catalogue"}
+                    </small>
+                  </span>
+                  <ArrowUpRight size={17} aria-hidden="true" />
+                </Link>
+              ))
+            ) : (
+              <p>No sets published yet. Reviewed contributions will appear here.</p>
+            )}
+          </div>
+          <Link to="/games" className="text-link">
+            Explore all sets <ArrowRight size={16} aria-hidden="true" />
+          </Link>
         </div>
         <div className="hero-terminal">
           <div className="terminal-top">
@@ -96,7 +143,7 @@ export function Home() {
             <p className="code-comment">Live catalogue excerpt · selected response fields</p>
           </div>
           <div className="terminal-bottom">
-            <span className="protocol-dot" /> JSON in. Possibilities out.
+            <span className="protocol-dot" /> Public data. Ready to build.
             <Link to="/docs" aria-label="Read API documentation">
               <ArrowUpRight size={18} aria-hidden="true" />
             </Link>
@@ -187,7 +234,7 @@ export function Home() {
         <div>
           <p className="eyebrow">NO SIGN-UP. JUST A REQUEST.</p>
           <h2>Try your first query.</h2>
-          <p>Run Cardlattice locally, then open a terminal.</p>
+          <p>One request. No account needed.</p>
         </div>
         <div>
           <div className="copy-command">
