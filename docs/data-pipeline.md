@@ -33,7 +33,11 @@ unsupported tags, unknown fields and symlinks are rejected. Local validation is
 
 ## Build in CI
 
-Data PRs validate and compile with the exact application commit pinned by
+Data PR schema validation checks only changed card/set YAML files. Main-branch
+validation checks the whole tree. PRs still compile the whole preview artifact,
+including reference validation, so deletion cannot leave a broken catalogue.
+
+Data PRs compile with the exact application commit pinned by
 `builder-ref.txt`. The offline compiler uses the same domain validation as the
 API. It rejects synthetic data, invalid relationships, duplicate identities,
 invalid typed attributes and oversized inputs. It sorts records and produces
@@ -69,10 +73,20 @@ conflicting existing records. This is not a UUID migration: old databases are no
 supported. The first data repository contains only reviewed real facts; old demo
 records and snapshots are not published into it.
 
-The initial bundle covers the common core and external identifiers. Supplementary
-localisations, finishes and reviewed image references will need an explicit bundle
-schema extension before those tables can be rebuilt from Git. They are currently
-unpopulated in the reviewed catalogue. Private submissions, scans, moderation
+The bundle covers core records, external identifiers, typed Pokémon gameplay,
+and printing finishes/stamps. Card files accept ordered attacks (including free
+attacks and repeated energy costs), abilities, evolution, weakness/resistance,
+retreat cost, rules, subtypes and optional Trainer affiliations. Damage strings
+preserve modifiers such as `20×`. Missing values remain unknown; explicit empty
+lists mean none.
+
+Set `defaults` supply shared printing details (finishes, stamps, regulation mark,
+printed denominator and illustrators). Explicit card fields replace defaults;
+`stamps: []` clears an inherited stamp. The compiler materialises these fields in
+printing `attributes`, which the existing API and indexer preserve. No new SQL
+migration is needed. This does not populate the separate printing-variant table
+or create finish/stamp cross-products. Product membership, variant-specific images
+and supplementary localisations still need a separate data model. Private submissions, scans, moderation
 credentials and audit identities are never exported into the data repository.
 
 The deployment trigger and R2 publishing credentials are operator configuration;

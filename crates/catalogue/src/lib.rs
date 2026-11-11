@@ -140,17 +140,8 @@ fn empty_object() -> Value {
     serde_json::json!({})
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct PokemonAttributes {
-    pub category: Option<String>,
-    /// Provisional identity bounded to an internal printing identifier until rules are reviewed.
-    pub identity_scope: Option<String>,
-    pub hp: Option<u16>,
-    #[serde(default)]
-    pub types: Vec<String>,
-    pub stage: Option<String>,
-}
+pub mod pokemon;
+pub use pokemon::PokemonAttributes;
 
 impl Draft {
     /// New catalogue identities are readable. Existing edits retain their explicit key.
@@ -251,17 +242,7 @@ impl Draft {
         {
             let attributes: PokemonAttributes = serde_json::from_value(self.attributes.clone())
                 .map_err(|_| ValidationError("Invalid typed Pokémon attributes".into()))?;
-            if attributes
-                .category
-                .as_deref()
-                .is_some_and(|category| !["pokemon", "trainer", "energy"].contains(&category))
-                || attributes.hp.is_some_and(|hp| hp > 1000)
-                || attributes.types.len() > 4
-                || attributes.types.iter().any(|s| s.len() > 32)
-                || attributes.stage.as_ref().is_some_and(|s| s.len() > 40)
-            {
-                return fail("Invalid Pokémon category, HP, type or stage");
-            }
+            attributes.validate()?;
         }
         if let Some(source) = &self.source {
             if source.description.trim().len() < 10

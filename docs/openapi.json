@@ -13,6 +13,58 @@
       }
     },
     "schemas": {
+      "Ability": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "text",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "Attack": {
+        "additionalProperties": false,
+        "properties": {
+          "cost": {
+            "description": "Ordered energy symbols; an empty list means a printed free attack.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "damage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "cost"
+        ],
+        "type": "object"
+      },
       "CatalogueRecord": {
         "properties": {
           "attributes": {},
@@ -479,7 +531,31 @@
       "PokemonAttributes": {
         "additionalProperties": false,
         "properties": {
+          "abilities": {
+            "items": {
+              "$ref": "#/components/schemas/Ability"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "attacks": {
+            "items": {
+              "$ref": "#/components/schemas/Attack"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evolvesFrom": {
             "type": [
               "string",
               "null"
@@ -494,9 +570,46 @@
             ]
           },
           "identityScope": {
-            "description": "Provisional identity bounded to an internal printing identifier until rules are reviewed.",
+            "description": "Provisional identity bounded to a printing until shared rules identity is reviewed.",
             "type": [
               "string",
+              "null"
+            ]
+          },
+          "nationalDex": {
+            "items": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "resistances": {
+            "items": {
+              "$ref": "#/components/schemas/TypeModifier"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "retreatCost": {
+            "format": "int32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
               "null"
             ]
           },
@@ -506,11 +619,38 @@
               "null"
             ]
           },
+          "subtypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "trainers": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "types": {
             "items": {
               "type": "string"
             },
             "type": "array"
+          },
+          "weaknesses": {
+            "items": {
+              "$ref": "#/components/schemas/TypeModifier"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -781,6 +921,22 @@
           "operation",
           "draft",
           "termsAccepted"
+        ],
+        "type": "object"
+      },
+      "TypeModifier": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
         ],
         "type": "object"
       },

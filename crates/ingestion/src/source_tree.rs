@@ -1,6 +1,6 @@
 //! Contributor-facing files. Directory context supplies identity; no executable data.
 use crate::bundle::{Entry, Error, ExternalId};
-use catalogue::{Draft, Kind};
+use catalogue::{Draft, Kind, pokemon::PrintingMetadata};
 use chrono::NaiveDate;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -17,6 +17,7 @@ struct RecordFile {
     region: Option<String>,
     release_date: Option<NaiveDate>,
     series: Option<String>,
+    defaults: Option<PrintingMetadata>,
     #[serde(default = "object")]
     attributes: Value,
     #[serde(default)]
@@ -50,6 +51,11 @@ struct PrintingFile {
     #[serde(default = "object")]
     printing_attributes: Value,
     pokemon: Option<catalogue::PokemonAttributes>,
+    finishes: Option<Vec<String>>,
+    stamps: Option<Vec<String>>,
+    regulation_mark: Option<String>,
+    printed_total: Option<u16>,
+    illustrators: Option<Vec<String>>,
     #[serde(default)]
     external_ids: Vec<ExternalId>,
 }
@@ -73,7 +79,11 @@ fn decode<T: serde::de::DeserializeOwned>(path: &Path, bytes: &[u8]) -> Result<T
     options.reject_tagged_field_names = true;
     options.strict_booleans = true;
     options.budget = Some(budget);
-    serde_saphyr::from_str_with_options(text, options).map_err(|e| invalid(path, e))
+    // Preserve YAML scalar types before decoding the domain model. Direct typed
+    // decoding permits number-to-string coercion, which would hide damaged identifiers.
+    let value: Value =
+        serde_saphyr::from_str_with_options(text, options).map_err(|e| invalid(path, e))?;
+    serde_json::from_value(value).map_err(|e| invalid(path, e))
 }
 fn key(path: &Path, key: &str) -> Result<(), Error> {
     catalogue::parse_id(key).map_err(|e| invalid(path, e))?;
@@ -199,6 +209,11 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             _ => return Err(invalid(path, "Unrecognised catalogue path")),
         };
         let file: RecordFile = decode(path, bytes)?;
+        if file.defaults.is_some() && kind != Kind::Set {
+            return Err(invalid(path, "Printing defaults belong on set files only"));
+        }
+        let defaults = file.defaults.unwrap_or_default();
+        defaults.validate().map_err(|e| invalid(path, e))?;
         let mut record = draft(kind, file.name, (kind != Kind::Game).then_some(game));
         if kind == Kind::Game {
             record.slug = Some(game.into());
@@ -210,7 +225,7 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         record.attributes = file.attributes;
         record.validate(Some(game)).map_err(|e| invalid(path, e))?;
         if kind == Kind::Set {
-            sets.insert(id.clone(), record.release_date);
+            sets.insert(id.clone(), (record.release_date, defaults));
         }
         records.push(Entry {
             id,
@@ -226,7 +241,7 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         let language = parts[3];
         let region = parts[4];
         let number = parts[5].trim_end_matches(".yaml");
-        let set_date = sets
+        let (set_date, set_defaults) = sets
             .get(&set)
             .ok_or_else(|| invalid(path, "Missing set file"))?;
         let release_path = path.parent().unwrap();
@@ -306,7 +321,25 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         record.region = (region != "global").then(|| region.into());
         record.rarity = file.rarity;
         record.release_date = file.release_date.or(release.release_date).or(*set_date);
+        let details = PrintingMetadata {
+            finishes: file.finishes,
+            stamps: file.stamps,
+            regulation_mark: file.regulation_mark,
+            printed_total: file.printed_total,
+            illustrators: file.illustrators,
+        }
+        .inherit(set_defaults);
+        details.validate().map_err(|e| invalid(path, e))?;
         record.attributes = file.printing_attributes;
+        let attributes = record
+            .attributes
+            .as_object_mut()
+            .ok_or_else(|| invalid(path, "printingAttributes must be an object"))?;
+        for (key, value) in serde_json::to_value(details)?.as_object().unwrap() {
+            if attributes.insert(key.clone(), value.clone()).is_some() {
+                return Err(invalid(path, format!("Duplicate printing field {key}")));
+            }
+        }
         record.validate(Some(game)).map_err(|e| invalid(path, e))?;
         records.push(Entry {
             id,

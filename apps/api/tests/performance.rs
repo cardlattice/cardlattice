@@ -28,7 +28,7 @@ async fn measured_catalogue_workloads(pool: PgPool) {
     let mut lookups = Vec::new();
     let mut searches = Vec::new();
     let mut validators = Vec::new();
-    let payload = json!({"data":{"name":"Original benchmark record","synthetic":true,"attributes":{"category":"pokemon","hp":40,"types":["grass"]}}});
+    let payload = json!({"data":{"name":"Original benchmark record","synthetic":true,"attributes":{"category":"pokemon","hp":40,"types":["Grass"]}}});
     let modified = Utc::now();
     for sample in 0..550 {
         let started = Instant::now();

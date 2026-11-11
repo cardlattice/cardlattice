@@ -60,9 +60,9 @@
         "category": "pokemon",
         "hp": 40,
         "types": [
-          "grass"
+          "Grass"
         ],
-        "stage": "basic"
+        "stage": "Basic"
       },
       "synthetic": true,
       "source": {

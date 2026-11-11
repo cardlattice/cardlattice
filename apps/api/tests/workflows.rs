@@ -71,7 +71,7 @@ async fn call(
     (status, value, headers)
 }
 fn submission(name: &str) -> Value {
-    json!({"operation":"create","termsAccepted":true,"draft":{"kind":"card","name":name,"gameId":GAME,"attributes":{"category":"pokemon","hp":40,"types":["grass"]},"synthetic":true,"source":{"description":"Original synthetic integration test contribution; not a real card.","method":"original_contribution","license":"CC0-1.0"}}})
+    json!({"operation":"create","termsAccepted":true,"draft":{"kind":"card","name":name,"gameId":GAME,"attributes":{"category":"pokemon","hp":40,"types":["Grass"]},"synthetic":true,"source":{"description":"Original synthetic integration test contribution; not a real card.","method":"original_contribution","license":"CC0-1.0"}}})
 }
 async fn submit(state: &AppState, name: &str) -> String {
     let (status, value, _) = call(

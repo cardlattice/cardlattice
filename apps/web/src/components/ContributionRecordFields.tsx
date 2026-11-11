@@ -166,7 +166,7 @@ export function ContributionRecordFields({
           <Field
             label="Game-specific attributes (JSON)"
             hint={
-              'For Pokémon cards: {"category":"pokemon","hp":40,"types":["grass"],"stage":"basic"}. Leave {} when not recorded.'
+              'For Pokémon cards: {"category":"pokemon","hp":40,"types":["Grass"],"stage":"Basic"}. Leave {} when not recorded.'
             }
           >
             {(id, hint) => (

@@ -56,6 +56,22 @@ fn reproducible_build_checks_manifest_integrity_and_relations() {
 #[sqlx::test(migrations = "../../migrations")]
 async fn indexing_is_atomic_idempotent_and_detects_local_conflicts(pool: PgPool) {
     let mut bundle = input();
+    let card = bundle
+        .records
+        .iter_mut()
+        .find(|r| r.draft.kind == catalogue::Kind::Card)
+        .unwrap();
+    card.draft.attributes["attacks"] = serde_json::json!([
+        {"name": "Prism Echo", "cost": ["Psychic", "Psychic"], "damage": "20×"}
+    ]);
+    let card_id = card.id.clone();
+    let printing = bundle
+        .records
+        .iter_mut()
+        .find(|r| r.draft.kind == catalogue::Kind::Printing)
+        .unwrap();
+    printing.draft.attributes = serde_json::json!({"finishes": ["holo"], "stamps": ["laboratory-anniversary"], "printedTotal": 128});
+    let printing_id = printing.id.clone();
     let dry = bundle::index(&pool, &bundle, false).await.unwrap();
     assert_eq!(dry.inserted, bundle.records.len());
     let count: i64 = sqlx::query_scalar("SELECT count(*) FROM catalogue_records")
@@ -65,6 +81,28 @@ async fn indexing_is_atomic_idempotent_and_detects_local_conflicts(pool: PgPool)
     assert_eq!(count, 0);
     let applied = bundle::index(&pool, &bundle, true).await.unwrap();
     assert_eq!(applied.inserted, bundle.records.len());
+    let attributes: serde_json::Value =
+        sqlx::query_scalar("SELECT attributes FROM catalogue_records WHERE id=$1")
+            .bind(&card_id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert_eq!(attributes["attacks"][0]["damage"], "20×");
+    assert_eq!(
+        attributes["attacks"][0]["cost"],
+        serde_json::json!(["Psychic", "Psychic"])
+    );
+    let attributes: serde_json::Value =
+        sqlx::query_scalar("SELECT attributes FROM catalogue_records WHERE id=$1")
+            .bind(&printing_id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert_eq!(attributes["finishes"], serde_json::json!(["holo"]));
+    assert_eq!(
+        attributes["stamps"],
+        serde_json::json!(["laboratory-anniversary"])
+    );
     let repeat = bundle::index(&pool, &bundle, true).await.unwrap();
     assert_eq!(repeat.unchanged, bundle.records.len());
     let events: i64 = sqlx::query_scalar("SELECT count(*) FROM cache_invalidation_outbox")
@@ -357,4 +395,134 @@ fn source_tree_inherits_release_overrides_and_rejects_duplicate_patterns() {
             .to_string()
             .contains("Duplicate external identifier")
     );
+}
+
+#[test]
+fn source_tree_preserves_gameplay_and_resolves_printing_defaults() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/sets/laboratory.yaml",
+        r#"name: Laboratory
+defaults:
+  stamps: [laboratory-anniversary]
+  regulationMark: J
+  printedTotal: 128
+  finishes: [holo]
+"#,
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        r#"name: Prism Seed
+stamps: []
+finishes: [non-holo, reverse-holo]
+pokemon:
+  category: pokemon
+  hp: 60
+  types: [Grass]
+  stage: Basic
+  attacks:
+    - name: Two sparks
+      cost: [Lightning, Lightning, Colorless]
+      damage: "20×"
+    - name: Rest
+      cost: []
+      text: Heal 10 damage from this Pokémon.
+  abilities: []
+  retreatCost: 0
+  weaknesses: [{type: Fire, value: "×2"}]
+  resistances: []
+"#,
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/002.yaml",
+        "name: Prism Leaf\n",
+    );
+    let records = ingestion::source_tree::load(source.path()).unwrap();
+    let card = &records
+        .iter()
+        .find(|r| r.id == "card-pokemon-laboratory-en-US-001")
+        .unwrap()
+        .draft;
+    assert_eq!(
+        card.attributes["attacks"][0]["cost"],
+        serde_json::json!(["Lightning", "Lightning", "Colorless"])
+    );
+    assert_eq!(card.attributes["attacks"][0]["damage"], "20×");
+    assert!(card.attributes["attacks"][1].get("damage").is_none());
+    assert_eq!(card.attributes["attacks"][1]["cost"], serde_json::json!([]));
+    assert_eq!(card.attributes["retreatCost"], 0);
+    let printing = &records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory-en-US-001")
+        .unwrap()
+        .draft;
+    assert_eq!(printing.attributes["stamps"], serde_json::json!([]));
+    assert_eq!(
+        printing.attributes["finishes"],
+        serde_json::json!(["non-holo", "reverse-holo"])
+    );
+    assert_eq!(printing.attributes["regulationMark"], "J");
+    assert_eq!(printing.attributes["printedTotal"], 128);
+    let inherited = &records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory-en-US-002")
+        .unwrap()
+        .draft;
+    assert_eq!(
+        inherited.attributes["stamps"],
+        serde_json::json!(["laboratory-anniversary"])
+    );
+    assert_eq!(
+        inherited.attributes["finishes"],
+        serde_json::json!(["holo"])
+    );
+    let unknown = &records
+        .iter()
+        .find(|r| r.id == "card-pokemon-laboratory-en-US-002")
+        .unwrap()
+        .draft;
+    assert!(unknown.attributes.get("attacks").is_none());
+}
+
+#[test]
+fn source_tree_rejects_invalid_rules_and_printing_metadata() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    let path = "pokemon/cards/laboratory/en/US/001.yaml";
+    for fields in [
+        "finishes: [shiny]",
+        "finishes: [holo, holo]",
+        "finishes: []",
+        "regulationMark: JJ",
+        "printedTotal: 0",
+        "pokemon: {hp: 0}",
+        "pokemon: {category: trainer, attacks: []}",
+        "pokemon: {attacks: [{name: Hit, cost: [Electric]}]}",
+        "pokemon: {attacks: [{name: Hit, cost: [], damage: '20++'}]}",
+        "pokemon: {attacks: [{name: Hit, cost: [], damage: 20}]}",
+        "pokemon: {weaknesses: [{type: Fire, value: '2'}]}",
+        "pokemon: {trainers: [hop, hop]}",
+        "finishes: [holo]\nprintingAttributes: {finishes: [non-holo]}",
+    ] {
+        write(
+            source.path(),
+            path,
+            &format!("name: Prism Seed\n{fields}\n"),
+        );
+        let error = ingestion::source_tree::load(source.path())
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains(path), "{fields}: {error}");
+    }
+    write(source.path(), path, "name: Prism Seed\n");
+    write(
+        source.path(),
+        "pokemon/sets/laboratory.yaml",
+        "name: Laboratory\ndefaults: {finishes: [shiny]}\n",
+    );
+    assert!(ingestion::source_tree::load(source.path()).is_err());
 }

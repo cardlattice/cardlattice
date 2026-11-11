@@ -21,6 +21,22 @@ import type {
 } from '@tanstack/react-query';
 
 import { request } from '../api';
+export interface Ability {
+  kind: string;
+  name: string;
+  text: string;
+}
+
+export interface Attack {
+  /** Ordered energy symbols; an empty list means a printed free attack. */
+  cost: string[];
+  /** @nullable */
+  damage?: string | null;
+  name: string;
+  /** @nullable */
+  text?: string | null;
+}
+
 export interface CatalogueRecord {
   attributes: unknown;
   /** @nullable */
@@ -195,22 +211,53 @@ export interface Page {
   nextCursor?: string | null;
 }
 
+export interface TypeModifier {
+  type: string;
+  value: string;
+}
+
 export interface PokemonAttributes {
   /** @nullable */
+  abilities?: Ability[] | null;
+  /** @nullable */
+  attacks?: Attack[] | null;
+  /** @nullable */
   category?: string | null;
+  /** @nullable */
+  evolvesFrom?: string | null;
   /**
      * @minimum 0
      * @nullable
      */
   hp?: number | null;
   /**
-     * Provisional identity bounded to an internal printing identifier until rules are reviewed.
+     * Provisional identity bounded to a printing until shared rules identity is reviewed.
      * @nullable
      */
   identityScope?: string | null;
+  /**
+     * @nullable
+     * @items.minimum 0
+     */
+  nationalDex?: number[] | null;
+  /** @nullable */
+  resistances?: TypeModifier[] | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  retreatCost?: number | null;
+  /** @nullable */
+  rules?: string[] | null;
   /** @nullable */
   stage?: string | null;
+  /** @nullable */
+  subtypes?: string[] | null;
+  /** @nullable */
+  trainers?: string[] | null;
   types?: string[];
+  /** @nullable */
+  weaknesses?: TypeModifier[] | null;
 }
 
 export interface SourceView {
