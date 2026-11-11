@@ -61,6 +61,9 @@ pub enum Kind {
     Set,
     Card,
     Printing,
+    Product,
+    Collection,
+    Artwork,
 }
 
 impl Kind {
@@ -71,6 +74,9 @@ impl Kind {
             Self::Set => "set",
             Self::Card => "card",
             Self::Printing => "printing",
+            Self::Product => "product",
+            Self::Collection => "collection",
+            Self::Artwork => "artwork",
         }
     }
 }
@@ -141,6 +147,7 @@ fn empty_object() -> Value {
 }
 
 pub mod pokemon;
+pub mod relationships;
 pub use pokemon::PokemonAttributes;
 
 impl Draft {
@@ -151,6 +158,9 @@ impl Draft {
             Kind::Game => self.slug.clone().unwrap_or_default(),
             Kind::Series => format!("{game}-series-{}", slug(&self.name)),
             Kind::Set => format!("{game}-{}", slug(&self.name)),
+            Kind::Product | Kind::Collection | Kind::Artwork => {
+                format!("{game}-{}-{}", self.kind.as_str(), slug(&self.name))
+            }
             Kind::Card => self
                 .attributes
                 .get("identityScope")
@@ -261,6 +271,7 @@ impl Draft {
                 attributes.validate()?;
             }
         }
+        relationships::references(self)?;
         if let Some(source) = &self.source {
             if source.description.trim().len() < 10
                 || source.description.len() > 2000
@@ -343,6 +354,9 @@ pub struct ListQuery {
     pub sort: Option<String>,
     pub set_id: Option<String>,
     pub card_id: Option<String>,
+    pub product_id: Option<String>,
+    pub collection_id: Option<String>,
+    pub artwork_id: Option<String>,
     pub rarity: Option<String>,
     pub game: Option<String>,
 }
@@ -356,7 +370,16 @@ pub struct Cursor {
 
 impl ListQuery {
     pub fn validate(&self) -> Result<(), ValidationError> {
-        for id in [&self.set_id, &self.card_id].into_iter().flatten() {
+        for id in [
+            &self.set_id,
+            &self.card_id,
+            &self.product_id,
+            &self.collection_id,
+            &self.artwork_id,
+        ]
+        .into_iter()
+        .flatten()
+        {
             parse_id(id)?;
         }
         if self.limit.is_some_and(|v| v == 0 || v > 100) {

@@ -17,6 +17,9 @@ export function Browse() {
     sort?: string;
     setId?: string;
     cardId?: string;
+    productId?: string;
+    collectionId?: string;
+    artworkId?: string;
   };
   const navigate = useNavigate();
   const isSearch = pathname === "/search";
@@ -30,6 +33,9 @@ export function Browse() {
   if (search.language) query.set("language", search.language);
   if (search.setId) query.set("setId", search.setId);
   if (search.cardId) query.set("cardId", search.cardId);
+  if (search.productId) query.set("productId", search.productId);
+  if (search.collectionId) query.set("collectionId", search.collectionId);
+  if (search.artworkId) query.set("artworkId", search.artworkId);
   if (search.sort === "newest") query.set("sort", "newest");
   query.sort();
   const endpoint = isSearch
@@ -53,7 +59,13 @@ export function Browse() {
           ? "Browse sets."
           : collection === "cards"
             ? "Card identities."
-            : parent.data?.data.name || "Every printing has a story.";
+            : collection === "products"
+              ? "Distribution products."
+              : collection === "collections"
+                ? "Collector collections."
+                : collection === "artworks"
+                  ? "Shared illustrations."
+                  : parent.data?.data.name || "Every printing has a story.";
   function update(values: Record<string, string>) {
     void navigate({ to: pathname, search: { ...search, cursor: "", ...values } });
   }

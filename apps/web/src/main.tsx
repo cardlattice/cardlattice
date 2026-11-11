@@ -45,6 +45,9 @@ const route = (path: string, component: ReturnType<typeof lazyRouteComponent>) =
       language: typeof search.language === "string" ? search.language : "",
       setId: typeof search.setId === "string" ? search.setId : "",
       cardId: typeof search.cardId === "string" ? search.cardId : "",
+      productId: typeof search.productId === "string" ? search.productId : "",
+      collectionId: typeof search.collectionId === "string" ? search.collectionId : "",
+      artworkId: typeof search.artworkId === "string" ? search.artworkId : "",
       sort: search.sort === "newest" ? "newest" : "name",
       kind: typeof search.kind === "string" ? search.kind : "",
       target: typeof search.target === "string" ? search.target : "",
@@ -61,6 +64,10 @@ const routes = [
     "/games/$game/sets",
     "/games/$game/cards",
     "/games/$game/printings",
+    "/games/$game/products",
+    "/games/$game/collections",
+    "/games/$game/artworks",
+
     "/search",
   ].map((path) =>
     route(
@@ -72,6 +79,10 @@ const routes = [
     "/games/$game/sets/$id",
     "/games/$game/cards/$id",
     "/games/$game/printings/$id",
+    "/games/$game/products/$id",
+    "/games/$game/collections/$id",
+    "/games/$game/artworks/$id",
+
     "/games/$game/series/$id",
   ].map((path) =>
     route(

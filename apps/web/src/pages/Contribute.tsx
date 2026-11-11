@@ -7,7 +7,9 @@ import { ContributionForm } from "../components/ContributionForm";
 export function Contribute() {
   const search = useSearch({ strict: false }) as { target?: string; kind?: string; game?: string };
   const target = search.target;
-  const kind = ["card", "set", "printing", "series"].includes(search.kind || "")
+  const kind = ["card", "set", "printing", "series", "product", "collection", "artwork"].includes(
+    search.kind || "",
+  )
     ? search.kind!
     : "card";
   const original = useApi<DetailData>(

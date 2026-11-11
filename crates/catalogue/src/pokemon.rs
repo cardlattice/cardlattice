@@ -173,6 +173,12 @@ pub struct PrintingMetadata {
     pub printed_total: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub illustrators: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub products: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub collections: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub artwork: Option<String>,
 }
 impl PrintingMetadata {
     pub fn validate(&self) -> Result<(), ValidationError> {
@@ -191,6 +197,14 @@ impl PrintingMetadata {
                                 .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
                     })
             })
+            || [&self.products, &self.collections]
+                .into_iter()
+                .flatten()
+                .any(|v| !crate::relationships::references_valid(v))
+            || self
+                .artwork
+                .as_ref()
+                .is_some_and(|v| crate::parse_id(v).is_err())
             || self.printed_total.is_some_and(|v| v == 0 || v > 9999)
             || self.illustrators.as_ref().is_some_and(|v| {
                 v.is_empty() || v.len() > 10 || !unique(v) || v.iter().any(|s| !text(s, 200))
@@ -210,6 +224,9 @@ impl PrintingMetadata {
             regulation_mark: self.regulation_mark.or(defaults.regulation_mark),
             printed_total: self.printed_total.or(defaults.printed_total),
             illustrators: self.illustrators.or_else(|| defaults.illustrators.clone()),
+            products: self.products.or_else(|| defaults.products.clone()),
+            collections: self.collections.or_else(|| defaults.collections.clone()),
+            artwork: self.artwork.or_else(|| defaults.artwork.clone()),
         }
     }
 }

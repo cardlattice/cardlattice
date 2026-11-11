@@ -37,6 +37,12 @@ export interface Ability {
   text: string;
 }
 
+export interface ArtworkMetadata {
+  /** @nullable */
+  description?: string | null;
+  illustrators?: string[];
+}
+
 export type EnergyType = typeof EnergyType[keyof typeof EnergyType];
 
 
@@ -154,6 +160,9 @@ export const Kind = {
   set: 'set',
   card: 'card',
   printing: 'printing',
+  product: 'product',
+  collection: 'collection',
+  artwork: 'artwork',
 } as const;
 
 export type SourceMethod = typeof SourceMethod[keyof typeof SourceMethod];
@@ -218,6 +227,12 @@ export const Finish = {
   holo: 'holo',
   'reverse-holo': 'reverse-holo',
 } as const;
+
+export interface GroupMetadata {
+  /** @nullable */
+  description?: string | null;
+  relatedSets?: string[];
+}
 
 export interface Health {
   status: string;
@@ -350,6 +365,19 @@ export interface PokemonAttributes {
   weaknesses?: TypeModifier[] | null;
 }
 
+export interface PrintedIdentifier {
+  /** @nullable */
+  code?: string | null;
+  language: string;
+  /** @nullable */
+  region?: string | null;
+  /**
+     * Description of the printed symbol, not an image URL or canonical key.
+     * @nullable
+     */
+  symbol?: string | null;
+}
+
 export type RegulationMark = typeof RegulationMark[keyof typeof RegulationMark];
 
 
@@ -368,6 +396,10 @@ export const RegulationMark = {
 
 export interface PrintingMetadata {
   /** @nullable */
+  artwork?: string | null;
+  /** @nullable */
+  collections?: string[] | null;
+  /** @nullable */
   finishes?: Finish[] | null;
   /** @nullable */
   illustrators?: string[] | null;
@@ -376,6 +408,8 @@ export interface PrintingMetadata {
      * @nullable
      */
   printedTotal?: number | null;
+  /** @nullable */
+  products?: string[] | null;
   regulationMark?: null | RegulationMark;
   /** @nullable */
   stamps?: string[] | null;
@@ -502,6 +536,9 @@ export type GetV1GamesParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -527,6 +564,9 @@ export type HeadV1GamesParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -540,6 +580,70 @@ export const HeadV1GamesSort = {
 
 export type GetV1GamesGame200 = {
   data: CatalogueRecord;
+};
+
+export type GetV1GamesGameArtworksParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: GetV1GamesGameArtworksSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type GetV1GamesGameArtworksSort = typeof GetV1GamesGameArtworksSort[keyof typeof GetV1GamesGameArtworksSort];
+
+
+export const GetV1GamesGameArtworksSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type HeadV1GamesGameArtworksParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: HeadV1GamesGameArtworksSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type HeadV1GamesGameArtworksSort = typeof HeadV1GamesGameArtworksSort[keyof typeof HeadV1GamesGameArtworksSort];
+
+
+export const HeadV1GamesGameArtworksSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type GetV1GamesGameArtworksIdParams = {
+  language?: string;
+};
+
+export type HeadV1GamesGameArtworksIdParams = {
+  language?: string;
 };
 
 export type GetV1GamesGameCardsParams = {
@@ -556,6 +660,9 @@ export type GetV1GamesGameCardsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -581,6 +688,9 @@ export type HeadV1GamesGameCardsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -600,6 +710,70 @@ export type HeadV1GamesGameCardsIdParams = {
   language?: string;
 };
 
+export type GetV1GamesGameCollectionsParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: GetV1GamesGameCollectionsSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type GetV1GamesGameCollectionsSort = typeof GetV1GamesGameCollectionsSort[keyof typeof GetV1GamesGameCollectionsSort];
+
+
+export const GetV1GamesGameCollectionsSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type HeadV1GamesGameCollectionsParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: HeadV1GamesGameCollectionsSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type HeadV1GamesGameCollectionsSort = typeof HeadV1GamesGameCollectionsSort[keyof typeof HeadV1GamesGameCollectionsSort];
+
+
+export const HeadV1GamesGameCollectionsSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type GetV1GamesGameCollectionsIdParams = {
+  language?: string;
+};
+
+export type HeadV1GamesGameCollectionsIdParams = {
+  language?: string;
+};
+
 export type GetV1GamesGamePrintingsParams = {
   /**
    * @minimum 1
@@ -614,6 +788,9 @@ export type GetV1GamesGamePrintingsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -639,6 +816,9 @@ export type HeadV1GamesGamePrintingsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -658,6 +838,70 @@ export type HeadV1GamesGamePrintingsIdParams = {
   language?: string;
 };
 
+export type GetV1GamesGameProductsParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: GetV1GamesGameProductsSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type GetV1GamesGameProductsSort = typeof GetV1GamesGameProductsSort[keyof typeof GetV1GamesGameProductsSort];
+
+
+export const GetV1GamesGameProductsSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type HeadV1GamesGameProductsParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /** @maxLength 2048 */
+  cursor?: string;
+  /** @maxLength 120 */
+  q?: string;
+  sort?: HeadV1GamesGameProductsSort;
+  language?: string;
+  setId?: string;
+  cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
+  rarity?: string;
+};
+
+export type HeadV1GamesGameProductsSort = typeof HeadV1GamesGameProductsSort[keyof typeof HeadV1GamesGameProductsSort];
+
+
+export const HeadV1GamesGameProductsSort = {
+  name: 'name',
+  newest: 'newest',
+} as const;
+
+export type GetV1GamesGameProductsIdParams = {
+  language?: string;
+};
+
+export type HeadV1GamesGameProductsIdParams = {
+  language?: string;
+};
+
 export type GetV1GamesGameSeriesParams = {
   /**
    * @minimum 1
@@ -672,6 +916,9 @@ export type GetV1GamesGameSeriesParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -697,6 +944,9 @@ export type HeadV1GamesGameSeriesParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -730,6 +980,9 @@ export type GetV1GamesGameSetsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -755,6 +1008,9 @@ export type HeadV1GamesGameSetsParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
 };
 
@@ -800,6 +1056,9 @@ export type GetV1SearchParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
   game?: string;
 };
@@ -826,6 +1085,9 @@ export type HeadV1SearchParams = {
   language?: string;
   setId?: string;
   cardId?: string;
+  productId?: string;
+  collectionId?: string;
+  artworkId?: string;
   rarity?: string;
   game?: string;
 };
@@ -2530,6 +2792,486 @@ export function useHeadV1GamesGame<TData = Awaited<ReturnType<typeof headV1Games
 
 
 
+export const getGetV1GamesGameArtworksUrl = (game: string,
+    params?: GetV1GamesGameArtworksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/artworks?${stringifiedParams}` : `/v1/games/${game}/artworks`
+}
+
+/**
+ * @summary List artworks
+ */
+export const getV1GamesGameArtworks = async (game: string,
+    params?: GetV1GamesGameArtworksParams, options?: Parameters<typeof request>[1]): Promise<Page> => {
+
+  return request<Page>(getGetV1GamesGameArtworksUrl(game,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameArtworksQueryKey = (game: string,
+    params?: GetV1GamesGameArtworksParams,) => {
+    return [
+    `/v1/games/${game}/artworks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameArtworksQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError = void | ErrorResponse>(game: string,
+    params?: GetV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameArtworksQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameArtworks>>> = ({ signal }) => getV1GamesGameArtworks(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameArtworksQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameArtworks>>>
+export type GetV1GamesGameArtworksQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameArtworks<TData = Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  GetV1GamesGameArtworksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameArtworks>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameArtworks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameArtworks<TData = Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameArtworks>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameArtworks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameArtworks<TData = Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List artworks
+ */
+
+export function useGetV1GamesGameArtworks<TData = Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameArtworksQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameArtworksUrl = (game: string,
+    params?: HeadV1GamesGameArtworksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/artworks?${stringifiedParams}` : `/v1/games/${game}/artworks`
+}
+
+/**
+ * @summary List artworks (headers only)
+ */
+export const headV1GamesGameArtworks = async (game: string,
+    params?: HeadV1GamesGameArtworksParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameArtworksUrl(game,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameArtworksQueryKey = (game: string,
+    params?: HeadV1GamesGameArtworksParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/artworks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameArtworksQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError = void | ErrorResponse>(game: string,
+    params?: HeadV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameArtworksQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameArtworks>>> = ({ signal }) => headV1GamesGameArtworks(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameArtworksQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameArtworks>>>
+export type HeadV1GamesGameArtworksQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameArtworks<TData = Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  HeadV1GamesGameArtworksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameArtworks>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameArtworks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameArtworks<TData = Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameArtworks>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameArtworks>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameArtworks<TData = Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List artworks (headers only)
+ */
+
+export function useHeadV1GamesGameArtworks<TData = Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameArtworksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworks>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameArtworksQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetV1GamesGameArtworksIdUrl = (game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/artworks/${id}?${stringifiedParams}` : `/v1/games/${game}/artworks/${id}`
+}
+
+/**
+ * @summary Get a artwork
+ */
+export const getV1GamesGameArtworksId = async (game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams, options?: Parameters<typeof request>[1]): Promise<RecordDetail> => {
+
+  return request<RecordDetail>(getGetV1GamesGameArtworksIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameArtworksIdQueryKey = (game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams,) => {
+    return [
+    `/v1/games/${game}/artworks/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameArtworksIdQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameArtworksIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>> = ({ signal }) => getV1GamesGameArtworksId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameArtworksIdQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>>
+export type GetV1GamesGameArtworksIdQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  GetV1GamesGameArtworksIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameArtworksId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameArtworksId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameArtworksId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameArtworksId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a artwork
+ */
+
+export function useGetV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameArtworksIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameArtworksIdUrl = (game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/artworks/${id}?${stringifiedParams}` : `/v1/games/${game}/artworks/${id}`
+}
+
+/**
+ * @summary Get a artwork (headers only)
+ */
+export const headV1GamesGameArtworksId = async (game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameArtworksIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameArtworksIdQueryKey = (game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/artworks/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameArtworksIdQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameArtworksIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>> = ({ signal }) => headV1GamesGameArtworksId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameArtworksIdQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>>
+export type HeadV1GamesGameArtworksIdQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  HeadV1GamesGameArtworksIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameArtworksId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameArtworksId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameArtworksId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameArtworksId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a artwork (headers only)
+ */
+
+export function useHeadV1GamesGameArtworksId<TData = Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameArtworksIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameArtworksId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameArtworksIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetV1GamesGameCardsUrl = (game: string,
     params?: GetV1GamesGameCardsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -3010,6 +3752,486 @@ export function useHeadV1GamesGameCardsId<TData = Awaited<ReturnType<typeof head
 
 
 
+export const getGetV1GamesGameCollectionsUrl = (game: string,
+    params?: GetV1GamesGameCollectionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/collections?${stringifiedParams}` : `/v1/games/${game}/collections`
+}
+
+/**
+ * @summary List collections
+ */
+export const getV1GamesGameCollections = async (game: string,
+    params?: GetV1GamesGameCollectionsParams, options?: Parameters<typeof request>[1]): Promise<Page> => {
+
+  return request<Page>(getGetV1GamesGameCollectionsUrl(game,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameCollectionsQueryKey = (game: string,
+    params?: GetV1GamesGameCollectionsParams,) => {
+    return [
+    `/v1/games/${game}/collections`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameCollectionsQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError = void | ErrorResponse>(game: string,
+    params?: GetV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameCollectionsQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameCollections>>> = ({ signal }) => getV1GamesGameCollections(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameCollectionsQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameCollections>>>
+export type GetV1GamesGameCollectionsQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameCollections<TData = Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  GetV1GamesGameCollectionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameCollections>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameCollections<TData = Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameCollections>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameCollections<TData = Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List collections
+ */
+
+export function useGetV1GamesGameCollections<TData = Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameCollectionsQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameCollectionsUrl = (game: string,
+    params?: HeadV1GamesGameCollectionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/collections?${stringifiedParams}` : `/v1/games/${game}/collections`
+}
+
+/**
+ * @summary List collections (headers only)
+ */
+export const headV1GamesGameCollections = async (game: string,
+    params?: HeadV1GamesGameCollectionsParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameCollectionsUrl(game,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameCollectionsQueryKey = (game: string,
+    params?: HeadV1GamesGameCollectionsParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/collections`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameCollectionsQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError = void | ErrorResponse>(game: string,
+    params?: HeadV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameCollectionsQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameCollections>>> = ({ signal }) => headV1GamesGameCollections(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameCollectionsQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameCollections>>>
+export type HeadV1GamesGameCollectionsQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameCollections<TData = Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  HeadV1GamesGameCollectionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameCollections>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameCollections<TData = Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameCollections>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameCollections<TData = Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List collections (headers only)
+ */
+
+export function useHeadV1GamesGameCollections<TData = Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameCollectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollections>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameCollectionsQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetV1GamesGameCollectionsIdUrl = (game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/collections/${id}?${stringifiedParams}` : `/v1/games/${game}/collections/${id}`
+}
+
+/**
+ * @summary Get a collection
+ */
+export const getV1GamesGameCollectionsId = async (game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams, options?: Parameters<typeof request>[1]): Promise<RecordDetail> => {
+
+  return request<RecordDetail>(getGetV1GamesGameCollectionsIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameCollectionsIdQueryKey = (game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams,) => {
+    return [
+    `/v1/games/${game}/collections/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameCollectionsIdQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameCollectionsIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>> = ({ signal }) => getV1GamesGameCollectionsId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameCollectionsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>>
+export type GetV1GamesGameCollectionsIdQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  GetV1GamesGameCollectionsIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a collection
+ */
+
+export function useGetV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameCollectionsIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameCollectionsIdUrl = (game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/collections/${id}?${stringifiedParams}` : `/v1/games/${game}/collections/${id}`
+}
+
+/**
+ * @summary Get a collection (headers only)
+ */
+export const headV1GamesGameCollectionsId = async (game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameCollectionsIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameCollectionsIdQueryKey = (game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/collections/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameCollectionsIdQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameCollectionsIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>> = ({ signal }) => headV1GamesGameCollectionsId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameCollectionsIdQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>>
+export type HeadV1GamesGameCollectionsIdQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  HeadV1GamesGameCollectionsIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a collection (headers only)
+ */
+
+export function useHeadV1GamesGameCollectionsId<TData = Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameCollectionsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameCollectionsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameCollectionsIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetV1GamesGamePrintingsUrl = (game: string,
     params?: GetV1GamesGamePrintingsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -3478,6 +4700,486 @@ export function useHeadV1GamesGamePrintingsId<TData = Awaited<ReturnType<typeof 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getHeadV1GamesGamePrintingsIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetV1GamesGameProductsUrl = (game: string,
+    params?: GetV1GamesGameProductsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/products?${stringifiedParams}` : `/v1/games/${game}/products`
+}
+
+/**
+ * @summary List products
+ */
+export const getV1GamesGameProducts = async (game: string,
+    params?: GetV1GamesGameProductsParams, options?: Parameters<typeof request>[1]): Promise<Page> => {
+
+  return request<Page>(getGetV1GamesGameProductsUrl(game,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameProductsQueryKey = (game: string,
+    params?: GetV1GamesGameProductsParams,) => {
+    return [
+    `/v1/games/${game}/products`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameProductsQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError = void | ErrorResponse>(game: string,
+    params?: GetV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameProductsQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameProducts>>> = ({ signal }) => getV1GamesGameProducts(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameProductsQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameProducts>>>
+export type GetV1GamesGameProductsQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameProducts<TData = Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  GetV1GamesGameProductsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameProducts>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameProducts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameProducts<TData = Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameProducts>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameProducts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameProducts<TData = Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List products
+ */
+
+export function useGetV1GamesGameProducts<TData = Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: GetV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameProductsQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameProductsUrl = (game: string,
+    params?: HeadV1GamesGameProductsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/products?${stringifiedParams}` : `/v1/games/${game}/products`
+}
+
+/**
+ * @summary List products (headers only)
+ */
+export const headV1GamesGameProducts = async (game: string,
+    params?: HeadV1GamesGameProductsParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameProductsUrl(game,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameProductsQueryKey = (game: string,
+    params?: HeadV1GamesGameProductsParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/products`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameProductsQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError = void | ErrorResponse>(game: string,
+    params?: HeadV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameProductsQueryKey(game,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameProducts>>> = ({ signal }) => headV1GamesGameProducts(game,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameProductsQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameProducts>>>
+export type HeadV1GamesGameProductsQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameProducts<TData = Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params: undefined |  HeadV1GamesGameProductsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameProducts>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameProducts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameProducts<TData = Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameProducts>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameProducts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameProducts<TData = Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List products (headers only)
+ */
+
+export function useHeadV1GamesGameProducts<TData = Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError = void | ErrorResponse>(
+ game: string,
+    params?: HeadV1GamesGameProductsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProducts>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameProductsQueryOptions(game,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetV1GamesGameProductsIdUrl = (game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/products/${id}?${stringifiedParams}` : `/v1/games/${game}/products/${id}`
+}
+
+/**
+ * @summary Get a product
+ */
+export const getV1GamesGameProductsId = async (game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams, options?: Parameters<typeof request>[1]): Promise<RecordDetail> => {
+
+  return request<RecordDetail>(getGetV1GamesGameProductsIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetV1GamesGameProductsIdQueryKey = (game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams,) => {
+    return [
+    `/v1/games/${game}/products/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetV1GamesGameProductsIdQueryOptions = <TData = Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetV1GamesGameProductsIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getV1GamesGameProductsId>>> = ({ signal }) => getV1GamesGameProductsId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetV1GamesGameProductsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getV1GamesGameProductsId>>>
+export type GetV1GamesGameProductsIdQueryError = void | ErrorResponse
+
+
+export function useGetV1GamesGameProductsId<TData = Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  GetV1GamesGameProductsIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameProductsId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameProductsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameProductsId<TData = Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getV1GamesGameProductsId>>,
+          TError,
+          Awaited<ReturnType<typeof getV1GamesGameProductsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetV1GamesGameProductsId<TData = Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a product
+ */
+
+export function useGetV1GamesGameProductsId<TData = Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: GetV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetV1GamesGameProductsIdQueryOptions(game,id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getHeadV1GamesGameProductsIdUrl = (game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/games/${game}/products/${id}?${stringifiedParams}` : `/v1/games/${game}/products/${id}`
+}
+
+/**
+ * @summary Get a product (headers only)
+ */
+export const headV1GamesGameProductsId = async (game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams, options?: Parameters<typeof request>[1]): Promise<void> => {
+
+  return request<void>(getHeadV1GamesGameProductsIdUrl(game,id,params),
+  {
+    ...options,
+    method: 'HEAD'
+
+
+  }
+);}
+
+
+
+
+
+export const getHeadV1GamesGameProductsIdQueryKey = (game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams,) => {
+    return [
+    'HEAD', `/v1/games/${game}/products/${id}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getHeadV1GamesGameProductsIdQueryOptions = <TData = Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError = void | ErrorResponse>(game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHeadV1GamesGameProductsIdQueryKey(game,id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof headV1GamesGameProductsId>>> = ({ signal }) => headV1GamesGameProductsId(game,id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: game !== null && game !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HeadV1GamesGameProductsIdQueryResult = NonNullable<Awaited<ReturnType<typeof headV1GamesGameProductsId>>>
+export type HeadV1GamesGameProductsIdQueryError = void | ErrorResponse
+
+
+export function useHeadV1GamesGameProductsId<TData = Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params: undefined |  HeadV1GamesGameProductsIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameProductsId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameProductsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameProductsId<TData = Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof headV1GamesGameProductsId>>,
+          TError,
+          Awaited<ReturnType<typeof headV1GamesGameProductsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHeadV1GamesGameProductsId<TData = Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a product (headers only)
+ */
+
+export function useHeadV1GamesGameProductsId<TData = Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError = void | ErrorResponse>(
+ game: string,
+    id: string,
+    params?: HeadV1GamesGameProductsIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof headV1GamesGameProductsId>>, TError, TData>>, request?: SecondParameter<typeof request>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHeadV1GamesGameProductsIdQueryOptions(game,id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
