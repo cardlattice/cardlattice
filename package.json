@@ -1,0 +1,16 @@
+{
+  "name": "cardlattice",
+  "private": true,
+  "packageManager": "pnpm@12.4.1",
+  "scripts": {
+    "dev": "pnpm --filter @cardlattice/web dev",
+    "build": "pnpm --filter @cardlattice/web build",
+    "typecheck": "pnpm --filter @cardlattice/web typecheck",
+    "test": "pnpm --filter @cardlattice/web test",
+    "lint": "pnpm --filter @cardlattice/web lint",
+    "format": "pnpm --filter @cardlattice/web format",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "test:e2e": "pnpm --filter @cardlattice/web test:e2e",
+    "format:check": "pnpm --filter @cardlattice/web format:check"
+  }
+}

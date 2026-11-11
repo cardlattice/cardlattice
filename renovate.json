@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "timezone": "Europe/London",
+  "rangeStrategy": "bump",
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "oxlint-plugin-react-doctor"
+      ],
+      "allowedVersions": "<=0.5.8",
+      "description": "Keep the verified MIT release; newer versions have additional restrictions. Review licensing before updating."
+    }
+  ]
+}

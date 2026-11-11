@@ -1,0 +1,138 @@
+# Architecture
+
+Cardlattice is one Axum/Tokio service, PostgreSQL, and a static React website.
+The API process runs a durable invalidation worker and periodic health probes.
+Reviewed catalogue artifacts are built by the data repository CI and indexed at
+deployment; see [the data pipeline](data-pipeline.md). The origin serves those
+exact bytes and no longer runs the daily dataset-building worker.
+Cloudflare CDN is optional. There is no Redis, per-request Worker, external
+catalogue dependency, commerce, pricing, or inventory subsystem.
+
+```mermaid
+flowchart LR
+  Browser --> Web[Static React website]
+  Client[Anonymous GET / HEAD] --> CDN[Optional Cloudflare cache]
+  CDN --> API[Axum API]
+  Web --> API
+  Contributor --> Draft[Authenticated submission]
+  Draft --> DB[(PostgreSQL)]
+  Moderator --> Review[Review transaction]
+  Review --> DB
+  API --> DB
+  DB --> Worker[In-process durable worker]
+  Worker --> Purge[URL purge or local no-op]
+  Git[Data repository] --> CI[Validate and compile]
+  CI --> Snapshot[Immutable daily catalogue]
+  Snapshot --> Index[Index artifact]
+  Index --> DB
+  Purge --> CDN
+```
+
+## Identity and games
+
+Semantic identifiers use game, set, language, region and collector number. Games, series, sets, card identities, and
+printings use a common identity table with constrained discriminators and typed
+read views. This is single-table inheritance, not a claim that every game has the
+same concepts. A printing belongs to exactly one game, card identity, and set;
+language, region, collector number, rarity and release date remain printing data.
+Foil finishes and stamps belong in printing variants. Reprints remain distinct.
+
+Attributes are bounded JSON objects. Pokémon card attributes have a typed adapter
+for category, HP, types and stage. Other games accept bounded core attributes until
+their own adapter is supplied; they do not inherit Pokémon validation accidentally.
+The first adapter is intentionally small and does not model every Pokémon rule.
+
+## Read consistency
+
+Queries bind user values through SQLx; dynamic query fragments come only from fixed
+code branches. Requests use bounded limits (default 20, maximum 100), opaque
+query-scoped keyset cursors, stable canonical-name/identifier ordering, and a three-second
+database statement timeout. Full-text search uses `simple` tokenisation plus a GIN
+trigram substring fallback for scripts where word tokenisation is insufficient.
+NFKC normalisation and Unicode lowercasing preserve multilingual input. This is
+Unicode-aware, not a linguistic stemming engine or accent-insensitive search.
+
+Pagination is a live view, not a snapshot-isolated multi-request export. Changes to
+sort keys during traversal may move records; use versioned datasets for reproducible
+iteration. Names fall back to the canonical record when a requested translation is
+absent. Cursor ordering uses canonical names even when display names are translated.
+
+## Write and publish consistency
+
+1. Submission verifies a contributor capability, terms, field constraints,
+   duplicate fingerprint, idempotency key, and update base timestamp.
+2. Moderation takes an advisory transaction lock and locks the submission row.
+   Stale edits, invalid relationships, and duplicate canonical records fail before
+   commit. Approve/reject decisions are auditable.
+3. Approval commits metadata, provenance, revision, decision, contribution status,
+   and outbox event atomically. No submitted image is promoted by this transaction.
+4. Committed records are immediately available at the origin. A worker claims an
+   invalidation event using `FOR UPDATE SKIP LOCKED` and purges affected URLs.
+5. The event completes after purge succeeds. Without Cloudflare, purge is an
+   explicit successful no-op. Data CI builds daily artifacts independently.
+6. Errors persist attempts and next-attempt time. Backoff starts at five seconds,
+   doubles, and caps at one hour. Ten failures move an event to `failed`; the
+   moderator can replay it. A process crash rolls back the claim, permitting retry.
+
+The data repository compiles and validates immutable JSON artifacts in CI. Its
+scheduled release job publishes at most once per UTC day. The origin verifies and
+indexes approved artifacts, then registers their exact bytes for downloads;
+unchanged records create no new audit revisions.
+Internal revision IDs are audit watermarks, not release counts; PostgreSQL sequence
+gaps from rollback are expected. Public releases are identified by date.
+
+Snapshots are immutable, schema-versioned JSON containing public core metadata,
+never synthetic fixtures, private scans, credentials, contributor identities, or
+internal audit details. Withdrawn manifests remain private audit records; both
+listing and download endpoints exclude them, even for conditional GET/HEAD.
+Supplementary localisation/variant/image exports are not yet included. Metadata
+accepted by this first release must be CC0-compatible; artwork is separate.
+The previous database export library remains available for tests and development,
+but the API no longer schedules exports.
+
+The local worker is intentionally conservative: one event per five-second tick,
+12 database connections, bounded purge batches, a 15-second HTTP timeout. Batch
+coalescing and a separate worker command are future scaling improvements. Multiple
+API replicas require shared snapshot storage. A single deployment uses a persistent
+volume. Temporary files from interrupted exports need periodic operational cleanup.
+
+## Cache consistency
+
+Unfiltered record URLs have one-day shared TTLs; collections/stats/manifests have
+60-second shared TTLs. Browser TTL is 15 seconds. ETags hash exact JSON bytes;
+conditional GET/HEAD preserve validators. If-None-Match takes precedence over
+If-Modified-Since. HTTP dates are second-granularity, so comparison conservatively
+returns 200 when a stored timestamp is later within the same second.
+
+Outbox paths cover the changed record, parent card/set (old and new), game and
+default collections. Query-bearing requests are bypassed by the supplied CDN rules;
+origin headers bound other shared caches to 60 seconds. Search and supplementary
+relationships are therefore bounded even when exact URL enumeration is impossible.
+An origin request already in flight can fill a cache after a purge; TTL is the
+ultimate staleness bound. This design does not claim linearizable CDN reads.
+
+## Access and operational boundaries
+
+Public GET/HEAD requests are anonymous. Public CORS allows GET/HEAD only; the UI
+uses a same-origin proxy for writes. Separate random contributor, moderator and
+metrics capabilities come from environment or secret files. Tokens are hashed for
+audit identity and never put in URLs or browser storage. Shared capabilities are a
+deliberate initial mechanism, not per-person authentication.
+
+Submission budgets are PostgreSQL-backed per capability. Search budgets use the
+actual socket peer, never an untrusted forwarded header. Behind a reverse proxy,
+that budget is shared by the proxy's traffic: use edge rate limiting for per-user
+limits and plan a trusted-proxy policy before multi-instance public deployment.
+Scan uploads are byte- and decode-limited PNG/JPEG files stored privately in
+PostgreSQL. They are served to moderators as attachments with no-store and nosniff.
+
+### Checklist-based provisional identities
+
+Official Pokémon checklist imports (`ingestion::pokemon_cards`) resolve existing
+sets by secondary official product URLs and assign new internal semantic identifiers to cards and
+printings. Checklist names do not prove rules equivalence: a nullable typed Pokémon
+category and identifier `identityScope` permit provisional card identities without guessed
+attributes or name-based merging. Numbered alternate illustrations remain distinct
+printings. The insert-only batch operation, provenance, audit revisions and a
+consolidated invalidation event commit atomically. See `data/pokemon/README.md` for
+source boundaries, measured checklist scope, repeatability and exclusions.

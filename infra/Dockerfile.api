@@ -1,0 +1,16 @@
+FROM rust:slim-bookworm AS build
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+COPY apps/api ./apps/api
+COPY migrations ./migrations
+COPY data ./data
+RUN cargo build --locked --release --package cardlattice-api
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/* && useradd -r -u 10001 cardlattice && mkdir -p /var/lib/cardlattice/datasets && chown -R cardlattice /var/lib/cardlattice
+COPY --from=build /app/target/release/cardlattice-api /usr/local/bin/cardlattice-api
+USER cardlattice
+EXPOSE 8080
+ENTRYPOINT ["cardlattice-api"]
+CMD ["serve"]

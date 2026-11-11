@@ -1,0 +1,139 @@
+[
+  {
+    "id": "pokemon",
+    "draft": {
+      "kind": "game",
+      "name": "Pokémon",
+      "gameId": null,
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "slug": "pokemon"
+    }
+  },
+  {
+    "id": "pokemon-series-development-series-synthetic",
+    "draft": {
+      "kind": "series",
+      "name": "Development series — synthetic",
+      "gameId": "pokemon",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "pokemon-set-lattice-laboratory-synthetic",
+    "draft": {
+      "kind": "set",
+      "name": "Lattice laboratory — synthetic",
+      "gameId": "pokemon",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "seriesId": "pokemon-series-development-series-synthetic",
+      "releaseDate": "2026-01-01"
+    }
+  },
+  {
+    "id": "pokemon-card-prism-seed-synthetic",
+    "draft": {
+      "kind": "card",
+      "name": "Prism Seed — synthetic",
+      "gameId": "pokemon",
+      "attributes": {
+        "category": "pokemon",
+        "hp": 40,
+        "types": [
+          "Grass"
+        ],
+        "stage": "Basic"
+      },
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "pokemon-card-caf-lantern-synthetic",
+    "draft": {
+      "kind": "card",
+      "name": "Café Lantern — synthetic",
+      "gameId": "pokemon",
+      "attributes": {
+        "category": "trainer",
+        "types": []
+      },
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      }
+    }
+  },
+  {
+    "id": "pokemon-lattice-laboratory-en-test-LAB-001",
+    "draft": {
+      "kind": "printing",
+      "name": "Prism Seed · LAB-001 — synthetic",
+      "gameId": "pokemon",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "cardId": "pokemon-card-prism-seed-synthetic",
+      "setId": "pokemon-set-lattice-laboratory-synthetic",
+      "collectorNumber": "LAB-001",
+      "language": "en",
+      "region": "test",
+      "rarity": "Common"
+    }
+  },
+  {
+    "id": "pokemon-lattice-laboratory-en-test-LAB-002",
+    "draft": {
+      "kind": "printing",
+      "name": "Café Lantern · LAB-002 — synthetic",
+      "gameId": "pokemon",
+      "attributes": {},
+      "synthetic": true,
+      "source": {
+        "description": "Original synthetic development fixture authored for Cardlattice; not a real card product.",
+        "referenceUrl": null,
+        "method": "original_contribution",
+        "license": "CC0-1.0"
+      },
+      "cardId": "pokemon-card-caf-lantern-synthetic",
+      "setId": "pokemon-set-lattice-laboratory-synthetic",
+      "collectorNumber": "LAB-002",
+      "language": "en",
+      "region": "test",
+      "rarity": "Common"
+    }
+  }
+]

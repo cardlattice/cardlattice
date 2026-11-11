@@ -1,0 +1,38 @@
+{
+  "measurements": [
+    {
+      "cdnMeasured": false,
+      "concurrency": 1,
+      "environment": "local process plus PostgreSQL",
+      "records": 20007,
+      "timestamp": "2026-11-02T00:05:52.243601430Z",
+      "warmupSamples": 50
+    },
+    {
+      "benchmark": "primary_key_card_lookup",
+      "p50": 0.163204,
+      "p95": 0.224928,
+      "p99": 0.257729,
+      "samples": 500,
+      "unit": "milliseconds"
+    },
+    {
+      "benchmark": "indexed_full_text_search",
+      "p50": 0.295419,
+      "p95": 0.38143900000000003,
+      "p99": 0.419079,
+      "samples": 500,
+      "unit": "milliseconds"
+    },
+    {
+      "benchmark": "json_etag_response_generation",
+      "p50": 0.004428,
+      "p95": 0.006522,
+      "p99": 0.009558,
+      "samples": 500,
+      "unit": "milliseconds"
+    }
+  ],
+  "searchPlan": "Bitmap Index Scan on catalogue_search",
+  "note": "Local single-client release build, warm PostgreSQL cache; not HTTP throughput, production capacity or CDN latency."
+}

@@ -1,0 +1,33 @@
+[workspace]
+resolver = "3"
+members = ["apps/api", "crates/catalogue", "crates/ingestion", "crates/publishing", "crates/observability"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+rust-version = "1.94"
+
+[workspace.dependencies]
+anyhow = "1"
+axum = { version = "0.8.9", features = ["multipart"] }
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+futures-util = "0.3"
+httpdate = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.9", default-features = false, features = ["derive", "macros", "runtime-tokio", "tls-rustls-ring-webpki", "postgres", "chrono", "json", "migrate"] }
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+utoipa = { version = "5", features = ["chrono"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+strip = true
