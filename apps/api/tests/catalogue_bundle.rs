@@ -28,19 +28,13 @@ fn reproducible_build_checks_manifest_integrity_and_relations() {
     let source = tempfile::tempdir().unwrap();
     let first = tempfile::tempdir().unwrap();
     let second = tempfile::tempdir().unwrap();
-    let mut bundle = input();
-    std::fs::write(
-        source.path().join("records.json"),
-        serde_json::to_vec(&bundle.records).unwrap(),
-    )
-    .unwrap();
+    let mut bundle = source_fixture(source.path());
     let manifest = bundle::build(source.path(), first.path(), &bundle.source_commit).unwrap();
-    bundle.records.reverse();
-    std::fs::write(
-        source.path().join("records.json"),
-        serde_json::to_vec_pretty(&bundle.records).unwrap(),
-    )
-    .unwrap();
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "# A contributor comment does not change the artifact\nrarity: null\nname: Prism Seed\n",
+    );
     let again = bundle::build(source.path(), second.path(), &bundle.source_commit).unwrap();
     assert_eq!(manifest.sha256, again.sha256);
     let loaded = bundle::load(&first.path().join("manifest.json")).unwrap();
@@ -140,12 +134,7 @@ async fn indexed_download_is_the_exact_ci_artifact(pool: PgPool) {
     let source = tempfile::tempdir().unwrap();
     let built = tempfile::tempdir().unwrap();
     let downloads = tempfile::tempdir().unwrap();
-    let bundle = input();
-    std::fs::write(
-        source.path().join("records.json"),
-        serde_json::to_vec(&bundle.records).unwrap(),
-    )
-    .unwrap();
+    let bundle = source_fixture(source.path());
     let manifest = bundle::build(source.path(), built.path(), &bundle.source_commit).unwrap();
     let path = built.path().join("manifest.json");
     cardlattice_api::catalogue_index::import(&pool, &path, downloads.path(), false)
@@ -171,4 +160,201 @@ async fn indexed_download_is_the_exact_ci_artifact(pool: PgPool) {
         .await
         .unwrap();
     assert_eq!(count, 1);
+}
+
+fn write(root: &std::path::Path, path: &str, content: &str) {
+    let path = root.join(path);
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    std::fs::write(path, content).unwrap();
+}
+fn source_fixture(root: &std::path::Path) -> Bundle {
+    write(root, "pokemon/game.yaml", "name: Pokémon\n");
+    write(
+        root,
+        "pokemon/sets/laboratory.yaml",
+        "name: Laboratory\nreleaseDate: '2026-01-01'\n",
+    );
+    write(
+        root,
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\n",
+    );
+    Bundle {
+        schema_version: 1,
+        source_commit: "a".repeat(40),
+        records: ingestion::source_tree::load(root).unwrap(),
+    }
+}
+
+#[test]
+fn source_tree_inherits_context_without_evidence() {
+    let source = tempfile::tempdir().unwrap();
+    let bundle = source_fixture(source.path());
+    bundle.validate().unwrap();
+    let printing = bundle
+        .records
+        .iter()
+        .find(|e| e.draft.kind == catalogue::Kind::Printing)
+        .unwrap();
+    assert_eq!(printing.id, "pokemon-laboratory-en-US-001");
+    assert_eq!(printing.draft.collector_number.as_deref(), Some("001"));
+    assert_eq!(
+        printing.draft.release_date.unwrap().to_string(),
+        "2026-01-01"
+    );
+    let wire = serde_json::to_value(&bundle).unwrap();
+    assert!(wire.get("sources").is_none());
+    assert!(bundle.records.iter().all(|r| r.draft.source.is_none()));
+    assert!(
+        wire["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|r| r["metadata"].get("source").is_none())
+    );
+    let roundtrip: Bundle = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(
+        serde_json::to_value(roundtrip.records).unwrap(),
+        serde_json::to_value(&bundle.records).unwrap()
+    );
+    let mut bad = wire.clone();
+    bad["records"][0]["source"] = serde_json::json!("missing");
+    assert!(serde_json::from_value::<Bundle>(bad).is_err());
+    let mut bad = wire;
+    bad["records"][0]["metadata"]["source"] = serde_json::json!({});
+    assert!(serde_json::from_value::<Bundle>(bad).is_err());
+}
+
+#[test]
+fn source_tree_rejects_mistakes_with_file_diagnostics() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    let card = "pokemon/cards/laboratory/en/US/001.yaml";
+    for text in [
+        "name: One\nname: Two\n",
+        "name: Prism Seed\nrairty: Common\n",
+        "name: Prism Seed\nsource: missing\n",
+        "name: !custom Prism Seed\n",
+        "!custom name: Prism Seed\n",
+        "name: &card Prism Seed\n",
+        "name: Prism Seed\n---\nname: Different\n",
+        "name: Prism Seed\npokemon:\n  hp: 5000\n",
+        "name: Prism Seed\nattributes:\n  identityScope: manual\n",
+        "name: Prism Seed\n<<: {rarity: Common}\n",
+    ] {
+        write(source.path(), card, text);
+        let error = ingestion::source_tree::load(source.path())
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains(card), "{error}");
+    }
+    write(source.path(), card, "name: Prism Seed\n");
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/002.yaml",
+        "name: Another\ncollectorNumber: '001'\nidentity: card-pokemon-laboratory-en-US-001\n",
+    );
+    let mut duplicate = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..source_fixture(tempfile::tempdir().unwrap().path())
+    };
+    assert!(duplicate.validate().is_err());
+    duplicate
+        .records
+        .retain(|e| e.draft.kind != catalogue::Kind::Game);
+    assert!(duplicate.validate().is_err());
+}
+
+#[test]
+fn source_tree_supports_reviewed_reprints() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/identities/prism.yaml",
+        "name: Prism Seed\nattributes:\n  category: pokemon\n  hp: 70\n  types: [Lightning]\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\nidentity: pokemon-card-prism\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/002.yaml",
+        "name: Prism Seed\nidentity: pokemon-card-prism\n",
+    );
+    let bundle = Bundle {
+        schema_version: 1,
+        source_commit: "a".repeat(40),
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+    };
+    bundle.validate().unwrap();
+    assert_eq!(
+        bundle
+            .records
+            .iter()
+            .filter(|e| e.draft.kind == catalogue::Kind::Card)
+            .count(),
+        1
+    );
+    assert_eq!(
+        bundle
+            .records
+            .iter()
+            .filter(|e| e.draft.kind == catalogue::Kind::Printing)
+            .count(),
+        2
+    );
+}
+
+#[test]
+fn source_tree_rejects_stray_files_and_symlinks() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(source.path(), "ignored.json", "{}");
+    assert!(ingestion::source_tree::load(source.path()).is_err());
+    std::fs::remove_file(source.path().join("ignored.json")).unwrap();
+    #[cfg(unix)]
+    {
+        std::os::unix::fs::symlink("game.yaml", source.path().join("pokemon/linked.yaml")).unwrap();
+        assert!(
+            ingestion::source_tree::load(source.path())
+                .unwrap_err()
+                .to_string()
+                .contains("Symlinks")
+        );
+    }
+}
+
+#[test]
+fn source_tree_inherits_release_overrides_and_rejects_duplicate_patterns() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/release.yaml",
+        "releaseDate: '2026-02-01'\nexternalIds:\n  - namespace: example\n    prefix: 'test:'\n    suffix: ':en'\n",
+    );
+    let records = ingestion::source_tree::load(source.path()).unwrap();
+    let printing = records
+        .iter()
+        .find(|r| r.draft.kind == catalogue::Kind::Printing)
+        .unwrap();
+    assert_eq!(printing.external_ids[0].value, "test:001:en");
+    assert_eq!(
+        printing.draft.release_date.unwrap().to_string(),
+        "2026-02-01"
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/release.yaml",
+        "externalIds:\n  - namespace: example\n    prefix: 'test:'\n    suffix: ''\n  - namespace: example\n    prefix: 'other:'\n    suffix: ''\n",
+    );
+    assert!(
+        ingestion::source_tree::load(source.path())
+            .unwrap_err()
+            .to_string()
+            .contains("Duplicate external identifier")
+    );
 }

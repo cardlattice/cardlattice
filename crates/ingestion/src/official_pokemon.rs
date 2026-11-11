@@ -237,7 +237,7 @@ fn draft(candidate: &SetCandidate, game_id: &str) -> Draft {
         release_date: Some(candidate.release_date),
         attributes: json!({}),
         synthetic: false,
-        source: source(candidate),
+        source: Some(source(candidate)),
     }
 }
 

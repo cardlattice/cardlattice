@@ -14,17 +14,34 @@ Variants require distinct keys. There are no UUID aliases or compatibility route
 The schema is intentionally breaking for this unreleased project: use a fresh
 PostgreSQL database and rebuild it from the reviewed artifact, not old migrations.
 
+## Editing data
+
+Contributors edit one YAML file per printing:
+`catalogue/pokemon/cards/mega-evolution/en/US/001.yaml`. Most files contain only
+`name`; the path supplies identity and language/region context. Separate set
+files supply set metadata, and optional `release.yaml` supplies release overrides
+and external identifier patterns. Provisional card identities are generated
+automatically. Reviewed reprints can reference an explicit shared identity.
+
+No source-evidence files or per-record citations are required or included in the
+data tree or compiled artifact. Git history and the manifest commit track changes.
+The API accepts drafts without evidence; optional existing provenance support is
+independent of the data-repository workflow. No executable contributor code is
+loaded. YAML comments are allowed, but duplicate keys, aliases, anchors, merges,
+unsupported tags, unknown fields and symlinks are rejected. Local validation is
+`cardlattice-api validate-catalogue <catalogue-directory>` without a database.
+
 ## Build in CI
 
 Data PRs validate and compile with the exact application commit pinned by
 `builder-ref.txt`. The offline compiler uses the same domain validation as the
 API. It rejects synthetic data, invalid relationships, duplicate identities,
-invalid source licences and oversized inputs. It sorts records and produces
+invalid typed attributes and oversized inputs. It sorts records and produces
 byte-identical output for the same semantic input and source commit.
 
 The artifact contains `manifest.json` and `catalogue-<sha256>.json`. Manifest
 counts are measured; its source commit, size and checksum identify the input and
-output. All catalogue keys and provenance are retained. Daily GitHub releases
+output. Catalogue keys are retained. Daily GitHub releases
 publish from reviewed `main`; PR artifacts are previews only. A deployment may
 mirror the exact bytes to R2 without rebuilding the catalogue.
 
@@ -41,7 +58,7 @@ cargo run -p cardlattice-api -- index-catalogue /path/to/manifest.json --apply
 ```
 
 The default is a full transactional dry run. `--apply` atomically writes changed
-records, source provenance, audit revisions and one deduplicated invalidation
+records, audit revisions and one deduplicated invalidation
 event. Identical records create no revisions. Missing previously managed records
 are retired children-first. Other locally created records are not deleted.
 Changes made locally after the last index cause a conflict rather than silently

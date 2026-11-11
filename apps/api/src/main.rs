@@ -6,6 +6,20 @@ async fn main() -> anyhow::Result<()> {
     observability::init();
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let command = arguments.first().map(String::as_str).unwrap_or("serve");
+    if command == "validate-catalogue" {
+        anyhow::ensure!(
+            arguments.len() == 2,
+            "Usage: validate-catalogue <source-directory>"
+        );
+        let bundle = ingestion::bundle::Bundle {
+            schema_version: 1,
+            source_commit: "0".repeat(40),
+            records: ingestion::source_tree::load(std::path::Path::new(&arguments[1]))?,
+        };
+        bundle.validate()?;
+        println!("{}", serde_json::to_string_pretty(&bundle.counts())?);
+        return Ok(());
+    }
     if command == "build-catalogue" {
         anyhow::ensure!(
             arguments.len() == 4,

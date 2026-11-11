@@ -1,8 +1,8 @@
 # Reviewed Pokémon data moved
 
-The authoritative catalogue and original source evidence now live in
+The authoritative catalogue facts now live in
 [cardlattice-data](https://github.com/cardlattice/cardlattice-data).
-Correct the readable set files there through a reviewed PR. Its CI compiles
+Correct individual card YAML files or separate set files through a PR. Its CI compiles
 catalogues; the application consumes the resulting artifacts.
 
 See [the data pipeline](../../docs/data-pipeline.md) for validation and indexing.

@@ -8,6 +8,7 @@ use std::io::Cursor;
 pub mod bundle;
 pub mod official_pokemon;
 pub mod pokemon_cards;
+pub mod source_tree;
 
 #[derive(Debug, thiserror::Error)]
 pub enum IngestionError {
@@ -93,15 +94,22 @@ pub async fn write_record(
     draft.validate(game_slug.as_deref())?;
     sqlx::query("INSERT INTO catalogue_records (id,kind,game_id,slug,name,normalized_name,series_id,set_id,card_id,collector_number,language,region,rarity,release_date,attributes,synthetic,duplicate_key) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,normalized_name=EXCLUDED.normalized_name,series_id=EXCLUDED.series_id,set_id=EXCLUDED.set_id,card_id=EXCLUDED.card_id,collector_number=EXCLUDED.collector_number,language=EXCLUDED.language,region=EXCLUDED.region,rarity=EXCLUDED.rarity,release_date=EXCLUDED.release_date,attributes=EXCLUDED.attributes,synthetic=EXCLUDED.synthetic,duplicate_key=EXCLUDED.duplicate_key,updated_at=clock_timestamp()")
         .bind(id).bind(draft.kind.as_str()).bind(&draft.game_id).bind(&draft.slug).bind(draft.name.trim()).bind(normalize(&draft.name)).bind(&draft.series_id).bind(&draft.set_id).bind(&draft.card_id).bind(&draft.collector_number).bind(&draft.language).bind(&draft.region).bind(&draft.rarity).bind(draft.release_date).bind(&draft.attributes).bind(draft.synthetic).bind(draft.duplicate_key()).execute(&mut *connection).await?;
+    let Some(evidence) = &draft.source else {
+        sqlx::query("DELETE FROM provenance WHERE record_id=$1")
+            .bind(id)
+            .execute(&mut *connection)
+            .await?;
+        return Ok(());
+    };
     let source = catalogue::operation_id();
     sqlx::query(
         "INSERT INTO sources(id,description,reference_url,method,license) VALUES ($1,$2,$3,$4,$5)",
     )
     .bind(&source)
-    .bind(&draft.source.description)
-    .bind(&draft.source.reference_url)
-    .bind(serde_json::to_value(&draft.source.method)?.as_str())
-    .bind(&draft.source.license)
+    .bind(&evidence.description)
+    .bind(&evidence.reference_url)
+    .bind(serde_json::to_value(&evidence.method)?.as_str())
+    .bind(&evidence.license)
     .execute(&mut *connection)
     .await?;
     let fields = serde_json::to_value(draft)?;

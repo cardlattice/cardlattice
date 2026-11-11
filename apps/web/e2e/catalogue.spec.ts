@@ -203,3 +203,34 @@ test("long provisional identity metadata fits a phone", async ({ page }) => {
     .analyze();
   expect(result.violations).toEqual([]);
 });
+
+test("moderate a contribution without source evidence", async ({ page, request }) => {
+  const name = `No evidence ${Date.now()} — synthetic`;
+  const response = await request.post("/v1/contributions", {
+    headers: {
+      Authorization: `Bearer ${process.env.CONTRIBUTOR_TOKEN}`,
+      "Idempotency-Key": `browser-no-evidence-${Date.now()}`,
+    },
+    data: {
+      operation: "create",
+      termsAccepted: true,
+      website: "",
+      draft: { kind: "card", name, gameId: "pokemon", synthetic: true },
+    },
+  });
+  expect(response.status()).toBe(200);
+  await page.goto("/moderate");
+  await page.getByLabel("Moderator token", { exact: true }).fill(process.env.MODERATOR_TOKEN!);
+  await page.getByRole("button", { name: "Load review queue" }).click();
+  const card = page
+    .locator(".review-card")
+    .filter({ has: page.getByRole("heading", { name, exact: true }) });
+  await expect(card).toBeVisible();
+  await page.screenshot({
+    path: test.info().outputPath("review-without-evidence.png"),
+    fullPage: true,
+  });
+  await card.getByLabel("Review reason").fill("Checked the synthetic card facts.");
+  await card.getByRole("button", { name: "Approve metadata" }).click();
+  await expect(card).toHaveCount(0);
+});

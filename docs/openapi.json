@@ -277,7 +277,14 @@
             ]
           },
           "source": {
-            "$ref": "#/components/schemas/SourceInput"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SourceInput"
+              }
+            ]
           },
           "synthetic": {
             "type": "boolean"
@@ -285,8 +292,7 @@
         },
         "required": [
           "kind",
-          "name",
-          "source"
+          "name"
         ],
         "type": "object"
       },

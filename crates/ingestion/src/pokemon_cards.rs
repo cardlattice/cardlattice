@@ -184,7 +184,7 @@ pub async fn import(
                 release_date: None,
                 attributes: json!({"identityScope": printing_id}),
                 synthetic: false,
-                source: source.clone(),
+                source: Some(source.clone()),
             };
             write_record(&mut tx, &card_id, &draft).await?;
             revisions.push(revision_and_outbox(&mut tx, &card_id, None, None).await?);

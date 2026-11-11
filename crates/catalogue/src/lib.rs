@@ -134,7 +134,7 @@ pub struct Draft {
     pub attributes: Value,
     #[serde(default)]
     pub synthetic: bool,
-    pub source: SourceInput,
+    pub source: Option<SourceInput>,
 }
 fn empty_object() -> Value {
     serde_json::json!({})
@@ -263,21 +263,22 @@ impl Draft {
                 return fail("Invalid Pokémon category, HP, type or stage");
             }
         }
-        if self.source.description.trim().len() < 10
-            || self.source.description.len() > 2000
-            || self.source.license != "CC0-1.0"
-        {
-            return fail(
-                "Provide source description (10–2000 bytes) and CC0-1.0 factual metadata dedication",
-            );
-        }
-        if self
-            .source
-            .reference_url
-            .as_ref()
-            .is_some_and(|url| !url.starts_with("https://") || url.len() > 2000)
-        {
-            return fail("Reference URLs must use HTTPS and be at most 2000 bytes");
+        if let Some(source) = &self.source {
+            if source.description.trim().len() < 10
+                || source.description.len() > 2000
+                || source.license != "CC0-1.0"
+            {
+                return fail(
+                    "Provide source description (10–2000 bytes) and CC0-1.0 factual metadata dedication",
+                );
+            }
+            if source
+                .reference_url
+                .as_ref()
+                .is_some_and(|url| !url.starts_with("https://") || url.len() > 2000)
+            {
+                return fail("Reference URLs must use HTTPS and be at most 2000 bytes");
+            }
         }
         Ok(())
     }

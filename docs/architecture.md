@@ -81,7 +81,7 @@ unchanged records create no new audit revisions.
 Internal revision IDs are audit watermarks, not release counts; PostgreSQL sequence
 gaps from rollback are expected. Public releases are identified by date.
 
-Snapshots are immutable, schema-versioned JSON containing public core metadata and provenance,
+Snapshots are immutable, schema-versioned JSON containing public core metadata,
 never synthetic fixtures, private scans, credentials, contributor identities, or
 internal audit details. Withdrawn manifests remain private audit records; both
 listing and download endpoints exclude them, even for conditional GET/HEAD.

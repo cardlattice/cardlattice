@@ -17,6 +17,7 @@ sha2.workspace = true
 sqlx.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
+serde-saphyr = { version = "2.1.1", default-features = false, features = ["deserialize"] }
 
 [lints]
 workspace = true

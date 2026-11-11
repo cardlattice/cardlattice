@@ -42,12 +42,80 @@ pub struct Entry {
     pub draft: Draft,
     pub external_ids: Vec<ExternalId>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, Clone)]
 pub struct Bundle {
     pub schema_version: u32,
     pub source_commit: String,
     pub records: Vec<Entry>,
+}
+// Contributor artifacts contain facts and a Git commit, not source-evidence records.
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct WireBundle {
+    schema_version: u32,
+    source_commit: String,
+    records: Vec<WireEntry>,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct WireEntry {
+    id: String,
+    metadata: Value,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    external_ids: Vec<ExternalId>,
+}
+impl Serialize for Bundle {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut records = Vec::new();
+        for entry in &self.records {
+            let mut metadata =
+                serde_json::to_value(&entry.draft).map_err(serde::ser::Error::custom)?;
+            metadata.as_object_mut().unwrap().retain(|key, value| {
+                key != "source"
+                    && !value.is_null()
+                    && !(key == "synthetic" && value == false)
+                    && !(key == "attributes" && value == &serde_json::json!({}))
+            });
+            records.push(WireEntry {
+                id: entry.id.clone(),
+                metadata,
+                external_ids: entry.external_ids.clone(),
+            });
+        }
+        WireBundle {
+            schema_version: self.schema_version,
+            source_commit: self.source_commit.clone(),
+            records,
+        }
+        .serialize(serializer)
+    }
+}
+impl<'de> Deserialize<'de> for Bundle {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let wire = WireBundle::deserialize(deserializer)?;
+        let mut records = Vec::new();
+        for entry in wire.records {
+            let mut metadata = entry.metadata;
+            let object = metadata
+                .as_object_mut()
+                .ok_or_else(|| serde::de::Error::custom("Record metadata must be an object"))?;
+            if object.contains_key("source") {
+                return Err(serde::de::Error::custom(
+                    "Inline artifact sources are forbidden",
+                ));
+            }
+            records.push(Entry {
+                id: entry.id,
+                draft: serde_json::from_value(metadata).map_err(serde::de::Error::custom)?,
+                external_ids: entry.external_ids,
+            });
+        }
+        Ok(Self {
+            schema_version: wire.schema_version,
+            source_commit: wire.source_commit,
+            records,
+        })
+    }
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -110,9 +178,10 @@ impl Bundle {
                 || draft.name != draft.name.trim()
                 || !duplicates.insert(draft.duplicate_key())
             {
-                return Err(invalid(
-                    "Nil identifier, synthetic record, whitespace or duplicate identity",
-                ));
+                return Err(invalid(&format!(
+                    "{}: invalid identifier, synthetic record, whitespace or duplicate identity",
+                    entry.id
+                )));
             }
             for (parent, kind) in [
                 (draft.game_id.clone(), Kind::Game),
@@ -144,7 +213,7 @@ impl Bundle {
         }
         Ok(())
     }
-    fn counts(&self) -> BTreeMap<String, usize> {
+    pub fn counts(&self) -> BTreeMap<String, usize> {
         let mut counts = BTreeMap::new();
         for entry in &self.records {
             *counts.entry(entry.draft.kind.as_str().into()).or_default() += 1;
@@ -154,23 +223,7 @@ impl Bundle {
 }
 /// Deterministic: no network, database, random identifiers or wall-clock timestamps.
 pub fn build(source: &Path, output: &Path, source_commit: &str) -> Result<Manifest, Error> {
-    let mut paths = std::fs::read_dir(source)?
-        .map(|e| e.map(|e| e.path()))
-        .collect::<Result<Vec<_>, _>>()?;
-    paths.sort();
-    let mut records = Vec::new();
-    let mut total = 0;
-    for path in paths
-        .into_iter()
-        .filter(|p| p.extension().is_some_and(|e| e == "json"))
-    {
-        let bytes = read(&path)?;
-        total += bytes.len();
-        if total > MAX_BYTES {
-            return Err(invalid("Source catalogue exceeds 64 MiB"));
-        }
-        records.extend(serde_json::from_slice::<Vec<Entry>>(&bytes)?);
-    }
+    let mut records = super::source_tree::load(source)?;
     records.sort_by_key(|e| (rank(e.draft.kind), e.id.clone()));
     for record in &mut records {
         record
@@ -184,6 +237,9 @@ pub fn build(source: &Path, output: &Path, source_commit: &str) -> Result<Manife
     };
     bundle.validate()?;
     let bytes = serde_json::to_vec(&bundle)?;
+    if bytes.len() > MAX_BYTES {
+        return Err(invalid("Compiled catalogue exceeds 64 MiB"));
+    }
     let sha256 = hash(&bytes);
     let manifest = Manifest {
         schema_version: 1,
@@ -295,7 +351,7 @@ pub async fn index(pool: &PgPool, bundle: &Bundle, apply: bool) -> Result<Summar
             {
                 return Err(invalid("Record kind, game and slug are immutable"));
             }
-            let source: Value = sqlx::query_scalar("SELECT jsonb_build_object('description',s.description,'referenceUrl',s.reference_url,'method',s.method,'license',s.license) FROM sources s WHERE EXISTS(SELECT 1 FROM provenance p WHERE p.source_id=s.id AND p.record_id=$1) ORDER BY s.recorded_at DESC,s.id DESC LIMIT 1").bind(&entry.id).fetch_one(&mut *tx).await?;
+            let source: Value = sqlx::query_scalar("SELECT jsonb_build_object('description',s.description,'referenceUrl',s.reference_url,'method',s.method,'license',s.license) FROM sources s WHERE EXISTS(SELECT 1 FROM provenance p WHERE p.source_id=s.id AND p.record_id=$1) ORDER BY s.recorded_at DESC,s.id DESC LIMIT 1").bind(&entry.id).fetch_optional(&mut *tx).await?.unwrap_or(Value::Null);
             let mut current = serde_json::to_value(record)?;
             for key in ["id", "createdAt", "updatedAt"] {
                 current.as_object_mut().unwrap().remove(key);

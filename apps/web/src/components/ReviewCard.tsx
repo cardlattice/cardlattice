@@ -6,7 +6,7 @@ import { Field } from "./Field";
 export type PendingContribution = {
   id: string;
   operation: string;
-  payload: { name: string; kind: string; source: { description: string; license: string } };
+  payload: { name: string; kind: string; source?: { description: string; license: string } | null };
   createdAt: string;
 };
 export function ReviewCard({
@@ -76,7 +76,7 @@ export function ReviewCard({
         {contribution.operation} · {contribution.payload.kind}
       </p>
       <h2>{contribution.payload.name}</h2>
-      <p>{contribution.payload.source.description}</p>
+      {contribution.payload.source && <p>{contribution.payload.source.description}</p>}
       <details>
         <summary>Inspect complete draft & source</summary>
         <pre className="code-block">

@@ -145,7 +145,7 @@ export interface Draft {
   setId?: string | null;
   /** @nullable */
   slug?: string | null;
-  source: SourceInput;
+  source?: null | SourceInput;
   synthetic?: boolean;
 }
 
