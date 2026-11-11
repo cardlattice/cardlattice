@@ -134,6 +134,12 @@ Browser tests require `CONTRIBUTOR_TOKEN` and `MODERATOR_TOKEN`; use a disposabl
 development catalogue. They test the actual API, not mocked success responses.
 They also capture light/dark phone/tablet/desktop screenshots and run axe checks.
 
+CI runs `./scripts/browser-tests-ci.sh` on Linux with Docker. It uses the official
+Playwright image matching the installed SDK, with Chromium and system dependencies
+already included; CI does not install browser dependencies through Ubuntu apt.
+The test container shares the host network to reach the seeded API. Optional
+`API_PROXY_TARGET` and `WEB_TEST_ORIGIN` overrides are forwarded to it.
+
 `pnpm check` includes Oxfmt formatting, Oxlint with JSX accessibility and React
 Doctor rules, TypeScript, unit tests, and the production build. Lint warnings,
 unused lint suppressions, formatting differences, and Vite build warnings fail
