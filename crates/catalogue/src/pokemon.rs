@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 pub mod vocabulary;
 use vocabulary::{
-    AbilityKind, Category, Edition, EnergyType, Finish, RegulationMark, Stage, Subtype,
+    AbilityKind, Category, Edition, EnergyType, Finish, LegendPart, RegulationMark, Stage, Subtype,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -55,6 +55,10 @@ pub struct PokemonAttributes {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identity_group: Option<String>,
     pub hp: Option<u16>,
+    /// Numeric level printed on this card; LV.X is a separate mechanic.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(minimum = 1, maximum = 100)]
+    pub level: Option<u8>,
     /// Printed localised Pokédex flavour text, not an inferred species description.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flavour_text: Option<String>,
@@ -92,6 +96,7 @@ impl PokemonAttributes {
     pub fn validate(&self) -> Result<(), ValidationError> {
         let invalid = || ValidationError("Invalid typed Pokémon attributes".into());
         if self.hp.is_some_and(|v| v == 0 || v > 1000)
+            || self.level.is_some_and(|v| v == 0 || v > 100)
             || self
                 .types
                 .as_ref()
@@ -131,6 +136,7 @@ impl PokemonAttributes {
                 || self.retreat_cost.is_some()
                 || self.national_dex.is_some()
                 || self.species.is_some()
+                || self.level.is_some()
                 || self.height_metres.is_some()
                 || self.weight_kilograms.is_some())
         {
@@ -207,6 +213,14 @@ impl PokemonAttributes {
 #[derive(Debug, Default, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingMetadata {
+    /// Physical half; pair membership is represented by a shared collection.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub legend_part: Option<LegendPart>,
+    /// Derived from the source filename when collectorNumber is explicitly null.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unnumbered_key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub additional_numbers: Option<AdditionalNumbers>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub finishes: Option<Vec<Finish>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -252,6 +266,7 @@ impl PrintingMetadata {
                 .as_ref()
                 .is_some_and(|v| crate::parse_id(v).is_err())
             || self.printed_denominator.is_some_and(|v| v == 0 || v > 9999)
+            || self.additional_numbers.as_ref().is_some_and(|v| !v.valid())
             || self
                 .illustrators
                 .as_ref()
@@ -301,6 +316,25 @@ impl PrintingMetadata {
             }
         }
         Ok(())
+    }
+}
+
+/// Additional printed numbering never replaces the primary collector number.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdditionalNumbers {
+    #[schema(pattern = "^(0[1-9]|[12][0-9]|30)/30$")]
+    pub pikachu30th: String,
+}
+impl AdditionalNumbers {
+    fn valid(&self) -> bool {
+        let Some((number, denominator)) = self.pikachu30th.split_once('/') else {
+            return false;
+        };
+        denominator == "30"
+            && number.len() == 2
+            && number.bytes().all(|b| b.is_ascii_digit())
+            && number.parse::<u8>().is_ok_and(|v| (1..=30).contains(&v))
     }
 }
 
@@ -355,7 +389,7 @@ mod tests {
 
     #[test]
     fn localised_printed_pokedex_metadata_is_typed() {
-        let value = json!({"category":"pokemon", "flavourText":"Original synthetic flavour text.", "species":"Original synthetic species", "heightMetres":0.3, "weightKilograms":0.1});
+        let value = json!({"category":"pokemon", "level":12, "flavourText":"Original synthetic flavour text.", "species":"Original synthetic species", "heightMetres":0.3, "weightKilograms":0.1});
         let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
         attributes.validate().unwrap();
         assert_eq!(
@@ -363,6 +397,8 @@ mod tests {
             0.3
         );
         for patch in [
+            json!({"level":0}),
+            json!({"level":101}),
             json!({"heightMetres":-1}),
             json!({"weightKilograms":1000001}),
             json!({"species":" "}),
@@ -380,6 +416,31 @@ mod tests {
                     .validate()
                     .is_err()
             );
+        }
+    }
+
+    #[test]
+    fn additional_printed_numbering_is_scoped_and_bounded() {
+        for number in ["01/30", "09/30", "30/30"] {
+            let metadata: PrintingMetadata = serde_json::from_value(json!({
+                "additionalNumbers":{"pikachu30th":number}
+            }))
+            .unwrap();
+            metadata.validate().unwrap();
+        }
+        for number in ["00/30", "31/30", "1/30", "01/31", "+1/30", "０1/30"] {
+            let metadata: PrintingMetadata = serde_json::from_value(json!({
+                "additionalNumbers":{"pikachu30th":number}
+            }))
+            .unwrap();
+            assert!(metadata.validate().is_err());
+        }
+        for value in [
+            json!({}),
+            json!({"pikachu30th":9}),
+            json!({"pikachu": "01/30"}),
+        ] {
+            assert!(serde_json::from_value::<AdditionalNumbers>(value).is_err());
         }
     }
 

@@ -45,6 +45,8 @@ vocabulary! { Stage {
     Vmax => "VMAX",
     Vstar => "VSTAR",
     VUnion => "V-UNION",
+    LevelUp => "Level-Up",
+    Legend => "LEGEND",
 } }
 
 vocabulary! { Subtype {
@@ -62,6 +64,12 @@ vocabulary! { Subtype {
     Radiant => "Radiant",
     PrismStar => "Prism Star",
     UltraBeast => "Ultra Beast",
+    DeltaSpecies => "Delta Species",
+    LevelX => "LV.X",
+    Sp => "SP",
+    Legend => "LEGEND",
+    Dynamax => "Dynamax",
+    Gigantamax => "Gigantamax",
     SingleStrike => "Single Strike",
     RapidStrike => "Rapid Strike",
     FusionStrike => "Fusion Strike",
@@ -147,6 +155,12 @@ vocabulary! { AbilityKind {
     PokemonPower => "Pokémon Power",
     PokePower => "Poké-Power",
     PokeBody => "Poké-Body",
+    AncientTrait => "Ancient Trait",
+} }
+
+vocabulary! { LegendPart {
+    Top => "top",
+    Bottom => "bottom",
 } }
 
 vocabulary! { RegulationMark {
@@ -174,5 +188,6 @@ pub fn document() -> serde_json::Value {
         "edition": Edition::VALUES,
         "abilityKind": AbilityKind::VALUES,
         "regulationMark": RegulationMark::VALUES,
+        "legendPart": LegendPart::VALUES,
     })
 }

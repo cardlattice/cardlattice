@@ -38,9 +38,24 @@
           "Ability",
           "Pokémon Power",
           "Poké-Power",
-          "Poké-Body"
+          "Poké-Body",
+          "Ancient Trait"
         ],
         "type": "string"
+      },
+      "AdditionalNumbers": {
+        "additionalProperties": false,
+        "description": "Additional printed numbering never replaces the primary collector number.",
+        "properties": {
+          "pikachu30th": {
+            "pattern": "^(0[1-9]|[12][0-9]|30)/30$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pikachu30th"
+        ],
+        "type": "object"
       },
       "ArtworkMetadata": {
         "additionalProperties": false,
@@ -511,6 +526,13 @@
         ],
         "type": "string"
       },
+      "LegendPart": {
+        "enum": [
+          "top",
+          "bottom"
+        ],
+        "type": "string"
+      },
       "LocalisationView": {
         "properties": {
           "language": {
@@ -688,6 +710,16 @@
               "null"
             ]
           },
+          "level": {
+            "description": "Numeric level printed on this card; LV.X is a separate mechanic.",
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "nationalDex": {
             "items": {
               "format": "int32",
@@ -821,6 +853,16 @@
       "PrintingMetadata": {
         "additionalProperties": false,
         "properties": {
+          "additionalNumbers": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AdditionalNumbers"
+              }
+            ]
+          },
           "artwork": {
             "type": [
               "string",
@@ -852,6 +894,17 @@
             "type": [
               "array",
               "null"
+            ]
+          },
+          "legendPart": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LegendPart",
+                "description": "Physical half; pair membership is represented by a shared collection."
+              }
             ]
           },
           "printedDenominator": {
@@ -887,6 +940,13 @@
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "unnumberedKey": {
+            "description": "Derived from the source filename when collectorNumber is explicitly null.",
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -1147,7 +1207,9 @@
           "MEGA",
           "VMAX",
           "VSTAR",
-          "V-UNION"
+          "V-UNION",
+          "Level-Up",
+          "LEGEND"
         ],
         "type": "string"
       },
@@ -1298,6 +1360,12 @@
           "Radiant",
           "Prism Star",
           "Ultra Beast",
+          "Delta Species",
+          "LV.X",
+          "SP",
+          "LEGEND",
+          "Dynamax",
+          "Gigantamax",
           "Single Strike",
           "Rapid Strike",
           "Fusion Strike",

@@ -29,12 +29,21 @@ export const AbilityKind = {
   Pokémon_Power: 'Pokémon Power',
   'Poké-Power': 'Poké-Power',
   'Poké-Body': 'Poké-Body',
+  Ancient_Trait: 'Ancient Trait',
 } as const;
 
 export interface Ability {
   kind: AbilityKind;
   name: string;
   text: string;
+}
+
+/**
+ * Additional printed numbering never replaces the primary collector number.
+ */
+export interface AdditionalNumbers {
+  /** @pattern ^(0[1-9]|[12][0-9]|30)/30$ */
+  pikachu30th: string;
 }
 
 export interface ArtworkMetadata {
@@ -255,6 +264,14 @@ export interface ImageView {
   url: string;
 }
 
+export type LegendPart = typeof LegendPart[keyof typeof LegendPart];
+
+
+export const LegendPart = {
+  top: 'top',
+  bottom: 'bottom',
+} as const;
+
 export interface LocalisationView {
   language: string;
   name: string;
@@ -298,6 +315,8 @@ export const Stage = {
   VMAX: 'VMAX',
   VSTAR: 'VSTAR',
   'V-UNION': 'V-UNION',
+  'Level-Up': 'Level-Up',
+  LEGEND: 'LEGEND',
 } as const;
 
 export type Subtype = typeof Subtype[keyof typeof Subtype];
@@ -318,6 +337,12 @@ export const Subtype = {
   Radiant: 'Radiant',
   Prism_Star: 'Prism Star',
   Ultra_Beast: 'Ultra Beast',
+  Delta_Species: 'Delta Species',
+  LVX: 'LV.X',
+  SP: 'SP',
+  LEGEND: 'LEGEND',
+  Dynamax: 'Dynamax',
+  Gigantamax: 'Gigantamax',
   Single_Strike: 'Single Strike',
   Rapid_Strike: 'Rapid Strike',
   Fusion_Strike: 'Fusion Strike',
@@ -362,6 +387,13 @@ export interface PokemonAttributes {
      * @nullable
      */
   identityScope?: string | null;
+  /**
+     * Numeric level printed on this card; LV.X is a separate mechanic.
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  level?: number | null;
   /**
      * @nullable
      * @items.minimum 0
@@ -438,6 +470,7 @@ export const RegulationMark = {
 } as const;
 
 export interface PrintingMetadata {
+  additionalNumbers?: null | AdditionalNumbers;
   /** @nullable */
   artwork?: string | null;
   /** @nullable */
@@ -446,6 +479,7 @@ export interface PrintingMetadata {
   finishes?: Finish[] | null;
   /** @nullable */
   illustrators?: string[] | null;
+  legendPart?: null | LegendPart;
   /**
      * @minimum 0
      * @nullable
@@ -456,6 +490,11 @@ export interface PrintingMetadata {
   regulationMark?: null | RegulationMark;
   /** @nullable */
   stamps?: string[] | null;
+  /**
+     * Derived from the source filename when collectorNumber is explicitly null.
+     * @nullable
+     */
+  unnumberedKey?: string | null;
   /** @nullable */
   variants?: PrintingMetadataVariants;
 }

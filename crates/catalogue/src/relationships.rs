@@ -39,8 +39,11 @@ impl PrintedIdentifier {
                     || (v.code.is_none() && v.symbol.is_none())
                     || v.code.as_ref().is_some_and(|c| {
                         c.is_empty()
+                            || c != c.trim()
                             || c.len() > 30
-                            || !c.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+                            || !c.bytes().all(|b| {
+                                b.is_ascii_alphanumeric() || matches!(b, b'-' | b'+' | b' ')
+                            })
                     })
                     || v.symbol.as_ref().is_some_and(|s| !text(s, 200))
                     || values[..i]
@@ -152,4 +155,27 @@ fn printing_references(metadata: &crate::pokemon::PrintingMetadata) -> Vec<(Stri
         }
     }
     refs
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn printed_codes_preserve_literal_plus_and_interior_space() {
+        let check = |code: &str| {
+            PrintedIdentifier::validate_all(&[PrintedIdentifier {
+                language: "ja".into(),
+                region: Some("JP".into()),
+                code: Some(code.into()),
+                symbol: None,
+            }])
+        };
+        for code in ["SM4+", "SM-P", "30th C"] {
+            assert!(check(code).is_ok());
+        }
+        for code in ["", " SM4+", "30th C ", "SM4/1", "30th\tC", "30th\nC"] {
+            assert!(check(code).is_err());
+        }
+    }
 }
