@@ -75,3 +75,10 @@ breaking changes in a minor release.
 Capabilities are deliberately simple in this initial release. Do not expose a
 shared moderator capability publicly or embed it in a built website. A deployed
 project needs a published maintainer contact and clear role-issuance policy.
+
+Use Conventional Commits for every commit message and PR title:
+`feat(data): add Japanese cards`, `fix(api): correct pagination`, or
+`ci: enforce PR conventions`. Allowed types are `build`, `chore`, `ci`, `docs`,
+`feat`, `fix`, `perf`, `refactor`, `revert`, `style`, and `test`; a scope and
+breaking-change `!` are optional. Merge commits also need a conventional subject.
+The required checks rerun when a PR is renamed and validate every commit in it.
