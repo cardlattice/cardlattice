@@ -82,6 +82,7 @@ vocabulary! { Subtype {
     Supporter => "Supporter",
     Stadium => "Stadium",
     PokemonTool => "Pokémon Tool",
+    PokemonToolF => "Pokémon Tool F",
     AceSpec => "ACE SPEC",
     BasicEnergy => "Basic Energy",
     SpecialEnergy => "Special Energy",
@@ -106,6 +107,7 @@ vocabulary! { Rarity {
     PrintedCHR => "CHR",
     PrintedBWR => "BWR",
     PrintedMUR => "MUR",
+    PrintedK => "K",
     PrintedCircle => "●",
     PrintedDiamond => "◆",
     PrintedStar => "★",
@@ -143,9 +145,11 @@ vocabulary! { Edition {
 impl Subtype {
     pub fn allowed_for(self, category: Category) -> bool {
         match self {
-            Self::Item | Self::Supporter | Self::Stadium | Self::PokemonTool => {
-                category == Category::Trainer
-            }
+            Self::Item
+            | Self::Supporter
+            | Self::Stadium
+            | Self::PokemonTool
+            | Self::PokemonToolF => category == Category::Trainer,
             Self::AceSpec => matches!(category, Category::Trainer | Category::Energy),
             Self::TagTeam => matches!(category, Category::Pokemon | Category::Trainer),
             Self::BasicEnergy | Self::SpecialEnergy => category == Category::Energy,
