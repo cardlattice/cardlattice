@@ -84,12 +84,18 @@ impl PokemonAttributes {
         {
             return Err(invalid());
         }
+        // Fossil Items are Trainers with printed HP and, sometimes, Abilities.
+        let trainer_pokemon = self.category == Some(Category::Trainer)
+            && self.hp.is_some()
+            && self
+                .subtypes
+                .as_ref()
+                .is_some_and(|v| v.contains(&Subtype::Item));
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
-            && (self.hp.is_some()
+            && ((!trainer_pokemon && (self.hp.is_some() || self.abilities.is_some()))
                 || self.stage.is_some()
                 || self.evolves_from.is_some()
                 || self.attacks.is_some()
-                || self.abilities.is_some()
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
@@ -235,6 +241,27 @@ impl PrintingMetadata {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn fossil_items_accept_printed_hp_and_abilities_without_relaxing_other_categories() {
+        let fossil = json!({"category":"trainer","subtypes":["Item"],"hp":60,"abilities":[{"name":"Domed Armor","kind":"Ability","text":"This Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance)."}]});
+        let attributes: PokemonAttributes = serde_json::from_value(fossil.clone()).unwrap();
+        attributes.validate().unwrap();
+        for patch in [
+            json!({"category":"energy"}),
+            json!({"subtypes":["Supporter"]}),
+            json!({"hp":null}),
+            json!({"attacks":[]}),
+            json!({"stage":"Basic"}),
+        ] {
+            let mut invalid = fossil.clone();
+            for (key, value) in patch.as_object().unwrap() {
+                invalid[key] = value.clone();
+            }
+            let attributes: PokemonAttributes = serde_json::from_value(invalid).unwrap();
+            assert!(attributes.validate().is_err());
+        }
+    }
 
     #[test]
     fn enum_spellings_are_strict_at_deserialization() {
