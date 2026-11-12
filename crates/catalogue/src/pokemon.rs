@@ -508,6 +508,7 @@ mod tests {
     fn historical_printed_values_and_category_compatibility() {
         for value in [
             json!({"category":"trainer", "hp":10}),
+            json!({"category":"trainer", "subtypes":["Supporter", "TAG TEAM"]}),
             json!({"category":"pokemon", "attacks":[{"name":"Super Fang", "cost":[], "damage":"?"}], "weaknesses":[{"type":"Fighting"}]}),
             json!({"category":"energy", "subtypes":["Special Energy", "ACE SPEC"]}),
         ] {
@@ -520,6 +521,7 @@ mod tests {
             json!({"category":"pokemon", "subtypes":["Item"]}),
             json!({"category":"trainer", "subtypes":["ex"]}),
             json!({"category":"energy", "subtypes":["Supporter"]}),
+            json!({"category":"energy", "subtypes":["TAG TEAM"]}),
         ] {
             assert!(
                 serde_json::from_value::<PokemonAttributes>(value)

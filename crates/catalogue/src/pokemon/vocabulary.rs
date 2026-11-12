@@ -146,6 +146,7 @@ impl Subtype {
                 category == Category::Trainer
             }
             Self::AceSpec => matches!(category, Category::Trainer | Category::Energy),
+            Self::TagTeam => matches!(category, Category::Pokemon | Category::Trainer),
             Self::BasicEnergy | Self::SpecialEnergy => category == Category::Energy,
             Self::PrismStar
             | Self::SingleStrike
