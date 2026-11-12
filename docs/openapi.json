@@ -980,7 +980,14 @@
             ]
           },
           "finish": {
-            "$ref": "#/components/schemas/Finish"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Finish"
+              }
+            ]
           },
           "products": {
             "items": {
@@ -1001,9 +1008,6 @@
             ]
           }
         },
-        "required": [
-          "finish"
-        ],
         "type": "object"
       },
       "Rarity": {
@@ -1026,6 +1030,8 @@
           "●",
           "◆",
           "★",
+          "★ (silver)",
+          "★ (gold)",
           "★★",
           "★★★",
           "Common",
@@ -1368,6 +1374,7 @@
           "Dynamax",
           "Gigantamax",
           "Eternamax",
+          "Gold Star",
           "Single Strike",
           "Rapid Strike",
           "Fusion Strike",

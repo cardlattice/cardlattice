@@ -309,8 +309,10 @@ impl PrintingMetadata {
                     return Err(ValidationError("Duplicate variant combination".into()));
                 }
                 seen.push(comparison);
-                if !finishes.contains(&variant.finish) {
-                    finishes.push(variant.finish);
+                if let Some(finish) = variant.finish
+                    && !finishes.contains(&finish)
+                {
+                    finishes.push(finish);
                 }
             }
             if self.finishes.as_ref().is_some_and(|v| {
@@ -348,7 +350,8 @@ impl AdditionalNumbers {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingVariant {
-    pub finish: Finish,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub finish: Option<Finish>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub edition: Option<Edition>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -358,6 +361,15 @@ pub struct PrintingVariant {
 }
 impl PrintingVariant {
     fn validate(&self) -> Result<(), ValidationError> {
+        if self.finish.is_none()
+            && self.edition.is_none()
+            && self.stamps.as_ref().is_none_or(Vec::is_empty)
+            && self.products.as_ref().is_none_or(Vec::is_empty)
+        {
+            return Err(ValidationError(
+                "A variant needs an observed finish, edition, stamp or product".into(),
+            ));
+        }
         PrintingMetadata {
             stamps: self.stamps.clone(),
             products: self.products.clone(),
@@ -371,6 +383,23 @@ impl PrintingVariant {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn observed_editions_do_not_require_guessed_finishes() {
+        let value = json!({"variants":{"first-edition":{"edition":"first-edition"}}});
+        let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        for invalid in [
+            json!({"variants":{"unknown":{}}}),
+            json!({"variants":{"unknown":{"stamps":[],"products":[]}}}),
+            json!({"variants":{"first":{"edition":"first-edition"},"duplicate":{"edition":"first-edition"}}}),
+            json!({"finishes":["holo"],"variants":{"first":{"edition":"first-edition"}}}),
+        ] {
+            let metadata: PrintingMetadata = serde_json::from_value(invalid).unwrap();
+            assert!(metadata.validate().is_err());
+        }
+    }
 
     #[test]
     fn technical_machine_tools_accept_attacks_without_pokemon_only_stats() {

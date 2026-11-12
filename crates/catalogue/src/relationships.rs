@@ -42,7 +42,7 @@ impl PrintedIdentifier {
                             || c != c.trim()
                             || c.len() > 30
                             || !c.bytes().all(|b| {
-                                b.is_ascii_alphanumeric() || matches!(b, b'-' | b'+' | b' ')
+                                b.is_ascii_alphanumeric() || matches!(b, b'-' | b'+' | b'.' | b' ')
                             })
                     })
                     || v.symbol.as_ref().is_some_and(|s| !text(s, 200))
@@ -162,7 +162,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn printed_codes_preserve_literal_plus_and_interior_space() {
+    fn printed_codes_preserve_literal_punctuation_and_interior_space() {
         let check = |code: &str| {
             PrintedIdentifier::validate_all(&[PrintedIdentifier {
                 language: "ja".into(),
@@ -171,7 +171,7 @@ mod tests {
                 symbol: None,
             }])
         };
-        for code in ["SM4+", "SM-P", "30th C"] {
+        for code in ["SM4+", "SM-P", "30th C", "CSM1.5C"] {
             assert!(check(code).is_ok());
         }
         for code in ["", " SM4+", "30th C ", "SM4/1", "30th\tC", "30th\nC"] {

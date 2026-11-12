@@ -344,6 +344,7 @@ export const Subtype = {
   Dynamax: 'Dynamax',
   Gigantamax: 'Gigantamax',
   Eternamax: 'Eternamax',
+  Gold_Star: 'Gold Star',
   Single_Strike: 'Single Strike',
   Rapid_Strike: 'Rapid Strike',
   Fusion_Strike: 'Fusion Strike',
@@ -442,7 +443,7 @@ export interface PrintedIdentifier {
  */
 export interface PrintingVariant {
   edition?: null | Edition;
-  finish: Finish;
+  finish?: null | Finish;
   /** @nullable */
   products?: string[] | null;
   /** @nullable */
@@ -522,6 +523,8 @@ export const Rarity = {
   '●': '●',
   '◆': '◆',
   '★': '★',
+  '★_(silver)': '★ (silver)',
+  '★_(gold)': '★ (gold)',
   '★★': '★★',
   '★★★': '★★★',
   Common: 'Common',

@@ -728,6 +728,28 @@ fn source_tree_variants_validate_combinations_and_references() {
     write(source.path(), "pokemon/products/box.yaml", "name: Box\n");
     bundle.records = ingestion::source_tree::load(source.path()).unwrap();
     bundle.validate().unwrap();
+    write(
+        source.path(),
+        card,
+        "name: Prism Seed\nvariants: {first: {edition: first-edition}}\n",
+    );
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    bundle.validate().unwrap();
+    let printing = bundle
+        .records
+        .iter()
+        .find(|record| record.draft.kind == catalogue::Kind::Printing)
+        .unwrap();
+    assert_eq!(
+        printing.draft.attributes["variants"]["first"]["edition"],
+        "first-edition"
+    );
+    assert!(
+        printing.draft.attributes["variants"]["first"]
+            .get("finish")
+            .is_none()
+    );
+    assert!(printing.draft.attributes.get("finishes").is_none());
     for fields in [
         "finishes: [non-holo]\nvariants: {first: {finish: holo}}",
         "variants: {first: {finish: holo}, duplicate: {finish: holo}}",
