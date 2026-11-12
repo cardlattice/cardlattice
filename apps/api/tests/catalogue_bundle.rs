@@ -70,7 +70,7 @@ async fn indexing_is_atomic_idempotent_and_detects_local_conflicts(pool: PgPool)
         .iter_mut()
         .find(|r| r.draft.kind == catalogue::Kind::Printing)
         .unwrap();
-    printing.draft.attributes = serde_json::json!({"finishes": ["holo"], "stamps": ["laboratory-anniversary"], "printedTotal": 128});
+    printing.draft.attributes = serde_json::json!({"finishes": ["holo"], "stamps": ["laboratory-anniversary"], "printedDenominator": 128});
     let printing_id = printing.id.clone();
     let dry = bundle::index(&pool, &bundle, false).await.unwrap();
     assert_eq!(dry.inserted, bundle.records.len());
@@ -290,7 +290,7 @@ fn source_tree_rejects_mistakes_with_file_diagnostics() {
     write(
         source.path(),
         "pokemon/cards/laboratory/en/US/002.yaml",
-        "name: Another\ncollectorNumber: '001'\nidentity: card-pokemon-laboratory-en-US-001\n",
+        "name: Another\ncollectorNumber: '001'\n",
     );
     let mut duplicate = Bundle {
         records: ingestion::source_tree::load(source.path()).unwrap(),
@@ -310,7 +310,7 @@ fn source_tree_supports_reviewed_reprints() {
     write(
         source.path(),
         "pokemon/identities/prism.yaml",
-        "name: Prism Seed\nattributes:\n  category: pokemon\n  hp: 70\n  types: [Lightning]\n",
+        "localisations:\n  en:\n    name: Prism Seed\n    pokemon:\n      category: pokemon\n      hp: 70\n      types: [Lightning]\n",
     );
     write(
         source.path(),
@@ -405,11 +405,10 @@ fn source_tree_preserves_gameplay_and_resolves_printing_defaults() {
         source.path(),
         "pokemon/sets/laboratory.yaml",
         r#"name: Laboratory
-defaults:
-  stamps: [laboratory-anniversary]
-  regulationMark: J
-  printedTotal: 128
-  finishes: [holo]
+stamps: [laboratory-anniversary]
+regulationMark: J
+printedDenominator: 128
+finishes: [holo]
 "#,
     );
     write(
@@ -466,7 +465,7 @@ pokemon:
         serde_json::json!(["non-holo", "reverse-holo"])
     );
     assert_eq!(printing.attributes["regulationMark"], "J");
-    assert_eq!(printing.attributes["printedTotal"], 128);
+    assert_eq!(printing.attributes["printedDenominator"], 128);
     let inherited = &records
         .iter()
         .find(|r| r.id == "pokemon-laboratory-en-US-002")
@@ -496,9 +495,8 @@ fn source_tree_rejects_invalid_rules_and_printing_metadata() {
     for fields in [
         "finishes: [shiny]",
         "finishes: [holo, holo]",
-        "finishes: []",
         "regulationMark: JJ",
-        "printedTotal: 0",
+        "printedDenominator: 0",
         "pokemon: {hp: 0}",
         "pokemon: {category: trainer, attacks: []}",
         "pokemon: {attacks: [{name: Hit, cost: [Electric]}]}",
@@ -574,4 +572,260 @@ fn source_tree_enum_validation_cannot_be_bypassed_by_attribute_locations() {
             .to_string();
         assert!(error.contains(path), "{fields}: {error}");
     }
+}
+
+#[test]
+fn source_tree_inheritance_distinguishes_missing_cleared_and_empty() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/sets/laboratory.yaml",
+        "name: Laboratory\nprintedDenominator: 100\nregulationMark: J\nfinishes: [holo]\nstamps: [anniversary]\nreleaseDate: 2026-01-01\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/release.yaml",
+        "printedDenominator: 101\nfinishes: [non-holo]\nreleaseDate: 2026-02-01\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\nprintedDenominator: null\nregulationMark: null\nstamps: []\nreleaseDate: null\n",
+    );
+    let bundle = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..input()
+    };
+    bundle.validate().unwrap();
+    let printing = &bundle
+        .records
+        .iter()
+        .find(|r| r.draft.kind == catalogue::Kind::Printing)
+        .unwrap()
+        .draft;
+    assert!(printing.release_date.is_none());
+    assert_eq!(
+        printing.attributes["finishes"],
+        serde_json::json!(["non-holo"])
+    );
+    assert_eq!(printing.attributes["stamps"], serde_json::json!([]));
+    assert_eq!(
+        printing.attributes.get("printedDenominator"),
+        Some(&serde_json::Value::Null)
+    );
+    assert_eq!(
+        printing.attributes.get("regulationMark"),
+        Some(&serde_json::Value::Null)
+    );
+    assert!(
+        !printing
+            .attributes
+            .as_object()
+            .unwrap()
+            .contains_key("illustrators")
+    );
+    let card = &bundle
+        .records
+        .iter()
+        .find(|r| r.draft.kind == catalogue::Kind::Card)
+        .unwrap()
+        .draft;
+    assert!(card.attributes.get("types").is_none());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\npokemon: {types: []}\n",
+    );
+    let records = ingestion::source_tree::load(source.path()).unwrap();
+    let printing = &records
+        .iter()
+        .find(|r| r.draft.kind == catalogue::Kind::Printing)
+        .unwrap()
+        .draft;
+    assert_eq!(printing.attributes["printedDenominator"], 101);
+    assert_eq!(printing.release_date.unwrap().to_string(), "2026-02-01");
+    let card = &records
+        .iter()
+        .find(|r| r.draft.kind == catalogue::Kind::Card)
+        .unwrap()
+        .draft;
+    assert_eq!(card.attributes["types"], serde_json::json!([]));
+}
+
+#[test]
+fn source_tree_shared_identity_requires_each_printing_language() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/identities/prism.yaml",
+        "localisations:\n  en:\n    name: Prism\n    pokemon: {category: pokemon, attacks: [{name: Rest, cost: []}]}\n  nl:\n    name: Prism\n    pokemon: {category: pokemon, attacks: [{name: Rust, cost: []}]}\n",
+    );
+    for language in ["en", "nl"] {
+        write(
+            source.path(),
+            &format!("pokemon/cards/laboratory/{language}/US/001.yaml"),
+            "name: Prism\nidentity: pokemon-card-prism\n",
+        );
+    }
+    let bundle = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..input()
+    };
+    bundle.validate().unwrap();
+    for (language, attack) in [("en", "Rest"), ("nl", "Rust")] {
+        let card = bundle
+            .records
+            .iter()
+            .find(|r| r.id == format!("pokemon-card-prism-{language}"))
+            .unwrap();
+        assert_eq!(card.draft.attributes["identityGroup"], "pokemon-card-prism");
+        assert_eq!(card.draft.attributes["attacks"][0]["name"], attack);
+        let printing = bundle
+            .records
+            .iter()
+            .find(|r| r.id == format!("pokemon-laboratory-{language}-US-001"))
+            .unwrap();
+        assert_eq!(printing.draft.card_id.as_deref(), Some(card.id.as_str()));
+    }
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/fr/US/001.yaml",
+        "name: Prism\nidentity: pokemon-card-prism\n",
+    );
+    assert!(
+        ingestion::source_tree::load(source.path())
+            .unwrap_err()
+            .to_string()
+            .contains("Missing identity localisation")
+    );
+}
+
+#[test]
+fn source_tree_variants_validate_combinations_and_references() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    let card = "pokemon/cards/laboratory/en/US/001.yaml";
+    write(
+        source.path(),
+        card,
+        "name: Prism Seed\nfinishes: [holo]\nvariants:\n  first-edition:\n    finish: holo\n    edition: first-edition\n    products: [pokemon-product-box]\n",
+    );
+    let mut bundle = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..input()
+    };
+    assert!(bundle.validate().is_err());
+    write(source.path(), "pokemon/products/box.yaml", "name: Box\n");
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    bundle.validate().unwrap();
+    for fields in [
+        "finishes: [non-holo]\nvariants: {first: {finish: holo}}",
+        "variants: {first: {finish: holo}, duplicate: {finish: holo}}",
+        "variants: {first: {finish: holo, edition: First}}",
+        "variants: {first: {finish: holo, id: first}}",
+        "finishes: null",
+    ] {
+        write(
+            source.path(),
+            card,
+            &format!("name: Prism Seed\n{fields}\n"),
+        );
+        assert!(
+            ingestion::source_tree::load(source.path()).is_err(),
+            "{fields}"
+        );
+    }
+}
+
+#[sqlx::test(migrations = "../../migrations")]
+async fn indexing_preserves_clearing_and_indexes_variant_products(pool: PgPool) {
+    let source = tempfile::tempdir().unwrap();
+    let mut bundle = source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/sets/laboratory.yaml",
+        "name: Laboratory\nproducts: [pokemon-product-box]\nartwork: null\n",
+    );
+    write(source.path(), "pokemon/products/box.yaml", "name: Box\n");
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\nartwork: null\nproducts: []\nvariants: {first: {finish: holo, edition: first-edition, products: [pokemon-product-box]}}\n",
+    );
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    bundle::index(&pool, &bundle, true).await.unwrap();
+    let count: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM catalogue_links WHERE target_id='pokemon-product-box'",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(count, 2); // Set plus the printing's explicit variant.
+    let attrs: serde_json::Value =
+        sqlx::query_scalar("SELECT attributes FROM catalogue_records WHERE kind='printing'")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert_eq!(attrs.get("artwork"), Some(&serde_json::Value::Null));
+    assert_eq!(attrs["products"], serde_json::json!([]));
+}
+
+#[sqlx::test(migrations = false)]
+async fn migration_preserves_existing_catalogue_rows(pool: PgPool) {
+    // Exercise an upgrade with real rows, not only empty-database migrations.
+    for migration in sqlx::migrate!("../../migrations")
+        .iter()
+        .filter(|m| m.version < 8)
+    {
+        sqlx::raw_sql(migration.sql.clone())
+            .execute(&pool)
+            .await
+            .unwrap();
+    }
+    let mut bundle = input();
+    bundle::index(&pool, &bundle, true).await.unwrap();
+    let card = bundle
+        .records
+        .iter_mut()
+        .find(|r| r.draft.kind == catalogue::Kind::Card)
+        .unwrap();
+    let new_key = card.draft.duplicate_key();
+    sqlx::raw_sql(include_str!(
+        "../../../migrations/0008_printing_metadata.sql"
+    ))
+    .execute(&pool)
+    .await
+    .unwrap();
+    let actual: String =
+        sqlx::query_scalar("SELECT duplicate_key FROM catalogue_records WHERE id=$1")
+            .bind(&card.id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert_eq!(actual, new_key);
+}
+
+#[test]
+fn shared_identity_localisations_with_identical_text_are_distinct() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/identities/prism.yaml",
+        "localisations:\n  en:\n    name: Prism\n    pokemon: {category: pokemon, hp: 60}\n  nl:\n    name: Prism\n    pokemon: {category: pokemon, hp: 60}\n",
+    );
+    let bundle = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..input()
+    };
+    bundle.validate().unwrap();
+    let keys: std::collections::HashSet<_> = bundle
+        .records
+        .iter()
+        .filter(|r| r.draft.attributes.get("identityGroup").is_some())
+        .map(|r| r.draft.duplicate_key())
+        .collect();
+    assert_eq!(keys.len(), 2);
 }

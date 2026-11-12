@@ -80,14 +80,13 @@ retreat cost, rules, subtypes and optional Trainer affiliations. Damage strings
 preserve modifiers such as `20×`. Missing values remain unknown; explicit empty
 lists mean none.
 
-Set `defaults` supply shared printing details (finishes, stamps, regulation mark,
-printed denominator and illustrators). Explicit card fields replace defaults;
-`stamps: []` clears an inherited stamp. The compiler materialises these fields in
-printing `attributes`, which the existing API and indexer preserve. No new SQL
-migration is needed. This does not populate the separate printing-variant table
-or create finish/stamp cross-products. Product membership, variant-specific images
-and supplementary localisations still need a separate data model. Private submissions, scans, moderation
-credentials and audit identities are never exported into the data repository.
+Set-wide printing details are top-level YAML fields. The precedence is card >
+release > set. Missing fields inherit, null clears a scalar, and [] clears a list.
+The compiler preserves presence in printing JSON attributes; it does not fill
+unknown lists with empty arrays. `printedDenominator` is the printed collector
+number denominator, never a measured catalogue count. Regional dates belong in
+release.yaml. Unsupported authoring aliases (defaults, attributes,
+printingAttributes and printedTotal) are rejected. No compatibility aliases exist.
 
 The deployment trigger and R2 publishing credentials are operator configuration;
 repository CI does not deploy to the running local catalogue. The existing
@@ -147,3 +146,32 @@ open these records and submit corrections through the existing moderation flow.
 
 Run `cargo test -p cardlattice-api --test relationships` with a disposable
 PostgreSQL database to verify the graph, indexing, queries, retirement and outbox.
+
+## Schema audit format
+
+All authored record kinds have JSON Schemas in the data repository, sharing a
+common vocabulary. PR schema checks read changed files; compilation checks the
+complete relationship graph. Language tags use the canonical subset language,
+optional script and optional region (en, en-US, zh-Hant, es-419). Regions are
+uppercase two-letter codes; the directory token global compiles to no region.
+
+Reviewed identity files contain localisations keyed by language, each with name
+and typed pokemon fields. Printings resolve to an explicitly supplied matching
+localisation; there is no fallback translation. Compiled card records link via
+identityGroup and include the language in duplicate detection. Generated identity
+metadata is not accepted in authored YAML.
+
+Optional named variants describe actual finish/edition/stamp/product combinations.
+Each map entry requires finish, optionally edition (first-edition or unlimited),
+stamps and products. Normal cards still use a finishes array. Set/release variant
+inheritance replaces the whole map; null clears it. If finishes is also present,
+it must agree with the variants. Product filters include nested variant products.
+Migration 0008 handles explicit null artwork and indexes set and variant links.
+
+Historical Trainer HP does not require a retroactive Item subtype. Printed damage
+can be ?, and weakness/resistance may contain only a type where no modifier is
+printed. Category/subtype compatibility is validated alongside canonical enums.
+
+Deploy the application/compiler PR before merging the coordinated data PR, which
+pins its compiler commit in builder-ref.txt. Old authored aliases are deliberately
+unsupported. Rebuild/reindex the data artifact; do not edit immutable old snapshots.

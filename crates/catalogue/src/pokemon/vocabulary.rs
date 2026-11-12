@@ -99,6 +99,30 @@ vocabulary! { Finish {
     ReverseHolo => "reverse-holo",
 } }
 
+vocabulary! { Edition {
+    FirstEdition => "first-edition",
+    Unlimited => "unlimited",
+} }
+
+impl Subtype {
+    pub fn allowed_for(self, category: Category) -> bool {
+        match self {
+            Self::Item | Self::Supporter | Self::Stadium | Self::PokemonTool => {
+                category == Category::Trainer
+            }
+            Self::AceSpec => matches!(category, Category::Trainer | Category::Energy),
+            Self::BasicEnergy | Self::SpecialEnergy => category == Category::Energy,
+            Self::PrismStar
+            | Self::SingleStrike
+            | Self::RapidStrike
+            | Self::FusionStrike
+            | Self::Ancient
+            | Self::Future => true,
+            _ => category == Category::Pokemon,
+        }
+    }
+}
+
 vocabulary! { AbilityKind {
     Ability => "Ability",
     PokemonPower => "Pokémon Power",
@@ -128,6 +152,7 @@ pub fn document() -> serde_json::Value {
         "subtype": Subtype::VALUES,
         "rarity": Rarity::VALUES,
         "finish": Finish::VALUES,
+        "edition": Edition::VALUES,
         "abilityKind": AbilityKind::VALUES,
         "regulationMark": RegulationMark::VALUES,
     })

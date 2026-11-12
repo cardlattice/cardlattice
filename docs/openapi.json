@@ -383,6 +383,13 @@
         ],
         "type": "object"
       },
+      "Edition": {
+        "enum": [
+          "first-edition",
+          "unlimited"
+        ],
+        "type": "string"
+      },
       "EnergyType": {
         "enum": [
           "Grass",
@@ -653,6 +660,13 @@
               "null"
             ]
           },
+          "identityGroup": {
+            "description": "Reviewed identity shared by localised rules records.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "identityScope": {
             "description": "Provisional identity bounded to a printing until shared rules identity is reviewed.",
             "type": [
@@ -729,7 +743,10 @@
             "items": {
               "$ref": "#/components/schemas/EnergyType"
             },
-            "type": "array"
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "weaknesses": {
             "items": {
@@ -810,7 +827,7 @@
               "null"
             ]
           },
-          "printedTotal": {
+          "printedDenominator": {
             "format": "int32",
             "minimum": 0,
             "type": [
@@ -845,8 +862,61 @@
               "array",
               "null"
             ]
+          },
+          "variants": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PrintingVariant"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": [
+              "object",
+              "null"
+            ]
           }
         },
+        "type": "object"
+      },
+      "PrintingVariant": {
+        "additionalProperties": false,
+        "description": "Each entry is an observed combination; never infer an edition × finish cross product.",
+        "properties": {
+          "edition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Edition"
+              }
+            ]
+          },
+          "finish": {
+            "$ref": "#/components/schemas/Finish"
+          },
+          "products": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "stamps": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "finish"
+        ],
         "type": "object"
       },
       "Rarity": {
@@ -1204,12 +1274,14 @@
             "$ref": "#/components/schemas/EnergyType"
           },
           "value": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
-          "type",
-          "value"
+          "type"
         ],
         "type": "object"
       },

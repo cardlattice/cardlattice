@@ -82,6 +82,17 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
                     serde_json::from_value(value.clone()).map_err(invalid)?;
                 PrintedIdentifier::validate_all(&marks)?;
             }
+            if draft.game_id.as_deref() == Some("pokemon") {
+                let mut metadata = draft.attributes.clone();
+                metadata
+                    .as_object_mut()
+                    .unwrap()
+                    .remove("printedIdentifiers");
+                let metadata: crate::pokemon::PrintingMetadata =
+                    serde_json::from_value(metadata).map_err(invalid)?;
+                metadata.validate()?;
+                refs.extend(printing_references(&metadata));
+            }
         }
         Kind::Product | Kind::Collection => {
             let value: GroupMetadata =
@@ -109,27 +120,36 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
                 return Err(ValidationError("Invalid artwork metadata".into()));
             }
         }
-        Kind::Printing => {
-            for (field, kind) in [
-                ("products", Kind::Product),
-                ("collections", Kind::Collection),
-            ] {
-                if let Some(value) = draft.attributes.get(field) {
-                    let values: Vec<String> =
-                        serde_json::from_value(value.clone()).map_err(invalid)?;
-                    if !references_valid(&values) {
-                        return Err(ValidationError(format!("Invalid {field} references")));
-                    }
-                    refs.extend(values.into_iter().map(|id| (id, kind)));
-                }
-            }
-            if let Some(value) = draft.attributes.get("artwork") {
-                let id: String = serde_json::from_value(value.clone()).map_err(invalid)?;
-                parse_id(&id)?;
-                refs.push((id, Kind::Artwork));
-            }
+        Kind::Printing if draft.game_id.as_deref() == Some("pokemon") => {
+            let metadata: crate::pokemon::PrintingMetadata =
+                serde_json::from_value(draft.attributes.clone()).map_err(invalid)?;
+            metadata.validate()?;
+            refs.extend(printing_references(&metadata));
         }
         _ => {}
     }
     Ok(refs)
+}
+
+fn printing_references(metadata: &crate::pokemon::PrintingMetadata) -> Vec<(String, Kind)> {
+    let mut refs = Vec::new();
+    for (values, kind) in [
+        (&metadata.products, Kind::Product),
+        (&metadata.collections, Kind::Collection),
+    ] {
+        if let Some(values) = values {
+            refs.extend(values.iter().cloned().map(|id| (id, kind)));
+        }
+    }
+    if let Some(id) = &metadata.artwork {
+        refs.push((id.clone(), Kind::Artwork));
+    }
+    if let Some(variants) = &metadata.variants {
+        for variant in variants.values() {
+            if let Some(products) = &variant.products {
+                refs.extend(products.iter().cloned().map(|id| (id, Kind::Product)));
+            }
+        }
+    }
+    refs
 }

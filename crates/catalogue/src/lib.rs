@@ -185,7 +185,8 @@ impl Draft {
         {
             parse_id(id)?;
         }
-        if self.name.trim().is_empty()
+        if self.name != self.name.trim()
+            || self.name.trim().is_empty()
             || self.name.chars().count() > 200
             || self.name.chars().any(char::is_control)
         {
@@ -236,9 +237,16 @@ impl Draft {
         .into_iter()
         .flatten()
         {
-            if value.len() > 100 || value.chars().any(char::is_control) {
+            if value.trim().is_empty()
+                || value != value.trim()
+                || value.chars().count() > 100
+                || value.chars().any(char::is_control)
+            {
                 return fail("Metadata fields must be at most 100 bytes and printable");
             }
+        }
+        if self.region.as_ref().is_some_and(|r| !valid_region(r)) {
+            return fail("Use an uppercase two-letter region code");
         }
         if let Some(lang) = &self.language {
             validate_language(lang)?;
@@ -303,6 +311,14 @@ impl Draft {
                 self.region,
                 self.release_date
             ),
+            // Reviewed localisations may have identical names and rules text.
+            Kind::Card if self.attributes.get("identityGroup").is_some() => format!(
+                "localised-card:{:?}:{:?}:{}:{}",
+                self.game_id,
+                self.language,
+                normalize(&self.name),
+                self.attributes
+            ),
             Kind::Card => format!(
                 "card:{:?}:{}:{}",
                 self.game_id,
@@ -330,15 +346,30 @@ impl Draft {
     }
 }
 
+pub fn valid_region(region: &str) -> bool {
+    region.len() == 2 && region.bytes().all(|c| c.is_ascii_uppercase())
+}
+/// Supported canonical BCP 47 subset: language, optional script, optional region.
 pub fn validate_language(language: &str) -> Result<(), ValidationError> {
-    if language.len() < 2
-        || language.len() > 35
-        || !language.split('-').all(|part| {
-            !part.is_empty() && part.len() <= 8 && part.bytes().all(|b| b.is_ascii_alphanumeric())
+    let mut parts = language.split('-');
+    let primary = parts.next().unwrap_or("");
+    let mut rest: Vec<_> = parts.collect();
+    if rest.first().is_some_and(|s| {
+        s.len() == 4
+            && s.as_bytes()[0].is_ascii_uppercase()
+            && s.bytes().skip(1).all(|b| b.is_ascii_lowercase())
+    }) {
+        rest.remove(0);
+    }
+    if !(2..=3).contains(&primary.len())
+        || !primary.bytes().all(|b| b.is_ascii_lowercase())
+        || rest.len() > 1
+        || rest.first().is_some_and(|s| {
+            !valid_region(s) && !(s.len() == 3 && s.bytes().all(|b| b.is_ascii_digit()))
         })
     {
         return Err(ValidationError(
-            "Use a BCP 47 language tag, such as en or ja".into(),
+            "Use a canonical language tag such as en, en-US or zh-Hant".into(),
         ));
     }
     Ok(())

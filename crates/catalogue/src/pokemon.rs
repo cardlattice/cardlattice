@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub mod vocabulary;
-use vocabulary::{AbilityKind, Category, EnergyType, Finish, RegulationMark, Stage, Subtype};
+use vocabulary::{
+    AbilityKind, Category, Edition, EnergyType, Finish, RegulationMark, Stage, Subtype,
+};
 
 fn text(value: &str, max: usize) -> bool {
     !value.trim().is_empty() && value == value.trim() && value.chars().count() <= max
@@ -39,7 +41,8 @@ pub struct Ability {
 pub struct TypeModifier {
     #[serde(rename = "type")]
     pub energy_type: EnergyType,
-    pub value: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -48,9 +51,12 @@ pub struct PokemonAttributes {
     pub category: Option<Category>,
     /// Provisional identity bounded to a printing until shared rules identity is reviewed.
     pub identity_scope: Option<String>,
+    /// Reviewed identity shared by localised rules records.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub identity_group: Option<String>,
     pub hp: Option<u16>,
-    #[serde(default)]
-    pub types: Vec<EnergyType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub types: Option<Vec<EnergyType>>,
     pub stage: Option<Stage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evolves_from: Option<String>,
@@ -77,10 +83,19 @@ impl PokemonAttributes {
     pub fn validate(&self) -> Result<(), ValidationError> {
         let invalid = || ValidationError("Invalid typed Pokémon attributes".into());
         if self.hp.is_some_and(|v| v == 0 || v > 1000)
-            || self.types.len() > 4
-            || !unique(&self.types)
+            || self
+                .types
+                .as_ref()
+                .is_some_and(|v| v.len() > 4 || !unique(v))
             || self.evolves_from.as_ref().is_some_and(|v| !text(v, 200))
             || self.retreat_cost.is_some_and(|v| v > 10)
+        {
+            return Err(invalid());
+        }
+        if let (Some(category), Some(subtypes)) = (self.category, &self.subtypes)
+            && subtypes
+                .iter()
+                .any(|subtype| !subtype.allowed_for(category))
         {
             return Err(invalid());
         }
@@ -90,7 +105,7 @@ impl PokemonAttributes {
             && self
                 .subtypes
                 .as_ref()
-                .is_some_and(|v| v.contains(&Subtype::Item));
+                .is_none_or(|v| v.is_empty() || v == &[Subtype::Item]);
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
             && ((!trainer_pokemon && (self.hp.is_some() || self.abilities.is_some()))
                 || self.stage.is_some()
@@ -110,8 +125,11 @@ impl PokemonAttributes {
                         || attack.cost.len() > 10
                         || attack.text.as_ref().is_some_and(|v| !text(v, 2000))
                         || attack.damage.as_ref().is_some_and(|v| {
+                            if v == "?" {
+                                return false;
+                            }
                             let digits = v.trim_end_matches(['+', '×', '-']);
-                            v.len() > 12
+                            v.chars().count() > 12
                                 || digits.is_empty()
                                 || !digits.bytes().all(|b| b.is_ascii_digit())
                                 || v.chars().count() - digits.chars().count() > 1
@@ -131,10 +149,12 @@ impl PokemonAttributes {
         for modifiers in [&self.weaknesses, &self.resistances].into_iter().flatten() {
             if modifiers.len() > 4
                 || modifiers.iter().any(|v| {
-                    v.value.chars().count() > 8
-                        || !matches!(v.value.chars().next(), Some('×' | '+' | '-'))
-                        || v.value.chars().skip(1).count() == 0
-                        || !v.value.chars().skip(1).all(|c| c.is_ascii_digit())
+                    v.value.as_ref().is_some_and(|value| {
+                        value.chars().count() > 8
+                            || !matches!(value.chars().next(), Some('×' | '+' | '-'))
+                            || value.chars().skip(1).count() == 0
+                            || !value.chars().skip(1).all(|c| c.is_ascii_digit())
+                    })
                 })
             {
                 return Err(invalid());
@@ -176,7 +196,7 @@ pub struct PrintingMetadata {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub regulation_mark: Option<RegulationMark>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub printed_total: Option<u16>,
+    pub printed_denominator: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub illustrators: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -185,13 +205,15 @@ pub struct PrintingMetadata {
     pub collections: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub artwork: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub variants: Option<std::collections::BTreeMap<String, PrintingVariant>>,
 }
 impl PrintingMetadata {
     pub fn validate(&self) -> Result<(), ValidationError> {
         if self
             .finishes
             .as_ref()
-            .is_some_and(|v| v.is_empty() || v.len() > 3 || !unique(v))
+            .is_some_and(|v| v.len() > 3 || !unique(v))
             || self.stamps.as_ref().is_some_and(|v| {
                 v.len() > 10
                     || !unique(v)
@@ -211,29 +233,79 @@ impl PrintingMetadata {
                 .artwork
                 .as_ref()
                 .is_some_and(|v| crate::parse_id(v).is_err())
-            || self.printed_total.is_some_and(|v| v == 0 || v > 9999)
-            || self.illustrators.as_ref().is_some_and(|v| {
-                v.is_empty() || v.len() > 10 || !unique(v) || v.iter().any(|s| !text(s, 200))
-            })
+            || self.printed_denominator.is_some_and(|v| v == 0 || v > 9999)
+            || self
+                .illustrators
+                .as_ref()
+                .is_some_and(|v| v.len() > 10 || !unique(v) || v.iter().any(|s| !text(s, 200)))
         {
             return Err(ValidationError(
                 "Invalid printing finishes, stamps or printed details".into(),
             ));
         }
+        if let Some(variants) = &self.variants {
+            if variants.is_empty() || variants.len() > 50 {
+                return Err(ValidationError("Expected 1–50 explicit variants".into()));
+            }
+            let mut seen = Vec::new();
+            let mut finishes = Vec::new();
+            for (key, variant) in variants {
+                if key.is_empty()
+                    || key.len() > 100
+                    || !key
+                        .bytes()
+                        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
+                {
+                    return Err(ValidationError("Invalid variant key".into()));
+                }
+                variant.validate()?;
+                let mut comparison = variant.clone();
+                for values in [&mut comparison.stamps, &mut comparison.products]
+                    .into_iter()
+                    .flatten()
+                {
+                    values.sort();
+                }
+                if seen.contains(&comparison) {
+                    return Err(ValidationError("Duplicate variant combination".into()));
+                }
+                seen.push(comparison);
+                if !finishes.contains(&variant.finish) {
+                    finishes.push(variant.finish);
+                }
+            }
+            if self.finishes.as_ref().is_some_and(|v| {
+                v.len() != finishes.len() || v.iter().any(|f| !finishes.contains(f))
+            }) {
+                return Err(ValidationError(
+                    "finishes must match explicit variant finishes".into(),
+                ));
+            }
+        }
         Ok(())
     }
-    /// A supplied list replaces the default; [] explicitly clears inherited stamps.
-    pub fn inherit(self, defaults: &Self) -> Self {
-        Self {
-            finishes: self.finishes.or_else(|| defaults.finishes.clone()),
-            stamps: self.stamps.or_else(|| defaults.stamps.clone()),
-            regulation_mark: self.regulation_mark.or(defaults.regulation_mark),
-            printed_total: self.printed_total.or(defaults.printed_total),
-            illustrators: self.illustrators.or_else(|| defaults.illustrators.clone()),
-            products: self.products.or_else(|| defaults.products.clone()),
-            collections: self.collections.or_else(|| defaults.collections.clone()),
-            artwork: self.artwork.or_else(|| defaults.artwork.clone()),
+}
+
+/// Each entry is an observed combination; never infer an edition × finish cross product.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PrintingVariant {
+    pub finish: Finish,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edition: Option<Edition>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stamps: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub products: Option<Vec<String>>,
+}
+impl PrintingVariant {
+    fn validate(&self) -> Result<(), ValidationError> {
+        PrintingMetadata {
+            stamps: self.stamps.clone(),
+            products: self.products.clone(),
+            ..Default::default()
         }
+        .validate()
     }
 }
 
@@ -260,6 +332,32 @@ mod tests {
             }
             let attributes: PokemonAttributes = serde_json::from_value(invalid).unwrap();
             assert!(attributes.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn historical_printed_values_and_category_compatibility() {
+        for value in [
+            json!({"category":"trainer", "hp":10}),
+            json!({"category":"pokemon", "attacks":[{"name":"Super Fang", "cost":[], "damage":"?"}], "weaknesses":[{"type":"Fighting"}]}),
+            json!({"category":"energy", "subtypes":["Special Energy", "ACE SPEC"]}),
+        ] {
+            serde_json::from_value::<PokemonAttributes>(value)
+                .unwrap()
+                .validate()
+                .unwrap();
+        }
+        for value in [
+            json!({"category":"pokemon", "subtypes":["Item"]}),
+            json!({"category":"trainer", "subtypes":["ex"]}),
+            json!({"category":"energy", "subtypes":["Supporter"]}),
+        ] {
+            assert!(
+                serde_json::from_value::<PokemonAttributes>(value)
+                    .unwrap()
+                    .validate()
+                    .is_err()
+            );
         }
     }
 

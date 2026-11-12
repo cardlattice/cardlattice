@@ -22,7 +22,7 @@ test("products, collections and artwork retain independently browsable printings
             cardId: "pokemon-card-prism-seed-synthetic",
             collectorNumber: `REL-${stamp}`,
             language: "en",
-            region: "test",
+            region: "US",
             attributes: {
               products: [refs.product],
               collections: [refs.collection],

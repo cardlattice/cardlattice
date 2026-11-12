@@ -3,7 +3,7 @@ use crate::bundle::{Entry, Error, ExternalId};
 use catalogue::{Draft, Kind, pokemon::PrintingMetadata};
 use chrono::NaiveDate;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::{Map, Value, json};
 use std::{
     collections::{BTreeMap, HashSet},
     path::{Path, PathBuf},
@@ -17,13 +17,10 @@ struct RecordFile {
     region: Option<String>,
     release_date: Option<NaiveDate>,
     series: Option<String>,
-    defaults: Option<PrintingMetadata>,
     printed_identifiers: Option<Vec<catalogue::relationships::PrintedIdentifier>>,
     related_sets: Option<Vec<String>>,
     description: Option<String>,
     illustrators: Option<Vec<String>>,
-    #[serde(default = "object")]
-    attributes: Value,
     #[serde(default)]
     external_ids: Vec<ExternalId>,
 }
@@ -50,21 +47,59 @@ struct PrintingFile {
     collector_number: Option<String>,
     rarity: Option<String>,
     release_date: Option<NaiveDate>,
-    #[serde(default = "object")]
-    attributes: Value,
-    #[serde(default = "object")]
-    printing_attributes: Value,
     pokemon: Option<catalogue::PokemonAttributes>,
-    finishes: Option<Vec<catalogue::pokemon::vocabulary::Finish>>,
-    stamps: Option<Vec<String>>,
-    regulation_mark: Option<catalogue::pokemon::vocabulary::RegulationMark>,
-    printed_total: Option<u16>,
-    illustrators: Option<Vec<String>>,
-    products: Option<Vec<String>>,
-    collections: Option<Vec<String>>,
-    artwork: Option<String>,
     #[serde(default)]
     external_ids: Vec<ExternalId>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct IdentityFile {
+    localisations: BTreeMap<String, LocalisedIdentity>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LocalisedIdentity {
+    name: String,
+    pokemon: catalogue::PokemonAttributes,
+}
+const PRINTING_FIELDS: &[&str] = &[
+    "finishes",
+    "stamps",
+    "regulationMark",
+    "printedDenominator",
+    "illustrators",
+    "products",
+    "collections",
+    "artwork",
+    "variants",
+];
+/// Retain field presence, including explicit nulls, while still validating typed values.
+fn take_metadata(path: &Path, value: &mut Value) -> Result<Map<String, Value>, Error> {
+    let object = value
+        .as_object_mut()
+        .ok_or_else(|| invalid(path, "Expected an object"))?;
+    let mut fields = Map::new();
+    for key in PRINTING_FIELDS {
+        if let Some(value) = object.remove(*key) {
+            if value.is_null()
+                && matches!(
+                    *key,
+                    "finishes" | "stamps" | "illustrators" | "products" | "collections"
+                )
+            {
+                return Err(invalid(path, "Use [] to clear a list"));
+            }
+            fields.insert((*key).into(), value);
+        }
+    }
+    // A partial layer may inherit finishes, so check combinations after merging too.
+    let metadata: PrintingMetadata =
+        serde_json::from_value(Value::Object(fields.clone())).map_err(|e| invalid(path, e))?;
+    metadata.validate().map_err(|e| invalid(path, e))?;
+    Ok(fields)
+}
+fn typed<T: serde::de::DeserializeOwned>(path: &Path, value: Value) -> Result<T, Error> {
+    serde_json::from_value(value).map_err(|e| invalid(path, e))
 }
 fn object() -> Value {
     json!({})
@@ -90,7 +125,50 @@ fn decode<T: serde::de::DeserializeOwned>(path: &Path, bytes: &[u8]) -> Result<T
     // decoding permits number-to-string coercion, which would hide damaged identifiers.
     let value: Value =
         serde_saphyr::from_str_with_options(text, options).map_err(|e| invalid(path, e))?;
+    check_authored_values(path, &value, true)?;
     serde_json::from_value(value).map_err(|e| invalid(path, e))
+}
+fn check_authored_values(path: &Path, value: &Value, root: bool) -> Result<(), Error> {
+    match value {
+        Value::Object(fields) => {
+            for (key, value) in fields {
+                if matches!(key.as_str(), "identityScope" | "identityGroup") {
+                    return Err(invalid(
+                        path,
+                        "Identity grouping is generated, not authored",
+                    ));
+                }
+                if value.is_null()
+                    && root
+                    && matches!(
+                        key.as_str(),
+                        "releaseDate"
+                            | "rarity"
+                            | "printedDenominator"
+                            | "regulationMark"
+                            | "artwork"
+                            | "variants"
+                    )
+                {
+                    continue;
+                }
+                check_authored_values(path, value, false)?;
+            }
+        }
+        Value::Array(values) => {
+            for value in values {
+                check_authored_values(path, value, false)?;
+            }
+        }
+        Value::Null => {
+            return Err(invalid(
+                path,
+                "Omit unknown fields; only clearable printing scalars accept null",
+            ));
+        }
+        _ => {}
+    }
+    Ok(())
 }
 fn key(path: &Path, key: &str) -> Result<(), Error> {
     catalogue::parse_id(key).map_err(|e| invalid(path, e))?;
@@ -168,6 +246,7 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
     let mut sets = BTreeMap::new();
     let mut releases = BTreeMap::new();
     let mut printing_files = Vec::new();
+    let mut identities = HashSet::new();
     for (path, bytes) in &files {
         let parts: Vec<_> = path.iter().map(|s| s.to_str().unwrap_or("")).collect();
         for part in &parts {
@@ -203,18 +282,58 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
                     ),
                 )
             }
-            [game, "identities", file] => (
-                Kind::Card,
-                *game,
-                format!("{game}-card-{}", file.trim_end_matches(".yaml")),
-            ),
+            [game, "identities", file] => {
+                let identity: IdentityFile = decode(path, bytes)?;
+                if identity.localisations.is_empty() || identity.localisations.len() > 100 {
+                    return Err(invalid(path, "Expected 1–100 identity localisations"));
+                }
+                let group = format!("{game}-card-{}", file.trim_end_matches(".yaml"));
+                for (language, locale) in identity.localisations {
+                    catalogue::validate_language(&language).map_err(|e| invalid(path, e))?;
+                    let id = format!("{group}-{language}");
+                    let mut record = draft(Kind::Card, locale.name, Some(game));
+                    record.language = Some(language);
+                    let mut attributes = serde_json::to_value(locale.pokemon)?;
+                    let attrs = attributes.as_object_mut().unwrap();
+                    if attrs.get("identityScope").is_some_and(|v| !v.is_null())
+                        || attrs.contains_key("identityGroup")
+                    {
+                        return Err(invalid(path, "Identity grouping is generated"));
+                    }
+                    attrs.retain(|_, v| !v.is_null());
+                    attrs.insert("identityGroup".into(), json!(group));
+                    record.attributes = attributes;
+                    record.validate(Some(game)).map_err(|e| invalid(path, e))?;
+                    identities.insert(id.clone());
+                    records.push(Entry {
+                        id,
+                        draft: record,
+                        external_ids: vec![],
+                    });
+                }
+                continue;
+            }
             [game, "sets", file] => (
                 Kind::Set,
                 *game,
                 format!("{game}-{}", file.trim_end_matches(".yaml")),
             ),
             [_, "cards", _, _, _, "release.yaml"] => {
-                let release: ReleaseFile = decode(path, bytes)?;
+                let mut value: Value = decode(path, bytes)?;
+                let metadata = take_metadata(path, &mut value)?;
+                let date_present = value.get("releaseDate").is_some();
+                let release: ReleaseFile = typed(path, value)?;
+                if release.external_ids.len() > 50
+                    || release.external_ids.iter().any(|p| {
+                        p.namespace.trim().is_empty()
+                            || p.namespace != p.namespace.trim()
+                            || p.namespace.chars().count() > 100
+                            || p.prefix.chars().count() > 900
+                            || p.suffix.chars().count() > 100
+                    })
+                {
+                    return Err(invalid(path, "Invalid external identifier patterns"));
+                }
                 let mut namespaces = HashSet::new();
                 if release
                     .external_ids
@@ -226,7 +345,10 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
                         "Duplicate external identifier pattern namespace",
                     ));
                 }
-                releases.insert(path.parent().unwrap().to_path_buf(), release);
+                releases.insert(
+                    path.parent().unwrap().to_path_buf(),
+                    (release, metadata, date_present),
+                );
                 continue;
             }
             [_, "cards", _, _, _, _] => {
@@ -235,12 +357,21 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             }
             _ => return Err(invalid(path, "Unrecognised catalogue path")),
         };
-        let file: RecordFile = decode(path, bytes)?;
-        if file.defaults.is_some() && kind != Kind::Set {
-            return Err(invalid(path, "Printing defaults belong on set files only"));
+        let mut value: Value = decode(path, bytes)?;
+        let metadata = if kind == Kind::Set {
+            take_metadata(path, &mut value)?
+        } else {
+            Map::new()
+        };
+        let file: RecordFile = typed(path, value)?;
+        if kind == Kind::Game
+            && (file.language.is_some() || file.region.is_some() || file.release_date.is_some())
+        {
+            return Err(invalid(path, "Games do not have a release locale or date"));
         }
-        let defaults = file.defaults.unwrap_or_default();
-        defaults.validate().map_err(|e| invalid(path, e))?;
+        if file.series.is_some() && kind != Kind::Set {
+            return Err(invalid(path, "series belongs on sets"));
+        }
         let mut record = draft(kind, file.name, (kind != Kind::Game).then_some(game));
         if kind == Kind::Game {
             record.slug = Some(game.into());
@@ -249,7 +380,7 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         record.region = file.region;
         record.release_date = file.release_date;
         record.series_id = file.series;
-        record.attributes = file.attributes;
+        record.attributes = Value::Object(metadata.clone());
         let attributes = record
             .attributes
             .as_object_mut()
@@ -286,7 +417,7 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         }
         record.validate(Some(game)).map_err(|e| invalid(path, e))?;
         if kind == Kind::Set {
-            sets.insert(id.clone(), (record.release_date, defaults));
+            sets.insert(id.clone(), (record.release_date, metadata));
         }
         records.push(Entry {
             id,
@@ -306,10 +437,14 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             .get(&set)
             .ok_or_else(|| invalid(path, "Missing set file"))?;
         let release_path = path.parent().unwrap();
-        let defaults = ReleaseFile::default();
-        let release = releases.get(release_path).unwrap_or(&defaults);
+        let defaults = (ReleaseFile::default(), Map::new(), false);
+        let (release, release_metadata, release_date_present) =
+            releases.get(release_path).unwrap_or(&defaults);
         used_releases.insert(release_path.to_path_buf());
-        let mut file: PrintingFile = decode(path, &files[path])?;
+        let mut value: Value = decode(path, &files[path])?;
+        let metadata = take_metadata(path, &mut value)?;
+        let date_present = value.get("releaseDate").is_some();
+        let mut file: PrintingFile = typed(path, value)?;
         for pattern in &release.external_ids {
             if !file
                 .external_ids
@@ -327,38 +462,49 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
                 });
             }
         }
+        if file.identity.is_some() && file.pokemon.is_some() {
+            return Err(invalid(
+                path,
+                "Shared identity printings cannot override pokemon",
+            ));
+        }
+        let mut card_attributes = object();
         if let Some(pokemon) = file.pokemon.take() {
-            if game != "pokemon" || file.attributes != object() {
-                return Err(invalid(
-                    path,
-                    "pokemon requires the Pokémon game and cannot be mixed with attributes",
-                ));
+            if game != "pokemon" {
+                return Err(invalid(path, "pokemon requires the Pokémon game"));
             }
-            file.attributes = serde_json::to_value(pokemon)?;
-            file.attributes
+            card_attributes = serde_json::to_value(pokemon)?;
+            card_attributes
                 .as_object_mut()
                 .unwrap()
-                .retain(|_, value| !value.is_null());
+                .retain(|_, v| !v.is_null());
         }
         let id = format!("{set}-{language}-{region}-{number}");
         let card = if let Some(identity) = file.identity {
-            if file.attributes != object() {
+            if card_attributes != object() {
                 return Err(invalid(
                     path,
                     "Edit attributes on the referenced identity, not its printing",
                 ));
             }
-            identity
+            let localised = format!("{identity}-{language}");
+            if !identities.contains(&localised) {
+                return Err(invalid(
+                    path,
+                    "Missing identity localisation for printing language",
+                ));
+            }
+            localised
         } else {
             let card_id = format!("card-{id}");
             let mut card = draft(Kind::Card, file.name.clone(), Some(game));
             card.language = Some(language.into());
             card.region = (region != "global").then(|| region.into());
-            let mut attributes = file.attributes;
+            let mut attributes = card_attributes;
             let attrs = attributes
                 .as_object_mut()
                 .ok_or_else(|| invalid(path, "attributes must be an object"))?;
-            if attrs.contains_key("identityScope") {
+            if attrs.contains_key("identityScope") || attrs.contains_key("identityGroup") {
                 return Err(invalid(
                     path,
                     "identityScope is generated; use identity for a reviewed shared identity",
@@ -381,29 +527,19 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         record.language = Some(language.into());
         record.region = (region != "global").then(|| region.into());
         record.rarity = file.rarity;
-        record.release_date = file.release_date.or(release.release_date).or(*set_date);
-        let details = PrintingMetadata {
-            finishes: file.finishes,
-            stamps: file.stamps,
-            regulation_mark: file.regulation_mark,
-            printed_total: file.printed_total,
-            illustrators: file.illustrators,
-            products: file.products,
-            collections: file.collections,
-            artwork: file.artwork,
-        }
-        .inherit(set_defaults);
-        details.validate().map_err(|e| invalid(path, e))?;
-        record.attributes = file.printing_attributes;
-        let attributes = record
-            .attributes
-            .as_object_mut()
-            .ok_or_else(|| invalid(path, "printingAttributes must be an object"))?;
-        for (key, value) in serde_json::to_value(details)?.as_object().unwrap() {
-            if attributes.insert(key.clone(), value.clone()).is_some() {
-                return Err(invalid(path, format!("Duplicate printing field {key}")));
-            }
-        }
+        record.release_date = if date_present {
+            file.release_date
+        } else if *release_date_present {
+            release.release_date
+        } else {
+            *set_date
+        };
+        let mut details = set_defaults.clone();
+        details.extend(release_metadata.clone());
+        details.extend(metadata);
+        let typed_details: PrintingMetadata = typed(path, Value::Object(details.clone()))?;
+        typed_details.validate().map_err(|e| invalid(path, e))?;
+        record.attributes = Value::Object(details);
         record.validate(Some(game)).map_err(|e| invalid(path, e))?;
         records.push(Entry {
             id,
