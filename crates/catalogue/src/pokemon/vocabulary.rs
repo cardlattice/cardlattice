@@ -70,6 +70,7 @@ vocabulary! { Subtype {
     Legend => "LEGEND",
     Dynamax => "Dynamax",
     Gigantamax => "Gigantamax",
+    Eternamax => "Eternamax",
     SingleStrike => "Single Strike",
     RapidStrike => "Rapid Strike",
     FusionStrike => "Fusion Strike",

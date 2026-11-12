@@ -343,6 +343,7 @@ export const Subtype = {
   LEGEND: 'LEGEND',
   Dynamax: 'Dynamax',
   Gigantamax: 'Gigantamax',
+  Eternamax: 'Eternamax',
   Single_Strike: 'Single Strike',
   Rapid_Strike: 'Rapid Strike',
   Fusion_Strike: 'Fusion Strike',
