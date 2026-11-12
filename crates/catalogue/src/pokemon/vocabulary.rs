@@ -99,6 +99,7 @@ vocabulary! { Rarity {
     PrintedSSR => "SSR",
     PrintedPR => "PR",
     PrintedFUR => "FUR",
+    PrintedA => "A",
     PrintedCircle => "●",
     PrintedDiamond => "◆",
     PrintedStar => "★",

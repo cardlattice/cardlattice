@@ -517,6 +517,7 @@ export const Rarity = {
   SSR: 'SSR',
   PR: 'PR',
   FUR: 'FUR',
+  A: 'A',
   '●': '●',
   '◆': '◆',
   '★': '★',
