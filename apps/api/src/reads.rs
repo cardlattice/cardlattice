@@ -39,6 +39,9 @@ pub async fn catalogue(
             "series" => Some("series"),
             "sets" => Some("set"),
             "cards" => Some("card"),
+            "products" => Some("product"),
+            "collections" => Some("collection"),
+            "artworks" => Some("artwork"),
             "printings" => Some("printing"),
             _ => return Err(ApiError::not_found()),
         }
@@ -85,7 +88,7 @@ pub async fn catalogue(
         {
             record.name = name;
         }
-        let related=sqlx::query_as::<_,Record>("SELECT * FROM printings WHERE card_id=$1 OR set_id=$1 ORDER BY normalized_name,id LIMIT 20").bind(&id).fetch_all(&state.pool).await?;
+        let related=sqlx::query_as::<_,Record>("SELECT * FROM printings WHERE card_id=$1 OR set_id=$1 OR id IN (SELECT record_id FROM catalogue_links WHERE target_id=$1) ORDER BY normalized_name,id LIMIT 20").bind(&id).fetch_all(&state.pool).await?;
         let sources: Vec<SourceView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',s.id,'description',s.description,'referenceUrl',s.reference_url,'method',s.method,'license',s.license,'fields',jsonb_agg(p.field_path ORDER BY p.field_path)) FROM sources s JOIN provenance p ON p.source_id=s.id WHERE p.record_id=$1 GROUP BY s.id ORDER BY s.recorded_at LIMIT 100").bind(&id).fetch_all(&state.pool).await?)?;
         let images: Vec<ImageView> = typed_rows(sqlx::query_scalar("SELECT jsonb_build_object('id',i.id,'url',i.public_url,'side',i.side,'license',r.license,'attribution',r.attribution) FROM images i JOIN image_rights r ON r.id=i.rights_id WHERE printing_id=$1 ORDER BY i.id LIMIT 20").bind(&id).fetch_all(&state.pool).await?)?;
         let variants: Vec<VariantView> = typed_rows(sqlx::query_scalar("SELECT to_jsonb(v) FROM printing_variants v WHERE printing_id=$1 ORDER BY id LIMIT 100").bind(&id).fetch_all(&state.pool).await?)?;
@@ -98,6 +101,11 @@ pub async fn catalogue(
             Some("set") => Some(format!(
                 "/v1/games/{}/printings?setId={id}",
                 game_slug.unwrap_or_default()
+            )),
+            Some("product" | "collection" | "artwork") => Some(format!(
+                "/v1/games/{}/printings?{}Id={id}",
+                game_slug.unwrap_or_default(),
+                kind.unwrap()
             )),
             _ => None,
         };
@@ -140,6 +148,19 @@ pub async fn catalogue(
     if let Some(id) = &query.card_id {
         sql.push(" AND r.card_id=").push_bind(id);
     }
+    for (id, relation) in [
+        (&query.product_id, "products"),
+        (&query.collection_id, "collections"),
+        (&query.artwork_id, "artwork"),
+    ] {
+        if let Some(id) = id {
+            sql.push(" AND r.id IN (SELECT record_id FROM catalogue_links WHERE target_id=")
+                .push_bind(id)
+                .push(" AND relation=")
+                .push_bind(relation)
+                .push(")");
+        }
+    }
     if let Some(rarity) = &query.rarity {
         sql.push(" AND r.rarity=").push_bind(rarity);
     }
@@ -162,6 +183,7 @@ pub async fn catalogue(
                 .replace('_', "\\_")
         );
         sql.push(" AND (r.search_document @@ plainto_tsquery('simple',").push_bind(search.clone()).push(") OR r.normalized_name LIKE ").push_bind(like.clone())
+            .push(" OR (r.kind='set' AND to_tsvector('simple',COALESCE(r.attributes->'printedIdentifiers','[]')::text) @@ plainto_tsquery('simple',").push_bind(search.clone()).push("))")
             .push(" OR EXISTS(SELECT 1 FROM localisations sl WHERE sl.record_id=r.id AND (sl.search_document @@ plainto_tsquery('simple',").push_bind(search).push(") OR sl.normalized_name LIKE ").push_bind(like).push(")))");
     }
     if let Some(cursor) = cursor {

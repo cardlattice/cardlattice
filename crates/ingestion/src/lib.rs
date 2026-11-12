@@ -150,7 +150,15 @@ pub async fn revision_and_outbox(
     ];
     if let Some(game) = game {
         paths.push(format!("/v1/games/{game}"));
-        for collection in ["series", "sets", "cards", "printings"] {
+        for collection in [
+            "series",
+            "sets",
+            "cards",
+            "printings",
+            "products",
+            "collections",
+            "artworks",
+        ] {
             paths.push(format!("/v1/games/{game}/{collection}"));
         }
         let collection = match after["kind"].as_str() {
@@ -158,10 +166,34 @@ pub async fn revision_and_outbox(
             Some("printing") => "printings",
             Some("set") => "sets",
             Some("series") => "series",
+            Some("product") => "products",
+            Some("collection") => "collections",
+            Some("artwork") => "artworks",
             _ => "",
         };
         if !collection.is_empty() {
             paths.push(format!("/v1/games/{game}/{collection}/{id}"));
+        }
+        for value in std::iter::once(&after).chain(before.as_ref()) {
+            for (field, collection) in [
+                ("products", "products"),
+                ("collections", "collections"),
+                ("artwork", "artworks"),
+            ] {
+                let ids: Vec<&str> = if field == "artwork" {
+                    value["attributes"][field].as_str().into_iter().collect()
+                } else {
+                    value["attributes"][field]
+                        .as_array()
+                        .into_iter()
+                        .flatten()
+                        .filter_map(Value::as_str)
+                        .collect()
+                };
+                for parent in ids {
+                    paths.push(format!("/v1/games/{game}/{collection}/{parent}"));
+                }
+            }
         }
         for (field, collection) in [("card_id", "cards"), ("set_id", "sets")] {
             if let Some(parent) = after[field].as_str() {

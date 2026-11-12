@@ -115,3 +115,35 @@ the multi-game record's rarity field remains a string so other games can use the
 own taxonomy. Contribution submissions, YAML imports (including shared identities)
 and compiled bundle validation all use the same domain checks. Product stamp IDs,
 trainer affiliations, names and prose remain open-ended text.
+
+## Printing relationships
+
+Product, collection and artwork files are first-class records compiled with stable
+`<game>-product-<key>`, `<game>-collection-<key>` and `<game>-artwork-<key>` IDs.
+A printing's `products`, `collections` and `artwork` references are independent of
+its canonical set, collector number and shared rules identity. Product/collection
+`relatedSets` supplies context without implicitly including every set member.
+Artwork contains descriptive metadata, not image assets or publication rights.
+
+Set `printedIdentifiers` lists language/region-scoped printed codes and/or symbol
+descriptions. Codes are searchable; names and canonical IDs remain independent.
+Symbol images and membership of particular finish/stamp combinations are outside
+this change. Attacks remain inline: neither name nor era guarantees equal rules.
+
+Migration 0007 adds product/collection/artwork record kinds and `catalogue_links`.
+Database triggers maintain indexed links from typed JSON attributes. Deferred
+integrity checks reject missing, retired, wrong-kind or cross-game targets while
+allowing an authoritative transaction to update links and retire records together.
+The CI compiler validates the complete graph before producing a bundle. Schema
+checks in data PRs still inspect only changed YAML files, including new definitions.
+
+The public API exposes `/v1/games/{game}/products`, `/collections`, `/artworks`
+and their `/{id}` details using the existing pagination and caching contracts.
+Printing lists accept `productId`, `collectionId` and `artworkId` filters, which
+are included in cursor scope. Details include up to 20 related printings and a
+paginated URL. Link changes purge old and new target details; arbitrary filtered
+collections and search remain covered by their bounded TTLs. The web browser can
+open these records and submit corrections through the existing moderation flow.
+
+Run `cargo test -p cardlattice-api --test relationships` with a disposable
+PostgreSQL database to verify the graph, indexing, queries, retirement and outbox.

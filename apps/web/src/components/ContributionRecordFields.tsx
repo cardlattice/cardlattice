@@ -29,7 +29,16 @@ export function ContributionRecordFields({
                   disabled={!!original}
                   onChange={(event) => field.handleChange(event.target.value)}
                 >
-                  {["game", "series", "set", "card", "printing"].map((kind) => (
+                  {[
+                    "game",
+                    "series",
+                    "set",
+                    "card",
+                    "printing",
+                    "product",
+                    "collection",
+                    "artwork",
+                  ].map((kind) => (
                     <option key={kind} value={kind}>
                       {kind === "card" ? "Card identity" : kind[0].toUpperCase() + kind.slice(1)}
                     </option>

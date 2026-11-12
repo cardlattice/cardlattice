@@ -18,6 +18,10 @@ struct RecordFile {
     release_date: Option<NaiveDate>,
     series: Option<String>,
     defaults: Option<PrintingMetadata>,
+    printed_identifiers: Option<Vec<catalogue::relationships::PrintedIdentifier>>,
+    related_sets: Option<Vec<String>>,
+    description: Option<String>,
+    illustrators: Option<Vec<String>>,
     #[serde(default = "object")]
     attributes: Value,
     #[serde(default)]
@@ -56,6 +60,9 @@ struct PrintingFile {
     regulation_mark: Option<catalogue::pokemon::vocabulary::RegulationMark>,
     printed_total: Option<u16>,
     illustrators: Option<Vec<String>>,
+    products: Option<Vec<String>>,
+    collections: Option<Vec<String>>,
+    artwork: Option<String>,
     #[serde(default)]
     external_ids: Vec<ExternalId>,
 }
@@ -176,6 +183,26 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
                 *game,
                 format!("{game}-series-{}", file.trim_end_matches(".yaml")),
             ),
+            [
+                game,
+                directory @ ("products" | "collections" | "artworks"),
+                file,
+            ] => {
+                let kind = match *directory {
+                    "products" => Kind::Product,
+                    "collections" => Kind::Collection,
+                    _ => Kind::Artwork,
+                };
+                (
+                    kind,
+                    *game,
+                    format!(
+                        "{game}-{}-{}",
+                        kind.as_str(),
+                        file.trim_end_matches(".yaml")
+                    ),
+                )
+            }
             [game, "identities", file] => (
                 Kind::Card,
                 *game,
@@ -223,6 +250,40 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         record.release_date = file.release_date;
         record.series_id = file.series;
         record.attributes = file.attributes;
+        let attributes = record
+            .attributes
+            .as_object_mut()
+            .ok_or_else(|| invalid(path, "attributes must be an object"))?;
+        for (field, value, allowed) in [
+            (
+                "printedIdentifiers",
+                file.printed_identifiers
+                    .map(serde_json::to_value)
+                    .transpose()?,
+                kind == Kind::Set,
+            ),
+            (
+                "relatedSets",
+                file.related_sets.map(serde_json::to_value).transpose()?,
+                matches!(kind, Kind::Product | Kind::Collection),
+            ),
+            (
+                "description",
+                file.description.map(Value::String),
+                matches!(kind, Kind::Product | Kind::Collection | Kind::Artwork),
+            ),
+            (
+                "illustrators",
+                file.illustrators.map(serde_json::to_value).transpose()?,
+                kind == Kind::Artwork,
+            ),
+        ] {
+            if let Some(value) = value
+                && (!allowed || attributes.insert(field.into(), value).is_some())
+            {
+                return Err(invalid(path, format!("Misplaced or duplicate {field}")));
+            }
+        }
         record.validate(Some(game)).map_err(|e| invalid(path, e))?;
         if kind == Kind::Set {
             sets.insert(id.clone(), (record.release_date, defaults));
@@ -327,6 +388,9 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             regulation_mark: file.regulation_mark,
             printed_total: file.printed_total,
             illustrators: file.illustrators,
+            products: file.products,
+            collections: file.collections,
+            artwork: file.artwork,
         }
         .inherit(set_defaults);
         details.validate().map_err(|e| invalid(path, e))?;

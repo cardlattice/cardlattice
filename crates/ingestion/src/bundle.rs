@@ -132,8 +132,9 @@ fn rank(kind: Kind) -> u8 {
         Kind::Game => 0,
         Kind::Series => 1,
         Kind::Set => 2,
-        Kind::Card => 3,
-        Kind::Printing => 4,
+        Kind::Product | Kind::Collection | Kind::Artwork => 3,
+        Kind::Card => 4,
+        Kind::Printing => 5,
     }
 }
 fn hash(bytes: &[u8]) -> String {
@@ -198,6 +199,17 @@ impl Bundle {
                     {
                         return Err(invalid("Wrong parent kind or game"));
                     }
+                }
+            }
+            for (id, kind) in catalogue::relationships::references(draft)? {
+                let target = entries.get(&id).ok_or_else(|| {
+                    invalid(&format!("{}: missing relationship target {id}", entry.id))
+                })?;
+                if target.draft.kind != kind || target.draft.game_id != draft.game_id {
+                    return Err(invalid(&format!(
+                        "{}: wrong relationship kind or game for {id}",
+                        entry.id
+                    )));
                 }
             }
             for id in &entry.external_ids {
@@ -404,7 +416,7 @@ pub async fn index(pool: &PgPool, bundle: &Bundle, apply: bool) -> Result<Summar
         }
         sqlx::query("INSERT INTO catalogue_index_records(record_id,indexed_record,source_commit) SELECT id,to_jsonb(r)-'search_document',$2 FROM catalogue_records r WHERE id=$1 ON CONFLICT(record_id) DO UPDATE SET indexed_record=EXCLUDED.indexed_record,source_commit=EXCLUDED.source_commit").bind(&entry.id).bind(&bundle.source_commit).execute(&mut *tx).await?;
     }
-    let retired: Vec<(String,Value,Value)> = sqlx::query_as("SELECT r.id,to_jsonb(r)-'search_document',i.indexed_record FROM catalogue_index_records i JOIN catalogue_records r ON r.id=i.record_id WHERE NOT(r.id=ANY($1)) AND r.deleted_at IS NULL ORDER BY CASE r.kind WHEN 'printing' THEN 0 WHEN 'card' THEN 1 WHEN 'set' THEN 2 WHEN 'series' THEN 3 ELSE 4 END,r.id").bind(&ids).fetch_all(&mut *tx).await?;
+    let retired: Vec<(String,Value,Value)> = sqlx::query_as("SELECT r.id,to_jsonb(r)-'search_document',i.indexed_record FROM catalogue_index_records i JOIN catalogue_records r ON r.id=i.record_id WHERE NOT(r.id=ANY($1)) AND r.deleted_at IS NULL ORDER BY CASE r.kind WHEN 'printing' THEN 0 WHEN 'card' THEN 1 WHEN 'product' THEN 2 WHEN 'collection' THEN 2 WHEN 'artwork' THEN 2 WHEN 'set' THEN 3 WHEN 'series' THEN 4 ELSE 5 END,r.id").bind(&ids).fetch_all(&mut *tx).await?;
     for (id, before, saved) in retired {
         if before != saved {
             return Err(invalid(

@@ -61,6 +61,12 @@ pub fn router(state: AppState) -> Router {
         .route("/v1/games/{game}/cards/{id}", get(reads::catalogue))
         .route("/v1/games/{game}/printings", get(reads::catalogue))
         .route("/v1/games/{game}/printings/{id}", get(reads::catalogue))
+        .route("/v1/games/{game}/products", get(reads::catalogue))
+        .route("/v1/games/{game}/products/{id}", get(reads::catalogue))
+        .route("/v1/games/{game}/collections", get(reads::catalogue))
+        .route("/v1/games/{game}/collections/{id}", get(reads::catalogue))
+        .route("/v1/games/{game}/artworks", get(reads::catalogue))
+        .route("/v1/games/{game}/artworks/{id}", get(reads::catalogue))
         .route("/v1/search", get(reads::catalogue))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
@@ -130,7 +136,18 @@ async fn canonical_query(State(state): State<AppState>, request: Request, next: 
         let mut parameters = BTreeMap::new();
         for (key, value) in url::form_urlencoded::parse(raw.as_bytes()) {
             if ![
-                "limit", "cursor", "q", "language", "sort", "setId", "cardId", "rarity", "game",
+                "limit",
+                "cursor",
+                "q",
+                "language",
+                "sort",
+                "setId",
+                "cardId",
+                "rarity",
+                "game",
+                "productId",
+                "collectionId",
+                "artworkId",
             ]
             .contains(&key.as_ref())
                 || parameters.contains_key(key.as_ref())

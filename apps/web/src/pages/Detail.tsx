@@ -108,13 +108,13 @@ export function Detail() {
                 )}
               </section>
             </div>
-            {["card", "set"].includes(record.kind) && (
+            {["card", "set", "product", "collection", "artwork"].includes(record.kind) && (
               <section className="section">
                 <div className="section-heading">
                   <h2>Related printings</h2>
                   <Link
                     to={`/games/${game}/printings`}
-                    search={record.kind === "set" ? { setId: record.id } : { cardId: record.id }}
+                    search={{ [`${record.kind}Id`]: record.id }}
                     className="text-link"
                   >
                     Browse printings →
