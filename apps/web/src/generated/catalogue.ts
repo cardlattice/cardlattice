@@ -210,6 +210,14 @@ export interface Draft {
   synthetic?: boolean;
 }
 
+export type Edition = typeof Edition[keyof typeof Edition];
+
+
+export const Edition = {
+  'first-edition': 'first-edition',
+  unlimited: 'unlimited',
+} as const;
+
 export interface ErrorDetail {
   code: string;
   message: string;
@@ -273,7 +281,8 @@ export interface Page {
 
 export interface TypeModifier {
   type: EnergyType;
-  value: string;
+  /** @nullable */
+  value?: string | null;
 }
 
 export type Stage = typeof Stage[keyof typeof Stage];
@@ -337,6 +346,11 @@ export interface PokemonAttributes {
      */
   hp?: number | null;
   /**
+     * Reviewed identity shared by localised rules records.
+     * @nullable
+     */
+  identityGroup?: string | null;
+  /**
      * Provisional identity bounded to a printing until shared rules identity is reviewed.
      * @nullable
      */
@@ -360,7 +374,8 @@ export interface PokemonAttributes {
   subtypes?: Subtype[] | null;
   /** @nullable */
   trainers?: string[] | null;
-  types?: EnergyType[];
+  /** @nullable */
+  types?: EnergyType[] | null;
   /** @nullable */
   weaknesses?: TypeModifier[] | null;
 }
@@ -377,6 +392,23 @@ export interface PrintedIdentifier {
      */
   symbol?: string | null;
 }
+
+/**
+ * Each entry is an observed combination; never infer an edition × finish cross product.
+ */
+export interface PrintingVariant {
+  edition?: null | Edition;
+  finish: Finish;
+  /** @nullable */
+  products?: string[] | null;
+  /** @nullable */
+  stamps?: string[] | null;
+}
+
+/**
+ * @nullable
+ */
+export type PrintingMetadataVariants = {[key: string]: PrintingVariant} | null;
 
 export type RegulationMark = typeof RegulationMark[keyof typeof RegulationMark];
 
@@ -407,12 +439,14 @@ export interface PrintingMetadata {
      * @minimum 0
      * @nullable
      */
-  printedTotal?: number | null;
+  printedDenominator?: number | null;
   /** @nullable */
   products?: string[] | null;
   regulationMark?: null | RegulationMark;
   /** @nullable */
   stamps?: string[] | null;
+  /** @nullable */
+  variants?: PrintingMetadataVariants;
 }
 
 export type Rarity = typeof Rarity[keyof typeof Rarity];

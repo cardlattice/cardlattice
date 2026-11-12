@@ -114,7 +114,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
     assert_eq!(ingestion::seed(&pool, FIXTURES).await.unwrap(), 0);
 
     sqlx::query("UPDATE catalogue_records SET attributes=$1 WHERE id=$2")
-        .bind(json!({"independentlyRecorded":true}))
+        .bind(json!({"printedDenominator":128}))
         .bind(&set_id)
         .execute(&pool)
         .await
@@ -133,7 +133,7 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
         .await
         .unwrap();
     assert_eq!(actual.0, set_id);
-    assert_eq!(actual.1, json!({"independentlyRecorded":true}));
+    assert_eq!(actual.1, json!({"printedDenominator":128}));
 
     let directory = tempfile::tempdir().unwrap();
     let config = publishing::PublishingConfig {

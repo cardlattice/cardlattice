@@ -212,11 +212,16 @@ impl Bundle {
                     )));
                 }
             }
+            if entry.external_ids.len() > 50 {
+                return Err(invalid("At most 50 external identifiers"));
+            }
             for id in &entry.external_ids {
-                if id.namespace.is_empty()
-                    || id.namespace.len() > 100
+                if id.namespace.trim().is_empty()
+                    || id.namespace != id.namespace.trim()
+                    || id.value != id.value.trim()
+                    || id.namespace.chars().count() > 100
                     || id.value.is_empty()
-                    || id.value.len() > 1000
+                    || id.value.chars().count() > 1000
                     || !external.insert((&id.namespace, &id.value))
                 {
                     return Err(invalid("Invalid or duplicate external identifier"));

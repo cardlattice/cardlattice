@@ -110,7 +110,7 @@
       "setId": "pokemon-set-lattice-laboratory-synthetic",
       "collectorNumber": "LAB-001",
       "language": "en",
-      "region": "test",
+      "region": "US",
       "rarity": "Common"
     }
   },
@@ -132,7 +132,7 @@
       "setId": "pokemon-set-lattice-laboratory-synthetic",
       "collectorNumber": "LAB-002",
       "language": "en",
-      "region": "test",
+      "region": "US",
       "rarity": "Common"
     }
   }
