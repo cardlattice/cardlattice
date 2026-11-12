@@ -175,3 +175,14 @@ printed. Category/subtype compatibility is validated alongside canonical enums.
 Deploy the application/compiler PR before merging the coordinated data PR, which
 pins its compiler commit in builder-ref.txt. Old authored aliases are deliberately
 unsupported. Rebuild/reindex the data artifact; do not edit immutable old snapshots.
+
+A locale's `release.yaml` may supply `name` for its native printed set name.
+The compiler keeps the canonical set name and adds scoped `releaseNames` entries
+(`language`, `region`, `name`) to the compiled set attributes. This avoids repeating
+translated set names on every printing. These names are preserved metadata; the
+API's existing `localisations` table is separate from this scoped release list.
+
+`vUnionPart` records a physical V-UNION quadrant: `top-left`, `top-right`,
+`bottom-left`, or `bottom-right`. Link the four printings through a collection,
+and record only the fields printed on each piece. `legendPart` remains the
+separate two-half LEGEND layout.

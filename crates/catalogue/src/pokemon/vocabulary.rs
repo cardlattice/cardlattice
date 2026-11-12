@@ -45,6 +45,8 @@ vocabulary! { Stage {
     Vmax => "VMAX",
     Vstar => "VSTAR",
     VUnion => "V-UNION",
+    LevelUp => "Level-Up",
+    Legend => "LEGEND",
 } }
 
 vocabulary! { Subtype {
@@ -62,6 +64,15 @@ vocabulary! { Subtype {
     Radiant => "Radiant",
     PrismStar => "Prism Star",
     UltraBeast => "Ultra Beast",
+    DeltaSpecies => "Delta Species",
+    LevelX => "LV.X",
+    Sp => "SP",
+    Legend => "LEGEND",
+    Dynamax => "Dynamax",
+    Gigantamax => "Gigantamax",
+    Eternamax => "Eternamax",
+    GoldStar => "Gold Star",
+    Shining => "Shining",
     SingleStrike => "Single Strike",
     RapidStrike => "Rapid Strike",
     FusionStrike => "Fusion Strike",
@@ -71,12 +82,41 @@ vocabulary! { Subtype {
     Supporter => "Supporter",
     Stadium => "Stadium",
     PokemonTool => "Pokémon Tool",
+    PokemonToolF => "Pokémon Tool F",
     AceSpec => "ACE SPEC",
     BasicEnergy => "Basic Energy",
     SpecialEnergy => "Special Energy",
 } }
 
 vocabulary! { Rarity {
+    PrintedC => "C",
+    PrintedU => "U",
+    PrintedR => "R",
+    PrintedRR => "RR",
+    PrintedSR => "SR",
+    PrintedAR => "AR",
+    PrintedSAR => "SAR",
+    PrintedRRR => "RRR",
+    PrintedHR => "HR",
+    PrintedUR => "UR",
+    PrintedS => "S",
+    PrintedSSR => "SSR",
+    PrintedPR => "PR",
+    PrintedFUR => "FUR",
+    PrintedA => "A",
+    PrintedCHR => "CHR",
+    PrintedCSR => "CSR",
+    PrintedBWR => "BWR",
+    PrintedMUR => "MUR",
+    PrintedK => "K",
+    PrintedCircle => "●",
+    PrintedDiamond => "◆",
+    PrintedStar => "★",
+    PrintedSilverStar => "★ (silver)",
+    PrintedGoldStar => "★ (gold)",
+    PrintedTwoStars => "★★",
+    PrintedThreeStars => "★★★",
+    PrintedShining => "Shining",
     Common => "Common",
     Uncommon => "Uncommon",
     Rare => "Rare",
@@ -107,10 +147,13 @@ vocabulary! { Edition {
 impl Subtype {
     pub fn allowed_for(self, category: Category) -> bool {
         match self {
-            Self::Item | Self::Supporter | Self::Stadium | Self::PokemonTool => {
-                category == Category::Trainer
-            }
+            Self::Item
+            | Self::Supporter
+            | Self::Stadium
+            | Self::PokemonTool
+            | Self::PokemonToolF => category == Category::Trainer,
             Self::AceSpec => matches!(category, Category::Trainer | Category::Energy),
+            Self::TagTeam => matches!(category, Category::Pokemon | Category::Trainer),
             Self::BasicEnergy | Self::SpecialEnergy => category == Category::Energy,
             Self::PrismStar
             | Self::SingleStrike
@@ -128,6 +171,27 @@ vocabulary! { AbilityKind {
     PokemonPower => "Pokémon Power",
     PokePower => "Poké-Power",
     PokeBody => "Poké-Body",
+    AncientTrait => "Ancient Trait",
+} }
+
+vocabulary! { CostModifier {
+    Plus => "+",
+} }
+
+vocabulary! { Power {
+    Vstar => "VSTAR",
+} }
+
+vocabulary! { VUnionPart {
+    TopLeft => "top-left",
+    TopRight => "top-right",
+    BottomLeft => "bottom-left",
+    BottomRight => "bottom-right",
+} }
+
+vocabulary! { LegendPart {
+    Top => "top",
+    Bottom => "bottom",
 } }
 
 vocabulary! { RegulationMark {
@@ -154,6 +218,10 @@ pub fn document() -> serde_json::Value {
         "finish": Finish::VALUES,
         "edition": Edition::VALUES,
         "abilityKind": AbilityKind::VALUES,
+        "power": Power::VALUES,
+        "costModifier": CostModifier::VALUES,
         "regulationMark": RegulationMark::VALUES,
+        "legendPart": LegendPart::VALUES,
+        "vUnionPart": VUnionPart::VALUES,
     })
 }

@@ -39,8 +39,11 @@ impl PrintedIdentifier {
                     || (v.code.is_none() && v.symbol.is_none())
                     || v.code.as_ref().is_some_and(|c| {
                         c.is_empty()
+                            || c != c.trim()
                             || c.len() > 30
-                            || !c.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+                            || !c.bytes().all(|b| {
+                                b.is_ascii_alphanumeric() || matches!(b, b'-' | b'+' | b'.' | b' ')
+                            })
                     })
                     || v.symbol.as_ref().is_some_and(|s| !text(s, 200))
                     || values[..i]
@@ -51,6 +54,32 @@ impl PrintedIdentifier {
             return Err(ValidationError(
                 "Invalid or duplicate scoped printed set identifier".into(),
             ));
+        }
+        Ok(())
+    }
+}
+/// A printed set name scoped to its language and release region.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ReleaseName {
+    pub language: String,
+    pub region: String,
+    pub name: String,
+}
+impl ReleaseName {
+    pub fn validate_all(values: &[Self]) -> Result<(), ValidationError> {
+        if values.len() > 100
+            || values.iter().enumerate().any(|(i, v)| {
+                validate_language(&v.language).is_err()
+                    || v.region.len() != 2
+                    || !v.region.bytes().all(|b| b.is_ascii_uppercase())
+                    || !text(&v.name, 200)
+                    || values[..i]
+                        .iter()
+                        .any(|p| p.language == v.language && p.region == v.region)
+            })
+        {
+            return Err(ValidationError("Invalid or duplicate release name".into()));
         }
         Ok(())
     }
@@ -77,6 +106,11 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
     let mut refs = Vec::new();
     match draft.kind {
         Kind::Set => {
+            if let Some(value) = draft.attributes.get("releaseNames") {
+                let names: Vec<ReleaseName> =
+                    serde_json::from_value(value.clone()).map_err(invalid)?;
+                ReleaseName::validate_all(&names)?;
+            }
             if let Some(value) = draft.attributes.get("printedIdentifiers") {
                 let marks: Vec<PrintedIdentifier> =
                     serde_json::from_value(value.clone()).map_err(invalid)?;
@@ -88,6 +122,7 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
                     .as_object_mut()
                     .unwrap()
                     .remove("printedIdentifiers");
+                metadata.as_object_mut().unwrap().remove("releaseNames");
                 let metadata: crate::pokemon::PrintingMetadata =
                     serde_json::from_value(metadata).map_err(invalid)?;
                 metadata.validate()?;
@@ -152,4 +187,27 @@ fn printing_references(metadata: &crate::pokemon::PrintingMetadata) -> Vec<(Stri
         }
     }
     refs
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn printed_codes_preserve_literal_punctuation_and_interior_space() {
+        let check = |code: &str| {
+            PrintedIdentifier::validate_all(&[PrintedIdentifier {
+                language: "ja".into(),
+                region: Some("JP".into()),
+                code: Some(code.into()),
+                symbol: None,
+            }])
+        };
+        for code in ["SM4+", "SM-P", "30th C", "CSM1.5C"] {
+            assert!(check(code).is_ok());
+        }
+        for code in ["", " SM4+", "30th C ", "SM4/1", "30th\tC", "30th\nC"] {
+            assert!(check(code).is_err());
+        }
+    }
 }

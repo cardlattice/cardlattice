@@ -22,6 +22,16 @@
           "name": {
             "type": "string"
           },
+          "power": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Power"
+              }
+            ]
+          },
           "text": {
             "type": "string"
           }
@@ -38,9 +48,24 @@
           "Ability",
           "Pokémon Power",
           "Poké-Power",
-          "Poké-Body"
+          "Poké-Body",
+          "Ancient Trait"
         ],
         "type": "string"
+      },
+      "AdditionalNumbers": {
+        "additionalProperties": false,
+        "description": "Additional printed numbering never replaces the primary collector number.",
+        "properties": {
+          "pikachu30th": {
+            "pattern": "^(0[1-9]|[12][0-9]|30)/30$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pikachu30th"
+        ],
+        "type": "object"
       },
       "ArtworkMetadata": {
         "additionalProperties": false,
@@ -70,6 +95,17 @@
             },
             "type": "array"
           },
+          "costModifier": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CostModifier",
+                "description": "Printed modifier beside the base energy cost; conditional wording remains in text."
+              }
+            ]
+          },
           "damage": {
             "type": [
               "string",
@@ -78,6 +114,17 @@
           },
           "name": {
             "type": "string"
+          },
+          "power": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Power",
+                "description": "Explicit printed power banner, independent of the localised attack name."
+              }
+            ]
           },
           "text": {
             "type": [
@@ -265,6 +312,12 @@
           "createdAt"
         ],
         "type": "object"
+      },
+      "CostModifier": {
+        "enum": [
+          "+"
+        ],
+        "type": "string"
       },
       "Datasets": {
         "properties": {
@@ -511,6 +564,13 @@
         ],
         "type": "string"
       },
+      "LegendPart": {
+        "enum": [
+          "top",
+          "bottom"
+        ],
+        "type": "string"
+      },
       "LocalisationView": {
         "properties": {
           "language": {
@@ -652,6 +712,20 @@
               "null"
             ]
           },
+          "flavourText": {
+            "description": "Printed localised Pokédex flavour text, not an inferred species description.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "heightMetres": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "hp": {
             "format": "int32",
             "minimum": 0,
@@ -671,6 +745,16 @@
             "description": "Provisional identity bounded to a printing until shared rules identity is reviewed.",
             "type": [
               "string",
+              "null"
+            ]
+          },
+          "level": {
+            "description": "Numeric level printed on this card; LV.X is a separate mechanic.",
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": [
+              "integer",
               "null"
             ]
           },
@@ -708,6 +792,12 @@
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "species": {
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -756,9 +846,22 @@
               "array",
               "null"
             ]
+          },
+          "weightKilograms": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "type": "object"
+      },
+      "Power": {
+        "enum": [
+          "VSTAR"
+        ],
+        "type": "string"
       },
       "PrintedIdentifier": {
         "additionalProperties": false,
@@ -794,6 +897,16 @@
       "PrintingMetadata": {
         "additionalProperties": false,
         "properties": {
+          "additionalNumbers": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AdditionalNumbers"
+              }
+            ]
+          },
           "artwork": {
             "type": [
               "string",
@@ -825,6 +938,17 @@
             "type": [
               "array",
               "null"
+            ]
+          },
+          "legendPart": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LegendPart",
+                "description": "Physical half; pair membership is represented by a shared collection."
+              }
             ]
           },
           "printedDenominator": {
@@ -863,6 +987,24 @@
               "null"
             ]
           },
+          "unnumberedKey": {
+            "description": "Derived from the source filename when collectorNumber is explicitly null.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vUnionPart": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/VUnionPart",
+                "description": "Physical quadrant; assembly membership is represented by a shared collection."
+              }
+            ]
+          },
           "variants": {
             "additionalProperties": {
               "$ref": "#/components/schemas/PrintingVariant"
@@ -893,7 +1035,14 @@
             ]
           },
           "finish": {
-            "$ref": "#/components/schemas/Finish"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Finish"
+              }
+            ]
           },
           "products": {
             "items": {
@@ -914,13 +1063,38 @@
             ]
           }
         },
-        "required": [
-          "finish"
-        ],
         "type": "object"
       },
       "Rarity": {
         "enum": [
+          "C",
+          "U",
+          "R",
+          "RR",
+          "SR",
+          "AR",
+          "SAR",
+          "RRR",
+          "HR",
+          "UR",
+          "S",
+          "SSR",
+          "PR",
+          "FUR",
+          "A",
+          "CHR",
+          "CSR",
+          "BWR",
+          "MUR",
+          "K",
+          "●",
+          "◆",
+          "★",
+          "★ (silver)",
+          "★ (gold)",
+          "★★",
+          "★★★",
+          "Shining",
           "Common",
           "Uncommon",
           "Rare",
@@ -1101,7 +1275,9 @@
           "MEGA",
           "VMAX",
           "VSTAR",
-          "V-UNION"
+          "V-UNION",
+          "Level-Up",
+          "LEGEND"
         ],
         "type": "string"
       },
@@ -1252,6 +1428,15 @@
           "Radiant",
           "Prism Star",
           "Ultra Beast",
+          "Delta Species",
+          "LV.X",
+          "SP",
+          "LEGEND",
+          "Dynamax",
+          "Gigantamax",
+          "Eternamax",
+          "Gold Star",
+          "Shining",
           "Single Strike",
           "Rapid Strike",
           "Fusion Strike",
@@ -1261,6 +1446,7 @@
           "Supporter",
           "Stadium",
           "Pokémon Tool",
+          "Pokémon Tool F",
           "ACE SPEC",
           "Basic Energy",
           "Special Energy"
@@ -1284,6 +1470,15 @@
           "type"
         ],
         "type": "object"
+      },
+      "VUnionPart": {
+        "enum": [
+          "top-left",
+          "top-right",
+          "bottom-left",
+          "bottom-right"
+        ],
+        "type": "string"
       },
       "VariantView": {
         "properties": {

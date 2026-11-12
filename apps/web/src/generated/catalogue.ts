@@ -29,12 +29,29 @@ export const AbilityKind = {
   Pokémon_Power: 'Pokémon Power',
   'Poké-Power': 'Poké-Power',
   'Poké-Body': 'Poké-Body',
+  Ancient_Trait: 'Ancient Trait',
+} as const;
+
+export type Power = typeof Power[keyof typeof Power];
+
+
+export const Power = {
+  VSTAR: 'VSTAR',
 } as const;
 
 export interface Ability {
   kind: AbilityKind;
   name: string;
+  power?: null | Power;
   text: string;
+}
+
+/**
+ * Additional printed numbering never replaces the primary collector number.
+ */
+export interface AdditionalNumbers {
+  /** @pattern ^(0[1-9]|[12][0-9]|30)/30$ */
+  pikachu30th: string;
 }
 
 export interface ArtworkMetadata {
@@ -60,12 +77,21 @@ export const EnergyType = {
   Fairy: 'Fairy',
 } as const;
 
+export type CostModifier = typeof CostModifier[keyof typeof CostModifier];
+
+
+export const CostModifier = {
+  '+': '+',
+} as const;
+
 export interface Attack {
   /** Ordered energy symbols; an empty list means a printed free attack. */
   cost: EnergyType[];
+  costModifier?: null | CostModifier;
   /** @nullable */
   damage?: string | null;
   name: string;
+  power?: null | Power;
   /** @nullable */
   text?: string | null;
 }
@@ -255,6 +281,14 @@ export interface ImageView {
   url: string;
 }
 
+export type LegendPart = typeof LegendPart[keyof typeof LegendPart];
+
+
+export const LegendPart = {
+  top: 'top',
+  bottom: 'bottom',
+} as const;
+
 export interface LocalisationView {
   language: string;
   name: string;
@@ -298,6 +332,8 @@ export const Stage = {
   VMAX: 'VMAX',
   VSTAR: 'VSTAR',
   'V-UNION': 'V-UNION',
+  'Level-Up': 'Level-Up',
+  LEGEND: 'LEGEND',
 } as const;
 
 export type Subtype = typeof Subtype[keyof typeof Subtype];
@@ -318,6 +354,15 @@ export const Subtype = {
   Radiant: 'Radiant',
   Prism_Star: 'Prism Star',
   Ultra_Beast: 'Ultra Beast',
+  Delta_Species: 'Delta Species',
+  LVX: 'LV.X',
+  SP: 'SP',
+  LEGEND: 'LEGEND',
+  Dynamax: 'Dynamax',
+  Gigantamax: 'Gigantamax',
+  Eternamax: 'Eternamax',
+  Gold_Star: 'Gold Star',
+  Shining: 'Shining',
   Single_Strike: 'Single Strike',
   Rapid_Strike: 'Rapid Strike',
   Fusion_Strike: 'Fusion Strike',
@@ -327,6 +372,7 @@ export const Subtype = {
   Supporter: 'Supporter',
   Stadium: 'Stadium',
   Pokémon_Tool: 'Pokémon Tool',
+  Pokémon_Tool_F: 'Pokémon Tool F',
   ACE_SPEC: 'ACE SPEC',
   Basic_Energy: 'Basic Energy',
   Special_Energy: 'Special Energy',
@@ -340,6 +386,13 @@ export interface PokemonAttributes {
   category?: null | Category;
   /** @nullable */
   evolvesFrom?: string | null;
+  /**
+     * Printed localised Pokédex flavour text, not an inferred species description.
+     * @nullable
+     */
+  flavourText?: string | null;
+  /** @nullable */
+  heightMetres?: number | null;
   /**
      * @minimum 0
      * @nullable
@@ -356,6 +409,13 @@ export interface PokemonAttributes {
      */
   identityScope?: string | null;
   /**
+     * Numeric level printed on this card; LV.X is a separate mechanic.
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  level?: number | null;
+  /**
      * @nullable
      * @items.minimum 0
      */
@@ -369,6 +429,8 @@ export interface PokemonAttributes {
   retreatCost?: number | null;
   /** @nullable */
   rules?: string[] | null;
+  /** @nullable */
+  species?: string | null;
   stage?: null | Stage;
   /** @nullable */
   subtypes?: Subtype[] | null;
@@ -378,6 +440,8 @@ export interface PokemonAttributes {
   types?: EnergyType[] | null;
   /** @nullable */
   weaknesses?: TypeModifier[] | null;
+  /** @nullable */
+  weightKilograms?: number | null;
 }
 
 export interface PrintedIdentifier {
@@ -398,7 +462,7 @@ export interface PrintedIdentifier {
  */
 export interface PrintingVariant {
   edition?: null | Edition;
-  finish: Finish;
+  finish?: null | Finish;
   /** @nullable */
   products?: string[] | null;
   /** @nullable */
@@ -426,7 +490,18 @@ export const RegulationMark = {
   J: 'J',
 } as const;
 
+export type VUnionPart = typeof VUnionPart[keyof typeof VUnionPart];
+
+
+export const VUnionPart = {
+  'top-left': 'top-left',
+  'top-right': 'top-right',
+  'bottom-left': 'bottom-left',
+  'bottom-right': 'bottom-right',
+} as const;
+
 export interface PrintingMetadata {
+  additionalNumbers?: null | AdditionalNumbers;
   /** @nullable */
   artwork?: string | null;
   /** @nullable */
@@ -435,6 +510,7 @@ export interface PrintingMetadata {
   finishes?: Finish[] | null;
   /** @nullable */
   illustrators?: string[] | null;
+  legendPart?: null | LegendPart;
   /**
      * @minimum 0
      * @nullable
@@ -445,6 +521,12 @@ export interface PrintingMetadata {
   regulationMark?: null | RegulationMark;
   /** @nullable */
   stamps?: string[] | null;
+  /**
+     * Derived from the source filename when collectorNumber is explicitly null.
+     * @nullable
+     */
+  unnumberedKey?: string | null;
+  vUnionPart?: null | VUnionPart;
   /** @nullable */
   variants?: PrintingMetadataVariants;
 }
@@ -453,6 +535,34 @@ export type Rarity = typeof Rarity[keyof typeof Rarity];
 
 
 export const Rarity = {
+  C: 'C',
+  U: 'U',
+  R: 'R',
+  RR: 'RR',
+  SR: 'SR',
+  AR: 'AR',
+  SAR: 'SAR',
+  RRR: 'RRR',
+  HR: 'HR',
+  UR: 'UR',
+  S: 'S',
+  SSR: 'SSR',
+  PR: 'PR',
+  FUR: 'FUR',
+  A: 'A',
+  CHR: 'CHR',
+  CSR: 'CSR',
+  BWR: 'BWR',
+  MUR: 'MUR',
+  K: 'K',
+  '●': '●',
+  '◆': '◆',
+  '★': '★',
+  '★_(silver)': '★ (silver)',
+  '★_(gold)': '★ (gold)',
+  '★★': '★★',
+  '★★★': '★★★',
+  Shining: 'Shining',
   Common: 'Common',
   Uncommon: 'Uncommon',
   Rare: 'Rare',

@@ -5,7 +5,8 @@ use utoipa::ToSchema;
 
 pub mod vocabulary;
 use vocabulary::{
-    AbilityKind, Category, Edition, EnergyType, Finish, RegulationMark, Stage, Subtype,
+    AbilityKind, Category, CostModifier, Edition, EnergyType, Finish, LegendPart, Power,
+    RegulationMark, Stage, Subtype, VUnionPart,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -24,10 +25,16 @@ pub struct Attack {
     pub name: String,
     /// Ordered energy symbols; an empty list means a printed free attack.
     pub cost: Vec<EnergyType>,
+    /// Printed modifier beside the base energy cost; conditional wording remains in text.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cost_modifier: Option<CostModifier>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub damage: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
+    /// Explicit printed power banner, independent of the localised attack name.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub power: Option<Power>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -35,6 +42,8 @@ pub struct Ability {
     pub name: String,
     pub text: String,
     pub kind: AbilityKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub power: Option<Power>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -55,6 +64,19 @@ pub struct PokemonAttributes {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identity_group: Option<String>,
     pub hp: Option<u16>,
+    /// Numeric level printed on this card; LV.X is a separate mechanic.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(minimum = 1, maximum = 100)]
+    pub level: Option<u8>,
+    /// Printed localised Pokédex flavour text, not an inferred species description.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flavour_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub species: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height_metres: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weight_kilograms: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub types: Option<Vec<EnergyType>>,
     pub stage: Option<Stage>,
@@ -83,12 +105,19 @@ impl PokemonAttributes {
     pub fn validate(&self) -> Result<(), ValidationError> {
         let invalid = || ValidationError("Invalid typed Pokémon attributes".into());
         if self.hp.is_some_and(|v| v == 0 || v > 1000)
+            || self.level.is_some_and(|v| v == 0 || v > 100)
             || self
                 .types
                 .as_ref()
                 .is_some_and(|v| v.len() > 4 || !unique(v))
             || self.evolves_from.as_ref().is_some_and(|v| !text(v, 200))
             || self.retreat_cost.is_some_and(|v| v > 10)
+            || self.flavour_text.as_ref().is_some_and(|v| !text(v, 2000))
+            || self.species.as_ref().is_some_and(|v| !text(v, 200))
+            || [self.height_metres, self.weight_kilograms]
+                .into_iter()
+                .flatten()
+                .any(|v| !v.is_finite() || !(0.0..=1_000_000.0).contains(&v))
         {
             return Err(invalid());
         }
@@ -106,15 +135,26 @@ impl PokemonAttributes {
                 .subtypes
                 .as_ref()
                 .is_none_or(|v| v.is_empty() || v == &[Subtype::Item]);
+        // Tools can grant printed attacks or abilities to the attached Pokémon.
+        let pokemon_tool = self.category == Some(Category::Trainer)
+            && self
+                .subtypes
+                .as_ref()
+                .is_some_and(|values| values.contains(&Subtype::PokemonTool));
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
-            && ((!trainer_pokemon && (self.hp.is_some() || self.abilities.is_some()))
+            && ((!trainer_pokemon && self.hp.is_some())
+                || (!trainer_pokemon && !pokemon_tool && self.abilities.is_some())
                 || self.stage.is_some()
                 || self.evolves_from.is_some()
-                || self.attacks.is_some()
+                || (!pokemon_tool && self.attacks.is_some())
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
-                || self.national_dex.is_some())
+                || self.national_dex.is_some()
+                || self.species.is_some()
+                || self.level.is_some()
+                || self.height_metres.is_some()
+                || self.weight_kilograms.is_some())
         {
             return Err(invalid());
         }
@@ -189,6 +229,17 @@ impl PokemonAttributes {
 #[derive(Debug, Default, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingMetadata {
+    /// Physical half; pair membership is represented by a shared collection.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub legend_part: Option<LegendPart>,
+    /// Physical quadrant; assembly membership is represented by a shared collection.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub v_union_part: Option<VUnionPart>,
+    /// Derived from the source filename when collectorNumber is explicitly null.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unnumbered_key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub additional_numbers: Option<AdditionalNumbers>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub finishes: Option<Vec<Finish>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -234,6 +285,7 @@ impl PrintingMetadata {
                 .as_ref()
                 .is_some_and(|v| crate::parse_id(v).is_err())
             || self.printed_denominator.is_some_and(|v| v == 0 || v > 9999)
+            || self.additional_numbers.as_ref().is_some_and(|v| !v.valid())
             || self
                 .illustrators
                 .as_ref()
@@ -270,8 +322,10 @@ impl PrintingMetadata {
                     return Err(ValidationError("Duplicate variant combination".into()));
                 }
                 seen.push(comparison);
-                if !finishes.contains(&variant.finish) {
-                    finishes.push(variant.finish);
+                if let Some(finish) = variant.finish
+                    && !finishes.contains(&finish)
+                {
+                    finishes.push(finish);
                 }
             }
             if self.finishes.as_ref().is_some_and(|v| {
@@ -286,11 +340,31 @@ impl PrintingMetadata {
     }
 }
 
+/// Additional printed numbering never replaces the primary collector number.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdditionalNumbers {
+    #[schema(pattern = "^(0[1-9]|[12][0-9]|30)/30$")]
+    pub pikachu30th: String,
+}
+impl AdditionalNumbers {
+    fn valid(&self) -> bool {
+        let Some((number, denominator)) = self.pikachu30th.split_once('/') else {
+            return false;
+        };
+        denominator == "30"
+            && number.len() == 2
+            && number.bytes().all(|b| b.is_ascii_digit())
+            && number.parse::<u8>().is_ok_and(|v| (1..=30).contains(&v))
+    }
+}
+
 /// Each entry is an observed combination; never infer an edition × finish cross product.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingVariant {
-    pub finish: Finish,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub finish: Option<Finish>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub edition: Option<Edition>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -300,6 +374,15 @@ pub struct PrintingVariant {
 }
 impl PrintingVariant {
     fn validate(&self) -> Result<(), ValidationError> {
+        if self.finish.is_none()
+            && self.edition.is_none()
+            && self.stamps.as_ref().is_none_or(Vec::is_empty)
+            && self.products.as_ref().is_none_or(Vec::is_empty)
+        {
+            return Err(ValidationError(
+                "A variant needs an observed finish, edition, stamp or product".into(),
+            ));
+        }
         PrintingMetadata {
             stamps: self.stamps.clone(),
             products: self.products.clone(),
@@ -313,6 +396,97 @@ impl PrintingVariant {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn printed_cost_modifier_round_trips_and_rejects_aliases() {
+        let value = json!({"name":"Original attack","cost":["Colorless"],"costModifier":"+"});
+        let attack: Attack = serde_json::from_value(value.clone()).unwrap();
+        assert_eq!(serde_json::to_value(attack).unwrap(), value);
+        for invalid in ["plus", "-", "", " +"] {
+            let mut candidate = value.clone();
+            candidate["costModifier"] = json!(invalid);
+            assert!(serde_json::from_value::<Attack>(candidate).is_err());
+        }
+    }
+
+    #[test]
+    fn printed_power_markers_round_trip_on_attacks_and_abilities() {
+        let value = json!({"category":"pokemon","attacks":[{"name":"Original attack","cost":[],"power":"VSTAR"}],"abilities":[{"name":"Original ability","text":"Original effect.","kind":"Ability","power":"VSTAR"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        let serialised = serde_json::to_value(attributes).unwrap();
+        assert_eq!(serialised["attacks"], value["attacks"]);
+        assert_eq!(serialised["abilities"], value["abilities"]);
+        for field in ["attacks", "abilities"] {
+            for invalid in ["vstar", "V-Star", "Unknown"] {
+                let mut candidate = value.clone();
+                candidate[field][0]["power"] = json!(invalid);
+                assert!(serde_json::from_value::<PokemonAttributes>(candidate).is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn pokemon_tools_can_grant_printed_vstar_abilities() {
+        let value = json!({"category":"trainer","subtypes":["Item","Pokémon Tool"],"abilities":[{"name":"Original power","text":"Original effect.","kind":"Ability","power":"VSTAR"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        for patch in [
+            json!({"subtypes":["Item"]}),
+            json!({"subtypes":["Supporter"]}),
+            json!({"category":"energy"}),
+            json!({"hp":30}),
+            json!({"stage":"Basic"}),
+        ] {
+            let mut candidate = value.clone();
+            for (key, value) in patch.as_object().unwrap() {
+                candidate[key] = value.clone();
+            }
+            let attributes: PokemonAttributes = serde_json::from_value(candidate).unwrap();
+            assert!(attributes.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn observed_editions_do_not_require_guessed_finishes() {
+        let value = json!({"variants":{"first-edition":{"edition":"first-edition"}}});
+        let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        for invalid in [
+            json!({"variants":{"unknown":{}}}),
+            json!({"variants":{"unknown":{"stamps":[],"products":[]}}}),
+            json!({"variants":{"first":{"edition":"first-edition"},"duplicate":{"edition":"first-edition"}}}),
+            json!({"finishes":["holo"],"variants":{"first":{"edition":"first-edition"}}}),
+        ] {
+            let metadata: PrintingMetadata = serde_json::from_value(invalid).unwrap();
+            assert!(metadata.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn technical_machine_tools_accept_attacks_without_pokemon_only_stats() {
+        let tool = json!({"category":"trainer","subtypes":["Pokémon Tool"],"attacks":[{"name":"Original synthetic attack","cost":["Colorless","Colorless"],"damage":"20"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(tool.clone()).unwrap();
+        attributes.validate().unwrap();
+        for patch in [
+            json!({"category":"energy"}),
+            json!({"subtypes":["Item"]}),
+            json!({"subtypes":["Supporter"]}),
+            json!({"subtypes":null}),
+            json!({"hp":60}),
+            json!({"stage":"Basic"}),
+            json!({"retreatCost":0}),
+            json!({"attacks":[{"name":" ","cost":[]}]}),
+        ] {
+            let mut invalid = tool.clone();
+            for (key, value) in patch.as_object().unwrap() {
+                invalid[key] = value.clone();
+            }
+            let attributes: PokemonAttributes = serde_json::from_value(invalid).unwrap();
+            assert!(attributes.validate().is_err());
+        }
+    }
 
     #[test]
     fn fossil_items_accept_printed_hp_and_abilities_without_relaxing_other_categories() {
@@ -336,9 +510,67 @@ mod tests {
     }
 
     #[test]
+    fn localised_printed_pokedex_metadata_is_typed() {
+        let value = json!({"category":"pokemon", "level":12, "flavourText":"Original synthetic flavour text.", "species":"Original synthetic species", "heightMetres":0.3, "weightKilograms":0.1});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        assert_eq!(
+            serde_json::to_value(attributes).unwrap()["heightMetres"],
+            0.3
+        );
+        for patch in [
+            json!({"level":0}),
+            json!({"level":101}),
+            json!({"heightMetres":-1}),
+            json!({"weightKilograms":1000001}),
+            json!({"species":" "}),
+            json!({"flavourText":" "}),
+            json!({"category":"trainer"}),
+        ] {
+            let mut changed = value.clone();
+            changed
+                .as_object_mut()
+                .unwrap()
+                .extend(patch.as_object().unwrap().clone());
+            assert!(
+                serde_json::from_value::<PokemonAttributes>(changed)
+                    .unwrap()
+                    .validate()
+                    .is_err()
+            );
+        }
+    }
+
+    #[test]
+    fn additional_printed_numbering_is_scoped_and_bounded() {
+        for number in ["01/30", "09/30", "30/30"] {
+            let metadata: PrintingMetadata = serde_json::from_value(json!({
+                "additionalNumbers":{"pikachu30th":number}
+            }))
+            .unwrap();
+            metadata.validate().unwrap();
+        }
+        for number in ["00/30", "31/30", "1/30", "01/31", "+1/30", "０1/30"] {
+            let metadata: PrintingMetadata = serde_json::from_value(json!({
+                "additionalNumbers":{"pikachu30th":number}
+            }))
+            .unwrap();
+            assert!(metadata.validate().is_err());
+        }
+        for value in [
+            json!({}),
+            json!({"pikachu30th":9}),
+            json!({"pikachu": "01/30"}),
+        ] {
+            assert!(serde_json::from_value::<AdditionalNumbers>(value).is_err());
+        }
+    }
+
+    #[test]
     fn historical_printed_values_and_category_compatibility() {
         for value in [
             json!({"category":"trainer", "hp":10}),
+            json!({"category":"trainer", "subtypes":["Supporter", "TAG TEAM"]}),
             json!({"category":"pokemon", "attacks":[{"name":"Super Fang", "cost":[], "damage":"?"}], "weaknesses":[{"type":"Fighting"}]}),
             json!({"category":"energy", "subtypes":["Special Energy", "ACE SPEC"]}),
         ] {
@@ -351,6 +583,7 @@ mod tests {
             json!({"category":"pokemon", "subtypes":["Item"]}),
             json!({"category":"trainer", "subtypes":["ex"]}),
             json!({"category":"energy", "subtypes":["Supporter"]}),
+            json!({"category":"energy", "subtypes":["TAG TEAM"]}),
         ] {
             assert!(
                 serde_json::from_value::<PokemonAttributes>(value)

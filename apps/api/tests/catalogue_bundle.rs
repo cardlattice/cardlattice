@@ -417,9 +417,11 @@ finishes: [holo]
         r#"name: Prism Seed
 stamps: []
 finishes: [non-holo, reverse-holo]
+additionalNumbers: {pikachu30th: "09/30"}
 pokemon:
   category: pokemon
   hp: 60
+  level: 12
   types: [Grass]
   stage: Basic
   attacks:
@@ -454,6 +456,7 @@ pokemon:
     assert!(card.attributes["attacks"][1].get("damage").is_none());
     assert_eq!(card.attributes["attacks"][1]["cost"], serde_json::json!([]));
     assert_eq!(card.attributes["retreatCost"], 0);
+    assert_eq!(card.attributes["level"], 12);
     let printing = &records
         .iter()
         .find(|r| r.id == "pokemon-laboratory-en-US-001")
@@ -466,6 +469,11 @@ pokemon:
     );
     assert_eq!(printing.attributes["regulationMark"], "J");
     assert_eq!(printing.attributes["printedDenominator"], 128);
+    assert_eq!(printing.collector_number.as_deref(), Some("001"));
+    assert_eq!(
+        printing.attributes["additionalNumbers"]["pikachu30th"],
+        "09/30"
+    );
     let inherited = &records
         .iter()
         .find(|r| r.id == "pokemon-laboratory-en-US-002")
@@ -720,6 +728,28 @@ fn source_tree_variants_validate_combinations_and_references() {
     write(source.path(), "pokemon/products/box.yaml", "name: Box\n");
     bundle.records = ingestion::source_tree::load(source.path()).unwrap();
     bundle.validate().unwrap();
+    write(
+        source.path(),
+        card,
+        "name: Prism Seed\nvariants: {first: {edition: first-edition}}\n",
+    );
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    bundle.validate().unwrap();
+    let printing = bundle
+        .records
+        .iter()
+        .find(|record| record.draft.kind == catalogue::Kind::Printing)
+        .unwrap();
+    assert_eq!(
+        printing.draft.attributes["variants"]["first"]["edition"],
+        "first-edition"
+    );
+    assert!(
+        printing.draft.attributes["variants"]["first"]
+            .get("finish")
+            .is_none()
+    );
+    assert!(printing.draft.attributes.get("finishes").is_none());
     for fields in [
         "finishes: [non-holo]\nvariants: {first: {finish: holo}}",
         "variants: {first: {finish: holo}, duplicate: {finish: holo}}",
@@ -798,6 +828,12 @@ async fn migration_preserves_existing_catalogue_rows(pool: PgPool) {
     .execute(&pool)
     .await
     .unwrap();
+    sqlx::raw_sql(include_str!(
+        "../../../migrations/0009_unnumbered_printings.sql"
+    ))
+    .execute(&pool)
+    .await
+    .unwrap();
     let actual: String =
         sqlx::query_scalar("SELECT duplicate_key FROM catalogue_records WHERE id=$1")
             .bind(&card.id)
@@ -828,4 +864,120 @@ fn shared_identity_localisations_with_identical_text_are_distinct() {
         .map(|r| r.draft.duplicate_key())
         .collect();
     assert_eq!(keys.len(), 2);
+}
+
+#[sqlx::test(migrations = "../../migrations")]
+async fn unnumbered_printings_keep_semantic_keys_without_inventing_collector_numbers(pool: PgPool) {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    for key in ["grass-energy", "fire-energy"] {
+        write(
+            source.path(),
+            &format!("pokemon/cards/laboratory/en/US/{key}.yaml"),
+            "name: Original synthetic energy\ncollectorNumber: null\nprintedDenominator: null\npokemon: {category: energy, subtypes: [Basic Energy]}\n",
+        );
+    }
+    let bundle = Bundle {
+        records: ingestion::source_tree::load(source.path()).unwrap(),
+        ..input()
+    };
+    bundle.validate().unwrap();
+    for key in ["grass-energy", "fire-energy"] {
+        let id = format!("pokemon-laboratory-en-US-{key}");
+        let printing = bundle
+            .records
+            .iter()
+            .find(|record| record.id == id)
+            .unwrap();
+        assert!(printing.draft.collector_number.is_none());
+        assert_eq!(printing.draft.attributes["unnumberedKey"], key);
+        assert_eq!(printing.draft.record_id().unwrap(), id);
+        let mut invalid = printing.draft.clone();
+        invalid.collector_number = Some("001".into());
+        assert!(invalid.validate(Some("pokemon")).is_err());
+        invalid.collector_number = None;
+        invalid
+            .attributes
+            .as_object_mut()
+            .unwrap()
+            .remove("unnumberedKey");
+        assert!(invalid.validate(Some("pokemon")).is_err());
+    }
+    bundle::index(&pool, &bundle, true).await.unwrap();
+    let count: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM catalogue_records WHERE kind='printing' AND collector_number IS NULL",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(count, 2);
+    let invalid = sqlx::query("UPDATE catalogue_records SET collector_number='999' WHERE id='pokemon-laboratory-en-US-grass-energy'").execute(&pool).await;
+    assert!(invalid.is_err());
+    let mut duplicate = bundle.clone();
+    let mut entry = duplicate
+        .records
+        .iter()
+        .find(|record| {
+            record.id.ends_with("-grass-energy") && record.draft.kind == catalogue::Kind::Printing
+        })
+        .unwrap()
+        .clone();
+    entry.id = "another-key".into();
+    duplicate.records.push(entry);
+    assert!(duplicate.validate().is_err());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/grass-energy.yaml",
+        "name: Original synthetic energy\ncollectorNumber: null\nunnumberedKey: forged\n",
+    );
+    assert!(ingestion::source_tree::load(source.path()).is_err());
+}
+
+#[test]
+fn source_release_names_and_v_union_quadrants_survive_compilation() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/release.yaml",
+        "name: 원본 실험 세트\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/001.yaml",
+        "name: 원본 카드\nvUnionPart: top-left\npokemon: {category: pokemon, stage: V-UNION, subtypes: [V-UNION]}\n",
+    );
+    let records = ingestion::source_tree::load(source.path()).unwrap();
+    let set = records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory")
+        .unwrap();
+    assert_eq!(
+        set.draft.attributes["releaseNames"],
+        serde_json::json!([{"language":"ko","region":"KR","name":"원본 실험 세트"}])
+    );
+    let printing = records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory-ko-KR-001")
+        .unwrap();
+    assert_eq!(printing.draft.attributes["vUnionPart"], "top-left");
+    for invalid in ["", " padded", "line\\nbreak"] {
+        write(
+            source.path(),
+            "pokemon/cards/laboratory/ko/KR/release.yaml",
+            &format!("name: \"{invalid}\"\n"),
+        );
+        assert!(ingestion::source_tree::load(source.path()).is_err());
+    }
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/release.yaml",
+        "name: 원본 실험 세트\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/001.yaml",
+        "name: 원본 카드\nvUnionPart: upper-left\n",
+    );
+    assert!(ingestion::source_tree::load(source.path()).is_err());
 }

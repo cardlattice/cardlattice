@@ -172,7 +172,10 @@ impl Draft {
                 self.set_id.as_deref().unwrap_or_default(),
                 self.language.as_deref().unwrap_or_default(),
                 self.region.as_deref().unwrap_or("global"),
-                self.collector_number.as_deref().unwrap_or_default()
+                self.collector_number
+                    .as_deref()
+                    .or_else(|| self.attributes.get("unnumberedKey").and_then(Value::as_str))
+                    .unwrap_or_default()
             ),
         };
         parse_id(&id)
@@ -206,16 +209,31 @@ impl Draft {
         {
             return fail("Game slug must use lowercase ASCII letters, numbers and hyphens");
         }
+        let unnumbered_key = self.attributes.get("unnumberedKey");
+        if unnumbered_key.is_some_and(|v| {
+            self.kind != Kind::Printing
+                || self.collector_number.is_some()
+                || v.as_str().is_none_or(|key| {
+                    key.len() > 100 || matches!(key, "." | "..") || parse_id(key).is_err()
+                })
+        }) {
+            return fail(
+                "unnumberedKey is a semantic key only for printings without a collector number",
+            );
+        }
         if self.kind == Kind::Printing
             && (self.card_id.is_none()
                 || self.set_id.is_none()
+                || (self.collector_number.is_none() && unnumbered_key.is_none())
                 || self
                     .collector_number
                     .as_ref()
-                    .is_none_or(|s| s.trim().is_empty())
+                    .is_some_and(|s| s.trim().is_empty())
                 || self.language.is_none())
         {
-            return fail("Printings require cardId, setId, collectorNumber and language");
+            return fail(
+                "Printings require cardId, setId, language and a collectorNumber or unnumberedKey",
+            );
         }
         if self.kind != Kind::Printing
             && (self.card_id.is_some() || self.set_id.is_some() || self.collector_number.is_some())
@@ -306,7 +324,16 @@ impl Draft {
                 "printing:{:?}:{:?}:{}:{:?}:{:?}:{:?}",
                 self.game_id,
                 self.set_id,
-                normalize(self.collector_number.as_deref().unwrap_or_default()),
+                self.collector_number
+                    .as_deref()
+                    .map(normalize)
+                    .unwrap_or_else(|| format!(
+                        "unnumbered:{}",
+                        self.attributes
+                            .get("unnumberedKey")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                    )),
                 self.language,
                 self.region,
                 self.release_date

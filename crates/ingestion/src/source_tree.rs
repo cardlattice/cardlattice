@@ -27,6 +27,7 @@ struct RecordFile {
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ReleaseFile {
+    name: Option<String>,
     release_date: Option<NaiveDate>,
     #[serde(default)]
     external_ids: Vec<ExternalIdPattern>,
@@ -63,6 +64,9 @@ struct LocalisedIdentity {
     pokemon: catalogue::PokemonAttributes,
 }
 const PRINTING_FIELDS: &[&str] = &[
+    "legendPart",
+    "vUnionPart",
+    "additionalNumbers",
     "finishes",
     "stamps",
     "regulationMark",
@@ -132,10 +136,13 @@ fn check_authored_values(path: &Path, value: &Value, root: bool) -> Result<(), E
     match value {
         Value::Object(fields) => {
             for (key, value) in fields {
-                if matches!(key.as_str(), "identityScope" | "identityGroup") {
+                if matches!(
+                    key.as_str(),
+                    "identityScope" | "identityGroup" | "unnumberedKey"
+                ) {
                     return Err(invalid(
                         path,
-                        "Identity grouping is generated, not authored",
+                        "Identity grouping and unnumbered keys are generated, not authored",
                     ));
                 }
                 if value.is_null()
@@ -143,11 +150,15 @@ fn check_authored_values(path: &Path, value: &Value, root: bool) -> Result<(), E
                     && matches!(
                         key.as_str(),
                         "releaseDate"
+                            | "collectorNumber"
                             | "rarity"
                             | "printedDenominator"
                             | "regulationMark"
                             | "artwork"
                             | "variants"
+                            | "additionalNumbers"
+                            | "legendPart"
+                            | "vUnionPart"
                     )
                 {
                     continue;
@@ -425,6 +436,31 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             external_ids: file.external_ids,
         });
     }
+    // Locale-specific set names belong to the release, not every card file.
+    for (path, (release, _, _)) in &releases {
+        if let Some(name) = &release.name {
+            let parts: Vec<_> = path.iter().map(|s| s.to_str().unwrap()).collect();
+            let id = format!("{}-{}", parts[0], parts[2]);
+            let record = records
+                .iter_mut()
+                .find(|r| r.id == id)
+                .ok_or_else(|| invalid(path, "Missing release set"))?;
+            let names = record
+                .draft
+                .attributes
+                .as_object_mut()
+                .unwrap()
+                .entry("releaseNames")
+                .or_insert_with(|| json!([]));
+            names.as_array_mut().unwrap().push(json!({
+                "language": parts[3], "region": parts[4], "name": name
+            }));
+            record
+                .draft
+                .validate(Some(parts[0]))
+                .map_err(|e| invalid(path, e))?;
+        }
+    }
     let mut used_releases = HashSet::new();
     for path in printing_files {
         let parts: Vec<_> = path.iter().map(|s| s.to_str().unwrap()).collect();
@@ -444,7 +480,14 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         let mut value: Value = decode(path, &files[path])?;
         let metadata = take_metadata(path, &mut value)?;
         let date_present = value.get("releaseDate").is_some();
+        let unnumbered = value.get("collectorNumber").is_some_and(Value::is_null);
         let mut file: PrintingFile = typed(path, value)?;
+        if unnumbered && !release.external_ids.is_empty() {
+            return Err(invalid(
+                path,
+                "Unnumbered cards need explicit external IDs, not collector-number patterns",
+            ));
+        }
         for pattern in &release.external_ids {
             if !file
                 .external_ids
@@ -523,7 +566,11 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         let mut record = draft(Kind::Printing, file.name, Some(game));
         record.set_id = Some(set);
         record.card_id = Some(card);
-        record.collector_number = Some(file.collector_number.unwrap_or_else(|| number.into()));
+        record.collector_number = if unnumbered {
+            None
+        } else {
+            Some(file.collector_number.unwrap_or_else(|| number.into()))
+        };
         record.language = Some(language.into());
         record.region = (region != "global").then(|| region.into());
         record.rarity = file.rarity;
@@ -537,6 +584,9 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
         let mut details = set_defaults.clone();
         details.extend(release_metadata.clone());
         details.extend(metadata);
+        if unnumbered {
+            details.insert("unnumberedKey".into(), json!(number));
+        }
         let typed_details: PrintingMetadata = typed(path, Value::Object(details.clone()))?;
         typed_details.validate().map_err(|e| invalid(path, e))?;
         record.attributes = Value::Object(details);
