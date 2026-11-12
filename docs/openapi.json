@@ -950,7 +950,11 @@
         "enum": [
           "C",
           "U",
+          "R",
           "RR",
+          "SR",
+          "AR",
+          "SAR",
           "Common",
           "Uncommon",
           "Rare",

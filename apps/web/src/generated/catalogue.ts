@@ -466,7 +466,11 @@ export type Rarity = typeof Rarity[keyof typeof Rarity];
 export const Rarity = {
   C: 'C',
   U: 'U',
+  R: 'R',
   RR: 'RR',
+  SR: 'SR',
+  AR: 'AR',
+  SAR: 'SAR',
   Common: 'Common',
   Uncommon: 'Uncommon',
   Rare: 'Rare',
