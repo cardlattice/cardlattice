@@ -95,6 +95,17 @@
             },
             "type": "array"
           },
+          "costModifier": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CostModifier",
+                "description": "Printed modifier beside the base energy cost; conditional wording remains in text."
+              }
+            ]
+          },
           "damage": {
             "type": [
               "string",
@@ -301,6 +312,12 @@
           "createdAt"
         ],
         "type": "object"
+      },
+      "CostModifier": {
+        "enum": [
+          "+"
+        ],
+        "type": "string"
       },
       "Datasets": {
         "properties": {
@@ -1066,6 +1083,7 @@
           "★ (gold)",
           "★★",
           "★★★",
+          "Shining",
           "Common",
           "Uncommon",
           "Rare",

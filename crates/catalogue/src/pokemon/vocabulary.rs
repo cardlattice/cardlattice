@@ -116,6 +116,7 @@ vocabulary! { Rarity {
     PrintedGoldStar => "★ (gold)",
     PrintedTwoStars => "★★",
     PrintedThreeStars => "★★★",
+    PrintedShining => "Shining",
     Common => "Common",
     Uncommon => "Uncommon",
     Rare => "Rare",
@@ -173,6 +174,10 @@ vocabulary! { AbilityKind {
     AncientTrait => "Ancient Trait",
 } }
 
+vocabulary! { CostModifier {
+    Plus => "+",
+} }
+
 vocabulary! { Power {
     Vstar => "VSTAR",
 } }
@@ -207,6 +212,7 @@ pub fn document() -> serde_json::Value {
         "edition": Edition::VALUES,
         "abilityKind": AbilityKind::VALUES,
         "power": Power::VALUES,
+        "costModifier": CostModifier::VALUES,
         "regulationMark": RegulationMark::VALUES,
         "legendPart": LegendPart::VALUES,
     })

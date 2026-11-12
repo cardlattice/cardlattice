@@ -5,8 +5,8 @@ use utoipa::ToSchema;
 
 pub mod vocabulary;
 use vocabulary::{
-    AbilityKind, Category, Edition, EnergyType, Finish, LegendPart, Power, RegulationMark, Stage,
-    Subtype,
+    AbilityKind, Category, CostModifier, Edition, EnergyType, Finish, LegendPart, Power,
+    RegulationMark, Stage, Subtype,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -25,6 +25,9 @@ pub struct Attack {
     pub name: String,
     /// Ordered energy symbols; an empty list means a printed free attack.
     pub cost: Vec<EnergyType>,
+    /// Printed modifier beside the base energy cost; conditional wording remains in text.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cost_modifier: Option<CostModifier>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub damage: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -390,6 +393,18 @@ impl PrintingVariant {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn printed_cost_modifier_round_trips_and_rejects_aliases() {
+        let value = json!({"name":"Original attack","cost":["Colorless"],"costModifier":"+"});
+        let attack: Attack = serde_json::from_value(value.clone()).unwrap();
+        assert_eq!(serde_json::to_value(attack).unwrap(), value);
+        for invalid in ["plus", "-", "", " +"] {
+            let mut candidate = value.clone();
+            candidate["costModifier"] = json!(invalid);
+            assert!(serde_json::from_value::<Attack>(candidate).is_err());
+        }
+    }
 
     #[test]
     fn printed_power_markers_round_trip_on_attacks_and_abilities() {

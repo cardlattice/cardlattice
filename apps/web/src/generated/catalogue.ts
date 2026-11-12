@@ -77,9 +77,17 @@ export const EnergyType = {
   Fairy: 'Fairy',
 } as const;
 
+export type CostModifier = typeof CostModifier[keyof typeof CostModifier];
+
+
+export const CostModifier = {
+  '+': '+',
+} as const;
+
 export interface Attack {
   /** Ordered energy symbols; an empty list means a printed free attack. */
   cost: EnergyType[];
+  costModifier?: null | CostModifier;
   /** @nullable */
   damage?: string | null;
   name: string;
@@ -543,6 +551,7 @@ export const Rarity = {
   '★_(gold)': '★ (gold)',
   '★★': '★★',
   '★★★': '★★★',
+  Shining: 'Shining',
   Common: 'Common',
   Uncommon: 'Uncommon',
   Rare: 'Rare',
