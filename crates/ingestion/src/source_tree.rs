@@ -27,6 +27,7 @@ struct RecordFile {
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ReleaseFile {
+    name: Option<String>,
     release_date: Option<NaiveDate>,
     #[serde(default)]
     external_ids: Vec<ExternalIdPattern>,
@@ -64,6 +65,7 @@ struct LocalisedIdentity {
 }
 const PRINTING_FIELDS: &[&str] = &[
     "legendPart",
+    "vUnionPart",
     "additionalNumbers",
     "finishes",
     "stamps",
@@ -156,6 +158,7 @@ fn check_authored_values(path: &Path, value: &Value, root: bool) -> Result<(), E
                             | "variants"
                             | "additionalNumbers"
                             | "legendPart"
+                            | "vUnionPart"
                     )
                 {
                     continue;
@@ -432,6 +435,31 @@ pub fn load(root: &Path) -> Result<Vec<Entry>, Error> {
             draft: record,
             external_ids: file.external_ids,
         });
+    }
+    // Locale-specific set names belong to the release, not every card file.
+    for (path, (release, _, _)) in &releases {
+        if let Some(name) = &release.name {
+            let parts: Vec<_> = path.iter().map(|s| s.to_str().unwrap()).collect();
+            let id = format!("{}-{}", parts[0], parts[2]);
+            let record = records
+                .iter_mut()
+                .find(|r| r.id == id)
+                .ok_or_else(|| invalid(path, "Missing release set"))?;
+            let names = record
+                .draft
+                .attributes
+                .as_object_mut()
+                .unwrap()
+                .entry("releaseNames")
+                .or_insert_with(|| json!([]));
+            names.as_array_mut().unwrap().push(json!({
+                "language": parts[3], "region": parts[4], "name": name
+            }));
+            record
+                .draft
+                .validate(Some(parts[0]))
+                .map_err(|e| invalid(path, e))?;
+        }
     }
     let mut used_releases = HashSet::new();
     for path in printing_files {

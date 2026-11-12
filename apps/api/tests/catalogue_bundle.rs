@@ -932,3 +932,52 @@ async fn unnumbered_printings_keep_semantic_keys_without_inventing_collector_num
     );
     assert!(ingestion::source_tree::load(source.path()).is_err());
 }
+
+#[test]
+fn source_release_names_and_v_union_quadrants_survive_compilation() {
+    let source = tempfile::tempdir().unwrap();
+    source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/release.yaml",
+        "name: 원본 실험 세트\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/001.yaml",
+        "name: 원본 카드\nvUnionPart: top-left\npokemon: {category: pokemon, stage: V-UNION, subtypes: [V-UNION]}\n",
+    );
+    let records = ingestion::source_tree::load(source.path()).unwrap();
+    let set = records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory")
+        .unwrap();
+    assert_eq!(
+        set.draft.attributes["releaseNames"],
+        serde_json::json!([{"language":"ko","region":"KR","name":"원본 실험 세트"}])
+    );
+    let printing = records
+        .iter()
+        .find(|r| r.id == "pokemon-laboratory-ko-KR-001")
+        .unwrap();
+    assert_eq!(printing.draft.attributes["vUnionPart"], "top-left");
+    for invalid in ["", " padded", "line\\nbreak"] {
+        write(
+            source.path(),
+            "pokemon/cards/laboratory/ko/KR/release.yaml",
+            &format!("name: \"{invalid}\"\n"),
+        );
+        assert!(ingestion::source_tree::load(source.path()).is_err());
+    }
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/release.yaml",
+        "name: 원본 실험 세트\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/ko/KR/001.yaml",
+        "name: 원본 카드\nvUnionPart: upper-left\n",
+    );
+    assert!(ingestion::source_tree::load(source.path()).is_err());
+}

@@ -490,6 +490,16 @@ export const RegulationMark = {
   J: 'J',
 } as const;
 
+export type VUnionPart = typeof VUnionPart[keyof typeof VUnionPart];
+
+
+export const VUnionPart = {
+  'top-left': 'top-left',
+  'top-right': 'top-right',
+  'bottom-left': 'bottom-left',
+  'bottom-right': 'bottom-right',
+} as const;
+
 export interface PrintingMetadata {
   additionalNumbers?: null | AdditionalNumbers;
   /** @nullable */
@@ -516,6 +526,7 @@ export interface PrintingMetadata {
      * @nullable
      */
   unnumberedKey?: string | null;
+  vUnionPart?: null | VUnionPart;
   /** @nullable */
   variants?: PrintingMetadataVariants;
 }

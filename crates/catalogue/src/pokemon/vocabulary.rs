@@ -182,6 +182,13 @@ vocabulary! { Power {
     Vstar => "VSTAR",
 } }
 
+vocabulary! { VUnionPart {
+    TopLeft => "top-left",
+    TopRight => "top-right",
+    BottomLeft => "bottom-left",
+    BottomRight => "bottom-right",
+} }
+
 vocabulary! { LegendPart {
     Top => "top",
     Bottom => "bottom",
@@ -215,5 +222,6 @@ pub fn document() -> serde_json::Value {
         "costModifier": CostModifier::VALUES,
         "regulationMark": RegulationMark::VALUES,
         "legendPart": LegendPart::VALUES,
+        "vUnionPart": VUnionPart::VALUES,
     })
 }

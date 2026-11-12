@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 pub mod vocabulary;
 use vocabulary::{
     AbilityKind, Category, CostModifier, Edition, EnergyType, Finish, LegendPart, Power,
-    RegulationMark, Stage, Subtype,
+    RegulationMark, Stage, Subtype, VUnionPart,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -232,6 +232,9 @@ pub struct PrintingMetadata {
     /// Physical half; pair membership is represented by a shared collection.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub legend_part: Option<LegendPart>,
+    /// Physical quadrant; assembly membership is represented by a shared collection.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub v_union_part: Option<VUnionPart>,
     /// Derived from the source filename when collectorNumber is explicitly null.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unnumbered_key: Option<String>,

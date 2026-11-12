@@ -58,6 +58,32 @@ impl PrintedIdentifier {
         Ok(())
     }
 }
+/// A printed set name scoped to its language and release region.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ReleaseName {
+    pub language: String,
+    pub region: String,
+    pub name: String,
+}
+impl ReleaseName {
+    pub fn validate_all(values: &[Self]) -> Result<(), ValidationError> {
+        if values.len() > 100
+            || values.iter().enumerate().any(|(i, v)| {
+                validate_language(&v.language).is_err()
+                    || v.region.len() != 2
+                    || !v.region.bytes().all(|b| b.is_ascii_uppercase())
+                    || !text(&v.name, 200)
+                    || values[..i]
+                        .iter()
+                        .any(|p| p.language == v.language && p.region == v.region)
+            })
+        {
+            return Err(ValidationError("Invalid or duplicate release name".into()));
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Default, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GroupMetadata {
@@ -80,6 +106,11 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
     let mut refs = Vec::new();
     match draft.kind {
         Kind::Set => {
+            if let Some(value) = draft.attributes.get("releaseNames") {
+                let names: Vec<ReleaseName> =
+                    serde_json::from_value(value.clone()).map_err(invalid)?;
+                ReleaseName::validate_all(&names)?;
+            }
             if let Some(value) = draft.attributes.get("printedIdentifiers") {
                 let marks: Vec<PrintedIdentifier> =
                     serde_json::from_value(value.clone()).map_err(invalid)?;
@@ -91,6 +122,7 @@ pub fn references(draft: &Draft) -> Result<Vec<(String, Kind)>, ValidationError>
                     .as_object_mut()
                     .unwrap()
                     .remove("printedIdentifiers");
+                metadata.as_object_mut().unwrap().remove("releaseNames");
                 let metadata: crate::pokemon::PrintingMetadata =
                     serde_json::from_value(metadata).map_err(invalid)?;
                 metadata.validate()?;
