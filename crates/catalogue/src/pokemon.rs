@@ -55,6 +55,15 @@ pub struct PokemonAttributes {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identity_group: Option<String>,
     pub hp: Option<u16>,
+    /// Printed localised Pokédex flavour text, not an inferred species description.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flavour_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub species: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height_metres: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weight_kilograms: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub types: Option<Vec<EnergyType>>,
     pub stage: Option<Stage>,
@@ -89,6 +98,12 @@ impl PokemonAttributes {
                 .is_some_and(|v| v.len() > 4 || !unique(v))
             || self.evolves_from.as_ref().is_some_and(|v| !text(v, 200))
             || self.retreat_cost.is_some_and(|v| v > 10)
+            || self.flavour_text.as_ref().is_some_and(|v| !text(v, 2000))
+            || self.species.as_ref().is_some_and(|v| !text(v, 200))
+            || [self.height_metres, self.weight_kilograms]
+                .into_iter()
+                .flatten()
+                .any(|v| !v.is_finite() || !(0.0..=1_000_000.0).contains(&v))
         {
             return Err(invalid());
         }
@@ -114,7 +129,10 @@ impl PokemonAttributes {
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
-                || self.national_dex.is_some())
+                || self.national_dex.is_some()
+                || self.species.is_some()
+                || self.height_metres.is_some()
+                || self.weight_kilograms.is_some())
         {
             return Err(invalid());
         }
@@ -332,6 +350,36 @@ mod tests {
             }
             let attributes: PokemonAttributes = serde_json::from_value(invalid).unwrap();
             assert!(attributes.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn localised_printed_pokedex_metadata_is_typed() {
+        let value = json!({"category":"pokemon", "flavourText":"Original synthetic flavour text.", "species":"Original synthetic species", "heightMetres":0.3, "weightKilograms":0.1});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        assert_eq!(
+            serde_json::to_value(attributes).unwrap()["heightMetres"],
+            0.3
+        );
+        for patch in [
+            json!({"heightMetres":-1}),
+            json!({"weightKilograms":1000001}),
+            json!({"species":" "}),
+            json!({"flavourText":" "}),
+            json!({"category":"trainer"}),
+        ] {
+            let mut changed = value.clone();
+            changed
+                .as_object_mut()
+                .unwrap()
+                .extend(patch.as_object().unwrap().clone());
+            assert!(
+                serde_json::from_value::<PokemonAttributes>(changed)
+                    .unwrap()
+                    .validate()
+                    .is_err()
+            );
         }
     }
 

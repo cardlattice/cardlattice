@@ -77,6 +77,9 @@ vocabulary! { Subtype {
 } }
 
 vocabulary! { Rarity {
+    PrintedC => "C",
+    PrintedU => "U",
+    PrintedRR => "RR",
     Common => "Common",
     Uncommon => "Uncommon",
     Rare => "Rare",

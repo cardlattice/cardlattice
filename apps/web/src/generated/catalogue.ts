@@ -341,6 +341,13 @@ export interface PokemonAttributes {
   /** @nullable */
   evolvesFrom?: string | null;
   /**
+     * Printed localised Pokédex flavour text, not an inferred species description.
+     * @nullable
+     */
+  flavourText?: string | null;
+  /** @nullable */
+  heightMetres?: number | null;
+  /**
      * @minimum 0
      * @nullable
      */
@@ -369,6 +376,8 @@ export interface PokemonAttributes {
   retreatCost?: number | null;
   /** @nullable */
   rules?: string[] | null;
+  /** @nullable */
+  species?: string | null;
   stage?: null | Stage;
   /** @nullable */
   subtypes?: Subtype[] | null;
@@ -378,6 +387,8 @@ export interface PokemonAttributes {
   types?: EnergyType[] | null;
   /** @nullable */
   weaknesses?: TypeModifier[] | null;
+  /** @nullable */
+  weightKilograms?: number | null;
 }
 
 export interface PrintedIdentifier {
@@ -453,6 +464,9 @@ export type Rarity = typeof Rarity[keyof typeof Rarity];
 
 
 export const Rarity = {
+  C: 'C',
+  U: 'U',
+  RR: 'RR',
   Common: 'Common',
   Uncommon: 'Uncommon',
   Rare: 'Rare',

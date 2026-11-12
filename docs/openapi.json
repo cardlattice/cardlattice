@@ -652,6 +652,20 @@
               "null"
             ]
           },
+          "flavourText": {
+            "description": "Printed localised Pokédex flavour text, not an inferred species description.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "heightMetres": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "hp": {
             "format": "int32",
             "minimum": 0,
@@ -711,6 +725,12 @@
               "null"
             ]
           },
+          "species": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "stage": {
             "oneOf": [
               {
@@ -754,6 +774,13 @@
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "weightKilograms": {
+            "format": "double",
+            "type": [
+              "number",
               "null"
             ]
           }
@@ -921,6 +948,9 @@
       },
       "Rarity": {
         "enum": [
+          "C",
+          "U",
+          "RR",
           "Common",
           "Uncommon",
           "Rare",
