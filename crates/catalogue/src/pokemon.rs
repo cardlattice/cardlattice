@@ -126,11 +126,17 @@ impl PokemonAttributes {
                 .subtypes
                 .as_ref()
                 .is_none_or(|v| v.is_empty() || v == &[Subtype::Item]);
+        // Technical Machine Tools grant a printed attack to the attached Pokémon.
+        let tool_attack = self.category == Some(Category::Trainer)
+            && self
+                .subtypes
+                .as_ref()
+                .is_some_and(|values| values.contains(&Subtype::PokemonTool));
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
             && ((!trainer_pokemon && (self.hp.is_some() || self.abilities.is_some()))
                 || self.stage.is_some()
                 || self.evolves_from.is_some()
-                || self.attacks.is_some()
+                || (!tool_attack && self.attacks.is_some())
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
@@ -365,6 +371,31 @@ impl PrintingVariant {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn technical_machine_tools_accept_attacks_without_pokemon_only_stats() {
+        let tool = json!({"category":"trainer","subtypes":["Pokémon Tool"],"attacks":[{"name":"Original synthetic attack","cost":["Colorless","Colorless"],"damage":"20"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(tool.clone()).unwrap();
+        attributes.validate().unwrap();
+        for patch in [
+            json!({"category":"energy"}),
+            json!({"subtypes":["Item"]}),
+            json!({"subtypes":["Supporter"]}),
+            json!({"subtypes":null}),
+            json!({"hp":60}),
+            json!({"abilities":[]}),
+            json!({"stage":"Basic"}),
+            json!({"retreatCost":0}),
+            json!({"attacks":[{"name":" ","cost":[]}]}),
+        ] {
+            let mut invalid = tool.clone();
+            for (key, value) in patch.as_object().unwrap() {
+                invalid[key] = value.clone();
+            }
+            let attributes: PokemonAttributes = serde_json::from_value(invalid).unwrap();
+            assert!(attributes.validate().is_err());
+        }
+    }
 
     #[test]
     fn fossil_items_accept_printed_hp_and_abilities_without_relaxing_other_categories() {
