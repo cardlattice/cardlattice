@@ -345,6 +345,7 @@ export const Subtype = {
   Gigantamax: 'Gigantamax',
   Eternamax: 'Eternamax',
   Gold_Star: 'Gold Star',
+  Shining: 'Shining',
   Single_Strike: 'Single Strike',
   Rapid_Strike: 'Rapid Strike',
   Fusion_Strike: 'Fusion Strike',

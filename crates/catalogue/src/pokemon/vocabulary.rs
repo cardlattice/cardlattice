@@ -72,6 +72,7 @@ vocabulary! { Subtype {
     Gigantamax => "Gigantamax",
     Eternamax => "Eternamax",
     GoldStar => "Gold Star",
+    Shining => "Shining",
     SingleStrike => "Single Strike",
     RapidStrike => "Rapid Strike",
     FusionStrike => "Fusion Strike",
