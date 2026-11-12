@@ -32,9 +32,17 @@ export const AbilityKind = {
   Ancient_Trait: 'Ancient Trait',
 } as const;
 
+export type Power = typeof Power[keyof typeof Power];
+
+
+export const Power = {
+  VSTAR: 'VSTAR',
+} as const;
+
 export interface Ability {
   kind: AbilityKind;
   name: string;
+  power?: null | Power;
   text: string;
 }
 
@@ -75,6 +83,7 @@ export interface Attack {
   /** @nullable */
   damage?: string | null;
   name: string;
+  power?: null | Power;
   /** @nullable */
   text?: string | null;
 }
@@ -523,6 +532,7 @@ export const Rarity = {
   FUR: 'FUR',
   A: 'A',
   CHR: 'CHR',
+  CSR: 'CSR',
   BWR: 'BWR',
   MUR: 'MUR',
   K: 'K',

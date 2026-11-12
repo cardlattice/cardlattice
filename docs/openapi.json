@@ -22,6 +22,16 @@
           "name": {
             "type": "string"
           },
+          "power": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Power"
+              }
+            ]
+          },
           "text": {
             "type": "string"
           }
@@ -93,6 +103,17 @@
           },
           "name": {
             "type": "string"
+          },
+          "power": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Power",
+                "description": "Explicit printed power banner, independent of the localised attack name."
+              }
+            ]
           },
           "text": {
             "type": [
@@ -819,6 +840,12 @@
         },
         "type": "object"
       },
+      "Power": {
+        "enum": [
+          "VSTAR"
+        ],
+        "type": "string"
+      },
       "PrintedIdentifier": {
         "additionalProperties": false,
         "properties": {
@@ -1028,6 +1055,7 @@
           "FUR",
           "A",
           "CHR",
+          "CSR",
           "BWR",
           "MUR",
           "K",

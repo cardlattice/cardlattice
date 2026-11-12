@@ -5,7 +5,8 @@ use utoipa::ToSchema;
 
 pub mod vocabulary;
 use vocabulary::{
-    AbilityKind, Category, Edition, EnergyType, Finish, LegendPart, RegulationMark, Stage, Subtype,
+    AbilityKind, Category, Edition, EnergyType, Finish, LegendPart, Power, RegulationMark, Stage,
+    Subtype,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -28,6 +29,9 @@ pub struct Attack {
     pub damage: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
+    /// Explicit printed power banner, independent of the localised attack name.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub power: Option<Power>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -35,6 +39,8 @@ pub struct Ability {
     pub name: String,
     pub text: String,
     pub kind: AbilityKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub power: Option<Power>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -126,17 +132,18 @@ impl PokemonAttributes {
                 .subtypes
                 .as_ref()
                 .is_none_or(|v| v.is_empty() || v == &[Subtype::Item]);
-        // Technical Machine Tools grant a printed attack to the attached Pokémon.
-        let tool_attack = self.category == Some(Category::Trainer)
+        // Tools can grant printed attacks or abilities to the attached Pokémon.
+        let pokemon_tool = self.category == Some(Category::Trainer)
             && self
                 .subtypes
                 .as_ref()
                 .is_some_and(|values| values.contains(&Subtype::PokemonTool));
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
-            && ((!trainer_pokemon && (self.hp.is_some() || self.abilities.is_some()))
+            && ((!trainer_pokemon && self.hp.is_some())
+                || (!trainer_pokemon && !pokemon_tool && self.abilities.is_some())
                 || self.stage.is_some()
                 || self.evolves_from.is_some()
-                || (!tool_attack && self.attacks.is_some())
+                || (!pokemon_tool && self.attacks.is_some())
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
@@ -385,6 +392,44 @@ mod tests {
     use serde_json::json;
 
     #[test]
+    fn printed_power_markers_round_trip_on_attacks_and_abilities() {
+        let value = json!({"category":"pokemon","attacks":[{"name":"Original attack","cost":[],"power":"VSTAR"}],"abilities":[{"name":"Original ability","text":"Original effect.","kind":"Ability","power":"VSTAR"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        let serialised = serde_json::to_value(attributes).unwrap();
+        assert_eq!(serialised["attacks"], value["attacks"]);
+        assert_eq!(serialised["abilities"], value["abilities"]);
+        for field in ["attacks", "abilities"] {
+            for invalid in ["vstar", "V-Star", "Unknown"] {
+                let mut candidate = value.clone();
+                candidate[field][0]["power"] = json!(invalid);
+                assert!(serde_json::from_value::<PokemonAttributes>(candidate).is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn pokemon_tools_can_grant_printed_vstar_abilities() {
+        let value = json!({"category":"trainer","subtypes":["Item","Pokémon Tool"],"abilities":[{"name":"Original power","text":"Original effect.","kind":"Ability","power":"VSTAR"}]});
+        let attributes: PokemonAttributes = serde_json::from_value(value.clone()).unwrap();
+        attributes.validate().unwrap();
+        for patch in [
+            json!({"subtypes":["Item"]}),
+            json!({"subtypes":["Supporter"]}),
+            json!({"category":"energy"}),
+            json!({"hp":30}),
+            json!({"stage":"Basic"}),
+        ] {
+            let mut candidate = value.clone();
+            for (key, value) in patch.as_object().unwrap() {
+                candidate[key] = value.clone();
+            }
+            let attributes: PokemonAttributes = serde_json::from_value(candidate).unwrap();
+            assert!(attributes.validate().is_err());
+        }
+    }
+
+    #[test]
     fn observed_editions_do_not_require_guessed_finishes() {
         let value = json!({"variants":{"first-edition":{"edition":"first-edition"}}});
         let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
@@ -412,7 +457,6 @@ mod tests {
             json!({"subtypes":["Supporter"]}),
             json!({"subtypes":null}),
             json!({"hp":60}),
-            json!({"abilities":[]}),
             json!({"stage":"Basic"}),
             json!({"retreatCost":0}),
             json!({"attacks":[{"name":" ","cost":[]}]}),

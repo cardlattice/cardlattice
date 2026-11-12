@@ -105,6 +105,7 @@ vocabulary! { Rarity {
     PrintedFUR => "FUR",
     PrintedA => "A",
     PrintedCHR => "CHR",
+    PrintedCSR => "CSR",
     PrintedBWR => "BWR",
     PrintedMUR => "MUR",
     PrintedK => "K",
@@ -172,6 +173,10 @@ vocabulary! { AbilityKind {
     AncientTrait => "Ancient Trait",
 } }
 
+vocabulary! { Power {
+    Vstar => "VSTAR",
+} }
+
 vocabulary! { LegendPart {
     Top => "top",
     Bottom => "bottom",
@@ -201,6 +206,7 @@ pub fn document() -> serde_json::Value {
         "finish": Finish::VALUES,
         "edition": Edition::VALUES,
         "abilityKind": AbilityKind::VALUES,
+        "power": Power::VALUES,
         "regulationMark": RegulationMark::VALUES,
         "legendPart": LegendPart::VALUES,
     })
