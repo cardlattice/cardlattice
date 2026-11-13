@@ -1,7 +1,8 @@
+import { useCatalogue } from "../catalogue";
 import { Link, useNavigate, useParams, useRouterState, useSearch } from "@tanstack/react-router";
 import { Search, ArrowRight } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { useApi, type PageData, type RecordData } from "../api";
+import { type PageData, type RecordData } from "../api";
 import { PageHeader } from "../components/PageHeader";
 import { RecordTable } from "../components/RecordTable";
 import { QueryState } from "../components/QueryState";
@@ -39,14 +40,14 @@ export function Browse() {
   if (search.sort === "newest") query.set("sort", "newest");
   query.sort();
   const endpoint = isSearch
-    ? "/v1/search"
+    ? "/search"
     : isGames
-      ? "/v1/games"
-      : `/v1/games/${params.game}/${collection}`;
-  const records = useApi<PageData>(`${endpoint}${query.size ? `?${query}` : ""}`);
-  const game = useApi<{ data: RecordData }>(`/v1/games/${params.game}`, !!params.game);
-  const parent = useApi<{ data: RecordData }>(
-    `/v1/games/${params.game}/${search.setId ? "sets" : "cards"}/${search.setId || search.cardId}`,
+      ? "/games"
+      : `/games/${params.game}/${collection}`;
+  const records = useCatalogue<PageData>(`${endpoint}${query.size ? `?${query}` : ""}`);
+  const game = useCatalogue<{ data: RecordData }>(`/games/${params.game}`, !!params.game);
+  const parent = useCatalogue<{ data: RecordData }>(
+    `/games/${params.game}/${search.setId ? "sets" : "cards"}/${search.setId || search.cardId}`,
     !!params.game && !!(search.setId || search.cardId),
   );
   const title = isSearch
@@ -129,6 +130,9 @@ export function Browse() {
             <option value="">All languages</option>
             <option value="en">English</option>
             <option value="ja">Japanese</option>
+            <option value="nl">Dutch</option>
+            <option value="ko">Korean</option>
+            <option value="zh-Hans">Simplified Chinese</option>
             <option value="fr">French</option>
             <option value="de">German</option>
           </select>

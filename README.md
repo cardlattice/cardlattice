@@ -1,5 +1,11 @@
 # Cardlattice
 
+The public app at `cardlattice.com` loads catalogue data client-side with Vite,
+TanStack DB and TanStack Query. `status.cardlattice.com` hosts coverage and static
+snapshots; the Rust API at `api.cardlattice.com` is coming soon. See
+[Cloudflare Pages deployment](docs/cloudflare-pages.md) for CI and domain setup.
+
+
 Free, open trading card metadata. Independently maintained public data
 infrastructure, with anonymous read access and original, reviewed contributions.
 Software is MIT-licensed; original metadata is CC0-1.0. Card artwork is separate.

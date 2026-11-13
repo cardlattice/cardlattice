@@ -2,8 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { CatalogueRecord, Page, Stats, RecordDetail } from "./generated/catalogue";
 
-export type RecordData = Omit<CatalogueRecord, "attributes"> & {
+export type RecordData = Omit<
+  CatalogueRecord,
+  "attributes" | "createdAt" | "updatedAt" | "synthetic"
+> & {
   attributes: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+  synthetic?: boolean;
 };
 export type PageData = Omit<Page, "data"> & { data: RecordData[] };
 export type StatsData = Stats;

@@ -1,4 +1,5 @@
-import { useGetV1Stats } from "../generated/catalogue";
+import { manifestUrl } from "../catalogue-data";
+import { useCatalogue } from "../catalogue";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -10,16 +11,19 @@ import {
   Terminal,
 } from "lucide-react";
 import { useState } from "react";
-import { number, useApi, type PageData, type StatsData } from "../api";
+import { number, type PageData, type StatsData } from "../api";
 import { Button } from "../components/Button";
 
 export function Home() {
-  const stats = useGetV1Stats<StatsData, Error>({ query: { staleTime: 30_000, retry: 1 } });
-  const example = useApi<PageData>("/v1/games/pokemon/sets?limit=1", (stats.data?.games ?? 0) > 0);
-  const featured = useApi<PageData>("/v1/games/pokemon/sets?limit=3");
+  const stats = useCatalogue<StatsData>("/stats");
+  const example = useCatalogue<PageData>(
+    "/games/pokemon/sets?limit=1",
+    (stats.data?.games ?? 0) > 0,
+  );
+  const featured = useCatalogue<PageData>("/games/pokemon/sets?limit=3");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const command = `curl "${window.location.origin}/v1/games/pokemon/sets?limit=1"`;
+  const command = `curl "${manifestUrl}"`;
   const exampleText = example.data
     ? JSON.stringify(
         {
@@ -35,10 +39,10 @@ export function Home() {
         2,
       )
     : example.isError
-      ? "The live example is temporarily unavailable."
+      ? "The catalogue example is temporarily unavailable."
       : stats.data?.games === 0
         ? "The catalogue is empty. Import reviewed metadata to get started."
-        : "Loading a live catalogue record…";
+        : "Loading a published catalogue record…";
   async function copy() {
     try {
       await navigator.clipboard.writeText(command);
@@ -61,8 +65,8 @@ export function Home() {
             <span className="accent">Open to everyone.</span>
           </h1>
           <p className="hero-description">
-            A free, independently curated catalogue and public API for trading cards. Built for the
-            things you’ll build next.
+            A free, independently curated catalogue for trading cards. Built for the things you’ll
+            build next.
           </p>
           <div className="button-row">
             <Link to="/docs" className="button button-primary">
@@ -111,7 +115,7 @@ export function Home() {
                     <small>
                       {set.synthetic
                         ? "Synthetic development fixture"
-                        : "Pokémon · English catalogue"}
+                        : "Pokémon · Published catalogue"}
                     </small>
                   </span>
                   <ArrowUpRight size={17} aria-hidden="true" />
@@ -130,17 +134,17 @@ export function Home() {
             <span>
               <Terminal size={16} aria-hidden="true" /> A SIMPLE PLACE TO START
             </span>
-            <span className="badge">REST / v1</span>
+            <span className="badge">API coming soon</span>
           </div>
           <div className="terminal-body">
             <p className="code-comment">{"// Your next project starts here."}</p>
             <p className="code-request">
-              <span>GET</span> /v1/games/pokemon/sets?limit=1
+              <span>GET</span> Catalogue snapshot
             </p>
-            <pre aria-label="Live API response excerpt">
+            <pre aria-label="Catalogue snapshot excerpt">
               <code>{exampleText}</code>
             </pre>
-            <p className="code-comment">Live catalogue excerpt · selected response fields</p>
+            <p className="code-comment">Loaded in your browser · selected catalogue fields</p>
           </div>
           <div className="terminal-bottom">
             <span className="protocol-dot" /> Public data. Ready to build.
@@ -150,7 +154,7 @@ export function Home() {
           </div>
         </div>
       </section>
-      <section className="metrics-strip" aria-label="Live catalogue counts">
+      <section className="metrics-strip" aria-label="Published catalogue counts">
         {[
           ["Games", stats.data?.games],
           ["Sets", stats.data?.sets],
@@ -168,7 +172,7 @@ export function Home() {
       </section>
       <p className="metrics-note">
         {stats.isError
-          ? "Live counts are temporarily unavailable."
+          ? "Catalogue counts are temporarily unavailable."
           : stats.data?.syntheticRecords
             ? `${number.format(stats.data.syntheticRecords)} records are clearly marked synthetic development fixtures. No claim of catalogue completeness.`
             : "Counts come directly from the catalogue. Coverage is a work in progress."}
@@ -195,24 +199,24 @@ export function Home() {
             </span>
             <h3>Made for developers</h3>
             <p>
-              Predictable JSON, stable identities, cursor pagination, and an open API contract.
-              Small details that make a difference.
+              Downloadable JSON and stable identities. The Rust API is coming soon at
+              api.cardlattice.com. Small details that make a difference.
             </p>
             <Link to="/docs" className="text-link">
-              Explore the API <ArrowRight size={16} aria-hidden="true" />
+              API coming soon <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </article>
           <article>
             <span className="feature-icon">
               <Database aria-hidden="true" />
             </span>
-            <h3>Data you can trace</h3>
+            <h3>Open catalogue data</h3>
             <p>
-              Original contributions with recorded provenance. Card metadata and artwork rights are
-              always treated separately.
+              Community-maintained metadata, available to download. Card metadata and artwork rights
+              are always treated separately.
             </p>
             <Link to="/licensing" className="text-link">
-              Our sourcing principles <ArrowRight size={16} aria-hidden="true" />
+              Licensing details <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </article>
           <article>
@@ -233,7 +237,7 @@ export function Home() {
       <section className="quickstart">
         <div>
           <p className="eyebrow">NO SIGN-UP. JUST A REQUEST.</p>
-          <h2>Try your first query.</h2>
+          <h2>Download the manifest.</h2>
           <p>One request. No account needed.</p>
         </div>
         <div>
@@ -248,7 +252,7 @@ export function Home() {
               ? "Clipboard unavailable. Select and copy the command above."
               : copied
                 ? "Command copied to clipboard."
-                : "Public reads work without a token."}
+                : "Static catalogue downloads need no token."}
           </output>
         </div>
       </section>

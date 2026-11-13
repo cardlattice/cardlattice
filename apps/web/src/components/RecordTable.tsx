@@ -15,7 +15,7 @@ export function RecordTable({ records, game }: { records: RecordData[]; game?: s
         <h2>No records here yet</h2>
         <p>
           This catalogue grows through reviewed, original contributions. Try another filter or
-          contribute a source.
+          contribute a correction.
         </p>
         <Link to="/contribute" className="text-link">
           Contribute metadata <ArrowUpRight size={16} aria-hidden="true" />

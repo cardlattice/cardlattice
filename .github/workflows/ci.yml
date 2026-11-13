@@ -46,12 +46,6 @@ jobs:
           pnpm --filter @cardlattice/web generate
           git diff --exit-code -- docs/openapi.json apps/web/src/generated
       - run: cargo build --release --package cardlattice-api
-      - name: Prepare original development catalogue
-        run: |
-          target/release/cardlattice-api migrate
-          target/release/cardlattice-api seed
-          target/release/cardlattice-api serve > /tmp/cardlattice-api.log 2>&1 &
-          curl --retry 20 --retry-connrefused --retry-delay 1 -fsS http://localhost:8080/readyz
       - name: Browser tests with preinstalled Playwright dependencies
         run: ./scripts/browser-tests-ci.sh
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
