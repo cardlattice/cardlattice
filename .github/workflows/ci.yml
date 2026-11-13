@@ -32,6 +32,12 @@ jobs:
           node-version: '24.21.0'
       - run: npm install --global pnpm@12.4.1
       - run: rustup update stable && rustup default stable && rustup component add clippy rustfmt
+      - name: Cache Rust dependencies and Cargo tools
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          # Keyed by the installed compiler, Cargo manifests, lockfile and build flags.
+          # Includes target/debug, target/release and tools installed in ~/.cargo/bin.
+          cache-on-failure: true
       - run: cargo install --locked cargo-nextest cargo-audit cargo-deny
       - run: pnpm install --frozen-lockfile
       - run: cargo fmt --all --check
@@ -60,5 +66,18 @@ jobs:
           name: browser-validation
           path: apps/web/test-results
           retention-days: 7
+      - name: Set up Docker build cache
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Docker packaging
-        run: docker compose build
+        uses: docker/bake-action@5be5f02ff8819ecd3092ea6b2e6261c31774f2b4 # v6
+        with:
+          source: .
+          files: compose.yaml
+          # migrate and seed use the same Dockerfile and context as api.
+          targets: api,web
+          load: true
+          set: |
+            api.cache-from=type=gha,scope=ci-api
+            api.cache-to=type=gha,scope=ci-api,mode=max
+            web.cache-from=type=gha,scope=ci-web
+            web.cache-to=type=gha,scope=ci-web,mode=max
