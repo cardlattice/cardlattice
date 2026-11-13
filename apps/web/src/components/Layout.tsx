@@ -27,12 +27,12 @@ export function Layout() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="announcement">
+      <section className="announcement" aria-label="About Cardlattice">
         Independent. Open source. Free to build on.{" "}
         <Link to="/about">
           Meet the project <ArrowUpRight size={13} aria-hidden="true" />
         </Link>
-      </div>
+      </section>
       <header className="site-header">
         <div className="header-inner">
           <Link to="/" className="wordmark" aria-label="Cardlattice home">
@@ -87,12 +87,12 @@ export function Layout() {
           </p>
         </div>
         <nav aria-label="Footer navigation">
-          <Link to="/coverage">Coverage</Link>
-          <Link to="/status">Status</Link>
+          <a href="https://status.cardlattice.com">Coverage</a>
+          <a href="https://status.cardlattice.com">Status</a>
           <Link to="/changelog">Changelog</Link>
-          <Link to="/licensing">Licensing & provenance</Link>
+          <Link to="/licensing">Licensing</Link>
           <Link to="/about">About & governance</Link>
-          <Link to="/moderate">Moderator tools</Link>
+          <Link to="/docs">API — coming soon</Link>
         </nav>
         <p className="footer-note">
           Software: MIT · Original metadata: CC0

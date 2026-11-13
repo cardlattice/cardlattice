@@ -1,11 +1,11 @@
-import { useGetV1Stats } from "../generated/catalogue";
+import { useCatalogue } from "../catalogue";
 import { Link } from "@tanstack/react-router";
 import { number, type StatsData } from "../api";
 import { PageHeader } from "../components/PageHeader";
 import { QueryState } from "../components/QueryState";
 
 export function Coverage() {
-  const query = useGetV1Stats<StatsData, Error>({ query: { staleTime: 30_000, retry: 1 } });
+  const query = useCatalogue<StatsData>("/stats");
   const stats = query.data;
   return (
     <div className="page">
@@ -31,7 +31,7 @@ export function Coverage() {
             <section className="detail-grid section">
               <article className="panel">
                 <h2>Metadata coverage</h2>
-                <p>Calculated from the {stats.printings} printings currently in this database.</p>
+                <p>Calculated from the {stats.printings} printings in the published snapshot.</p>
                 <label className="coverage-label" htmlFor="rarity-coverage">
                   Rarity recorded{" "}
                   <strong>
@@ -59,10 +59,11 @@ export function Coverage() {
                 <h2>Catalogue completeness</h2>
                 <p className="large-value">Unknown</p>
                 <p>{stats.completenessNote}</p>
-                <p>{stats.syntheticRecords} records are synthetic development fixtures.</p>
+                <p>
+                  <a href="https://status.cardlattice.com">View coverage by language and set ↗</a>
+                </p>
                 <p className="field-hint">
-                  Counts may be cached for up to 60 seconds. Downloads are released daily when the
-                  catalogue changes.
+                  Counts are calculated in your browser from the published snapshot.
                 </p>
               </article>
             </section>

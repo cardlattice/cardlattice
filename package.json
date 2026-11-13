@@ -12,5 +12,8 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "test:e2e": "pnpm --filter @cardlattice/web test:e2e",
     "format:check": "pnpm --filter @cardlattice/web format:check"
+  },
+  "devDependencies": {
+    "wrangler": "4.161.0"
   }
 }

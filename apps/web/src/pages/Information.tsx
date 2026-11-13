@@ -6,13 +6,13 @@ export function Information() {
   return (
     <div className="page narrow">
       <PageHeader
-        eyebrow={licensing ? "KNOW WHERE YOUR DATA COMES FROM" : "PUBLIC DATA INFRASTRUCTURE"}
+        eyebrow={licensing ? "LICENSING & CONTRIBUTOR TERMS" : "PUBLIC DATA INFRASTRUCTURE"}
         title={licensing ? "Open, with clear boundaries." : "A shared foundation for card data."}
       >
         <p>
           {licensing
             ? "Metadata, software, and artwork have different rights. We keep those distinctions visible."
-            : "Cardlattice is a free, open-source, independently maintained trading card catalogue and public API."}
+            : "Cardlattice is a free, open-source, independently maintained trading card catalogue. Its public API is coming soon."}
         </p>
       </PageHeader>
       <div className="prose">
@@ -23,18 +23,6 @@ export function Information() {
               Cardlattice software is licensed under MIT. Original metadata contributions and the
               synthetic development fixtures are dedicated under CC0-1.0. Legally required notices
               and attribution must always be preserved.
-            </p>
-            <h2>Independent sourcing</h2>
-            <p>
-              Accepted sources are original manual entry, inspection of user-owned physical cards,
-              permitted official references, and original community contributions. We do not seed
-              the catalogue with TCGdex, Scryfall, YGOPRODeck, or other third-party catalogue dumps
-              or API responses.
-            </p>
-            <p>
-              Each reviewed change records its source and field-level provenance internally. Source
-              descriptions are visible on record pages. Do not include private personal information
-              in a source description.
             </p>
             <h2>Artwork is separate</h2>
             <p>
@@ -57,9 +45,6 @@ export function Information() {
                 legally possible. Do not submit copied descriptive text from protected sources.
               </li>
               <li>
-                Give an accurate source description and identify relevant rights restrictions.
-              </li>
-              <li>
                 Upload only scans you are authorised to provide privately for review. You grant the
                 project permission to store and inspect them for that purpose; no public artwork
                 licence is implied.
@@ -71,18 +56,19 @@ export function Information() {
             </ol>
             <h2>Corrections & removal requests</h2>
             <p>
-              Use the contribution form to propose corrections or request removal of a record. A
-              maintainer must review the source and preserve the audit trail. Production operators
-              must publish a monitored rights-contact address before launching publicly.
+              Use the data repository to propose corrections or request removal of a record. A
+              maintainer reviews these requests. Production operators must publish a monitored
+              rights-contact address before launching publicly.
             </p>
           </>
         ) : (
           <>
             <h2>Free access is the foundation.</h2>
             <p>
-              Public catalogue reads require no API key, subscription, or registration. The
-              application runs with PostgreSQL, a Rust API, and a static React website. No paid
-              service or proprietary infrastructure is required.
+              Public catalogue reads require no API key, subscription, or registration. The static
+              React app uses Vite, TanStack DB and TanStack Query to load and browse published
+              catalogue data in your browser. The Rust API and PostgreSQL backend will be deployed
+              separately.
             </p>
             <h2>A catalogue that earns your trust.</h2>
             <p>
@@ -93,14 +79,14 @@ export function Information() {
             <p>
               We never claim completeness without a verified reference total. The{" "}
               <Link to="/coverage">coverage dashboard</Link> reports counts and known gaps from the
-              actual database. Synthetic development fixtures are clearly labelled.
+              published snapshot.
             </p>
             <h2>Independent governance</h2>
             <p>
               This is an independently maintained open-source project, unaffiliated with card
-              publishers. Maintainers steward code, source policy, moderation access, and operating
-              costs. Changes should be reviewed publicly; significant data-policy decisions should
-              document their rationale.
+              publishers. Maintainers steward code, contribution policy, moderation access, and
+              operating costs. Changes should be reviewed publicly; significant data-policy
+              decisions should document their rationale.
             </p>
             <p>
               Contributors can propose code changes, new game adapters, original metadata, and
@@ -109,9 +95,8 @@ export function Information() {
             </p>
             <h2>Built to stay practical.</h2>
             <p>
-              A single API process, PostgreSQL-backed durable jobs, immutable dataset exports, and
-              optional CDN caching keep the architecture understandable. Expensive third-party
-              dependencies are not required.
+              The app and catalogue status site are static Cloudflare Pages deployments. Catalogue
+              browsing works without the future Rust API.
             </p>
             <div className="button-row">
               <Link to="/contribute" className="button button-primary">

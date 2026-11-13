@@ -1,65 +1,61 @@
 import { Download } from "lucide-react";
-import { useApi, date, number } from "../api";
+import { number } from "../api";
+import { useSnapshot } from "../catalogue";
+import { catalogueBase, manifestUrl } from "../catalogue-data";
 import { QueryState } from "../components/QueryState";
 import { PageHeader } from "../components/PageHeader";
-
-type Manifest = {
-  id: string;
-  revision: number;
-  releaseDate: string;
-  schemaVersion: number;
-  sha256: string;
-  byteSize: number;
-  recordCount: number;
-  filename: string;
-  createdAt: string;
-};
 export function Datasets() {
-  const query = useApi<{ data: Manifest[] }>("/v1/datasets");
+  const query = useSnapshot();
+  const manifest = query.data?.manifest;
   return (
     <div className="page">
       <PageHeader eyebrow="TAKE THE DATA WITH YOU" title="Open data. In one download.">
-        <p>Daily metadata releases. No account, no artwork, no hidden dependencies.</p>
+        <p>The same published snapshot used by this app. No account or API required.</p>
       </PageHeader>
       <div className="notice">
-        <strong>CC0-1.0 · Newline-delimited JSON</strong>
+        <strong>CC0-1.0 · JSON</strong>
         <p>
-          At most one release per UTC day, when the catalogue has changed. The API updates
-          immediately; downloads may lag until the next day. Each line is a catalogue record.
-          Synthetic records are excluded. Verify the SHA-256 before importing. Release contents
-          never change; withdrawn releases are no longer downloadable.
+          Original factual metadata only. Artwork is not included. Verify the SHA-256 checksum
+          before importing.
         </p>
       </div>
       <QueryState pending={query.isPending} error={query.error} retry={query.refetch}>
-        {query.data?.data.length ? (
-          query.data.data.map((manifest) => (
-            <article className="dataset panel" key={manifest.id}>
-              <div>
-                <p className="eyebrow">
-                  SCHEMA v{manifest.schemaVersion} · {date(manifest.createdAt)}
-                </p>
-                <h2>Release {manifest.releaseDate}</h2>
-                <p>
-                  {number.format(manifest.recordCount)} records · {number.format(manifest.byteSize)}{" "}
-                  bytes
-                </p>
-                <details>
-                  <summary>SHA-256 checksum</summary>
-                  <code className="break-code">{manifest.sha256}</code>
-                </details>
-              </div>
-              <a className="button button-primary" href={`/datasets/${manifest.filename}`} download>
-                <Download size={17} aria-hidden="true" /> Download NDJSON
+        {manifest && (
+          <article className="dataset panel">
+            <div>
+              <p className="eyebrow">SCHEMA v{manifest.schemaVersion}</p>
+              <h2>Published catalogue</h2>
+              <p>
+                {number.format(query.data!.records.length)} records ·{" "}
+                {number.format(manifest.byteSize)} bytes
+              </p>
+              <p>
+                Source:{" "}
+                <a
+                  href={`https://github.com/cardlattice/cardlattice-data/commit/${manifest.sourceCommit}`}
+                >
+                  {manifest.sourceCommit.slice(0, 7)}
+                </a>
+              </p>
+              <details>
+                <summary>SHA-256 checksum</summary>
+                <code className="break-code">{manifest.sha256}</code>
+              </details>
+            </div>
+            <div className="button-row">
+              <a className="button button-primary" href={`${catalogueBase}${manifest.filename}`}>
+                <Download size={17} aria-hidden="true" /> Download JSON
               </a>
-            </article>
-          ))
-        ) : (
-          <div className="empty">
-            <h2>No snapshots published yet</h2>
-            <p>The first release appears after reviewed, non-synthetic metadata is available.</p>
-          </div>
+              <a href={manifestUrl}>Manifest</a>
+            </div>
+          </article>
         )}
       </QueryState>
+      <p>
+        <a href="https://github.com/cardlattice/cardlattice-data/releases">
+          Browse archived releases on GitHub ↗
+        </a>
+      </p>
     </div>
   );
 }
