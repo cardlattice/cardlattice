@@ -12,7 +12,7 @@ export function Information() {
         <p>
           {licensing
             ? "Metadata, software, and artwork have different rights. We keep those distinctions visible."
-            : "Cardlattice is a free, open-source, independently maintained trading card catalogue and public API."}
+            : "Cardlattice is a free, open-source, independently maintained trading card catalogue. Its public API is coming soon."}
         </p>
       </PageHeader>
       <div className="prose">
@@ -32,9 +32,8 @@ export function Information() {
               or API responses.
             </p>
             <p>
-              Each reviewed change records its source and field-level provenance internally. Source
-              descriptions are visible on record pages. Do not include private personal information
-              in a source description.
+              The data repository’s Git history records reviewed changes. Do not include private
+              personal information in contributions.
             </p>
             <h2>Artwork is separate</h2>
             <p>
@@ -71,7 +70,7 @@ export function Information() {
             </ol>
             <h2>Corrections & removal requests</h2>
             <p>
-              Use the contribution form to propose corrections or request removal of a record. A
+              Use the data repository to propose corrections or request removal of a record. A
               maintainer must review the source and preserve the audit trail. Production operators
               must publish a monitored rights-contact address before launching publicly.
             </p>
@@ -80,9 +79,10 @@ export function Information() {
           <>
             <h2>Free access is the foundation.</h2>
             <p>
-              Public catalogue reads require no API key, subscription, or registration. The
-              application runs with PostgreSQL, a Rust API, and a static React website. No paid
-              service or proprietary infrastructure is required.
+              Public catalogue reads require no API key, subscription, or registration. The static
+              React app uses Vite, TanStack DB and TanStack Query to load and browse published
+              catalogue data in your browser. The Rust API and PostgreSQL backend will be deployed
+              separately.
             </p>
             <h2>A catalogue that earns your trust.</h2>
             <p>
@@ -93,7 +93,7 @@ export function Information() {
             <p>
               We never claim completeness without a verified reference total. The{" "}
               <Link to="/coverage">coverage dashboard</Link> reports counts and known gaps from the
-              actual database. Synthetic development fixtures are clearly labelled.
+              published snapshot.
             </p>
             <h2>Independent governance</h2>
             <p>
@@ -109,9 +109,8 @@ export function Information() {
             </p>
             <h2>Built to stay practical.</h2>
             <p>
-              A single API process, PostgreSQL-backed durable jobs, immutable dataset exports, and
-              optional CDN caching keep the architecture understandable. Expensive third-party
-              dependencies are not required.
+              The app and catalogue status site are static Cloudflare Pages deployments. Catalogue
+              browsing works without the future Rust API.
             </p>
             <div className="button-row">
               <Link to="/contribute" className="button button-primary">

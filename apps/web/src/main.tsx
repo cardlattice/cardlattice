@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   RouterProvider,
   createRootRoute,
@@ -9,6 +9,7 @@ import {
   lazyRouteComponent,
   Link,
 } from "@tanstack/react-router";
+import { queryClient } from "./query-client";
 import { Layout } from "./components/Layout";
 import "./styles.css";
 
@@ -126,10 +127,9 @@ const routes = [
   ),
 ];
 const router = createRouter({ routeTree: root.addChildren(routes), defaultPreload: "intent" });
-const client = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={client}>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
   </React.StrictMode>,

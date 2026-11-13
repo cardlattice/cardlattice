@@ -1,5 +1,6 @@
+import { useCatalogue } from "../catalogue";
 import { Link, useParams, useRouterState } from "@tanstack/react-router";
-import { useApi, date, type DetailData } from "../api";
+import { date, type DetailData } from "../api";
 import { QueryState } from "../components/QueryState";
 import { PageHeader } from "../components/PageHeader";
 import { RecordTable } from "../components/RecordTable";
@@ -8,7 +9,7 @@ import { SourceCitation } from "../components/SourceCitation";
 export function Detail() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { game } = useParams({ strict: false }) as { game: string; id: string };
-  const query = useApi<DetailData>(`/v1${pathname}`);
+  const query = useCatalogue<DetailData>(pathname);
   const record = query.data?.data;
   return (
     <div className="page">
@@ -48,7 +49,7 @@ export function Detail() {
                     Region: record.region,
                     Rarity: record.rarity,
                     "Release date": record.releaseDate,
-                    "Last updated": date(record.updatedAt),
+                    "Last updated": record.updatedAt ? date(record.updatedAt) : undefined,
                   }).map(([label, value]) => (
                     <div key={label}>
                       <dt>{label}</dt>
@@ -122,8 +123,7 @@ export function Detail() {
                 </div>
                 <RecordTable records={query.data?.printings || []} game={game} />
                 <p className="field-hint">
-                  Up to 20 related printings.{" "}
-                  <a href={query.data?.printingsUrl || "#"}>Paginated API collection</a>
+                  Up to 20 related printings. Browse printings to see all matches.
                 </p>
               </section>
             )}
