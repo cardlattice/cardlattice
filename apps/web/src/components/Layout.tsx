@@ -90,7 +90,7 @@ export function Layout() {
           <a href="https://status.cardlattice.com">Coverage</a>
           <a href="https://status.cardlattice.com">Status</a>
           <Link to="/changelog">Changelog</Link>
-          <Link to="/licensing">Licensing & provenance</Link>
+          <Link to="/licensing">Licensing</Link>
           <Link to="/about">About & governance</Link>
           <Link to="/docs">API — coming soon</Link>
         </nav>

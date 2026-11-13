@@ -210,13 +210,13 @@ export function Home() {
             <span className="feature-icon">
               <Database aria-hidden="true" />
             </span>
-            <h3>Data you can trace</h3>
+            <h3>Open catalogue data</h3>
             <p>
-              Original contributions with recorded provenance. Card metadata and artwork rights are
-              always treated separately.
+              Community-maintained metadata, available to download. Card metadata and artwork rights
+              are always treated separately.
             </p>
             <Link to="/licensing" className="text-link">
-              Our sourcing principles <ArrowRight size={16} aria-hidden="true" />
+              Licensing details <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </article>
           <article>

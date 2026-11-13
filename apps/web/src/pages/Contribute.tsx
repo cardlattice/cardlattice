@@ -2,7 +2,7 @@ import { PageHeader } from "../components/PageHeader";
 export function Contribute() {
   return (
     <div className="page narrow">
-      <PageHeader eyebrow="GROW THE COMMONS" title="Good data starts with a source.">
+      <PageHeader eyebrow="GROW THE COMMONS" title="Help improve the catalogue.">
         <p>Propose original metadata and corrections through the data repository.</p>
       </PageHeader>
       <section className="panel prose">

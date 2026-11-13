@@ -6,7 +6,7 @@ export function Information() {
   return (
     <div className="page narrow">
       <PageHeader
-        eyebrow={licensing ? "KNOW WHERE YOUR DATA COMES FROM" : "PUBLIC DATA INFRASTRUCTURE"}
+        eyebrow={licensing ? "LICENSING & CONTRIBUTOR TERMS" : "PUBLIC DATA INFRASTRUCTURE"}
         title={licensing ? "Open, with clear boundaries." : "A shared foundation for card data."}
       >
         <p>
@@ -23,17 +23,6 @@ export function Information() {
               Cardlattice software is licensed under MIT. Original metadata contributions and the
               synthetic development fixtures are dedicated under CC0-1.0. Legally required notices
               and attribution must always be preserved.
-            </p>
-            <h2>Independent sourcing</h2>
-            <p>
-              Accepted sources are original manual entry, inspection of user-owned physical cards,
-              permitted official references, and original community contributions. We do not seed
-              the catalogue with TCGdex, Scryfall, YGOPRODeck, or other third-party catalogue dumps
-              or API responses.
-            </p>
-            <p>
-              The data repository’s Git history records reviewed changes. Do not include private
-              personal information in contributions.
             </p>
             <h2>Artwork is separate</h2>
             <p>
@@ -56,9 +45,6 @@ export function Information() {
                 legally possible. Do not submit copied descriptive text from protected sources.
               </li>
               <li>
-                Give an accurate source description and identify relevant rights restrictions.
-              </li>
-              <li>
                 Upload only scans you are authorised to provide privately for review. You grant the
                 project permission to store and inspect them for that purpose; no public artwork
                 licence is implied.
@@ -71,8 +57,8 @@ export function Information() {
             <h2>Corrections & removal requests</h2>
             <p>
               Use the data repository to propose corrections or request removal of a record. A
-              maintainer must review the source and preserve the audit trail. Production operators
-              must publish a monitored rights-contact address before launching publicly.
+              maintainer reviews these requests. Production operators must publish a monitored
+              rights-contact address before launching publicly.
             </p>
           </>
         ) : (
@@ -98,9 +84,9 @@ export function Information() {
             <h2>Independent governance</h2>
             <p>
               This is an independently maintained open-source project, unaffiliated with card
-              publishers. Maintainers steward code, source policy, moderation access, and operating
-              costs. Changes should be reviewed publicly; significant data-policy decisions should
-              document their rationale.
+              publishers. Maintainers steward code, contribution policy, moderation access, and
+              operating costs. Changes should be reviewed publicly; significant data-policy
+              decisions should document their rationale.
             </p>
             <p>
               Contributors can propose code changes, new game adapters, original metadata, and
