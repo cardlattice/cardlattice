@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 pub mod vocabulary;
 use vocabulary::{
     AbilityKind, CardSize, Category, CostModifier, Edition, EnergyType, Finish, FoilPattern,
-    LegendPart, Power, RegulationMark, Stage, Subtype, VUnionPart,
+    LegendPart, Power, PrintingError, RegulationMark, Stage, Subtype, VUnionPart,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -234,6 +234,9 @@ impl PokemonAttributes {
 #[derive(Debug, Default, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingMetadata {
+    /// Verified physical printing errors, separate from the card's rules text.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub printing_errors: Option<Vec<PrintingError>>,
     /// Physical size of this distinct printing when its rules differ from other sizes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<CardSize>,
@@ -270,9 +273,13 @@ pub struct PrintingMetadata {
 impl PrintingMetadata {
     pub fn validate(&self) -> Result<(), ValidationError> {
         if self
-            .finishes
+            .printing_errors
             .as_ref()
-            .is_some_and(|v| v.len() > 3 || !unique(v))
+            .is_some_and(|v| v.len() > 10 || !unique(v))
+            || self
+                .finishes
+                .as_ref()
+                .is_some_and(|v| v.len() > 3 || !unique(v))
             || self.stamps.as_ref().is_some_and(|v| {
                 v.len() > 10
                     || !unique(v)
@@ -429,6 +436,9 @@ impl PrintedDenominator {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingVariant {
+    /// Exact printed flavour text for this physical variant, overriding the card's default bio.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flavour_text: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<CardSize>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -445,6 +455,7 @@ pub struct PrintingVariant {
 impl PrintingVariant {
     fn validate(&self) -> Result<(), ValidationError> {
         if self.finish.is_none()
+            && self.flavour_text.is_none()
             && self.size.is_none()
             && self.foil_pattern.is_none()
             && self.edition.is_none()
@@ -459,6 +470,15 @@ impl PrintingVariant {
         if self.foil_pattern.is_some() && self.finish == Some(Finish::NonHolo) {
             return Err(ValidationError(
                 "A foil pattern cannot describe a non-holo variant".into(),
+            ));
+        }
+        if self
+            .flavour_text
+            .as_ref()
+            .is_some_and(|value| !text(value, 2000))
+        {
+            return Err(ValidationError(
+                "Invalid printed variant flavour text".into(),
             ));
         }
         PrintingMetadata {
@@ -740,6 +760,32 @@ mod tests {
                 .validate()
                 .is_err()
         );
+    }
+
+    #[test]
+    fn printed_text_variants_and_graphic_errors_preserve_literal_observations() {
+        let value = json!({"printingErrors":["stage-2-evolution-frame"],"variants":{"first":{"finish":"reverse-holo","foilPattern":"mirror","flavourText":"Original synthetic first printing."},"corrected":{"finish":"reverse-holo","foilPattern":"mirror","flavourText":"Original synthetic corrected printing."}}});
+        let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        for pattern in ["tinsel", "energy-symbol", "sheen"] {
+            let observed = json!({"variants":{"foil":{"finish":"holo","foilPattern":pattern}}});
+            serde_json::from_value::<PrintingMetadata>(observed)
+                .unwrap()
+                .validate()
+                .unwrap();
+        }
+        for invalid in [
+            json!({"printingErrors":["stage-2-evolution-frame","stage-2-evolution-frame"]}),
+            json!({"variants":{"error":{"flavourText":" "}}}),
+        ] {
+            assert!(
+                serde_json::from_value::<PrintingMetadata>(invalid)
+                    .unwrap()
+                    .validate()
+                    .is_err()
+            );
+        }
     }
 
     #[test]

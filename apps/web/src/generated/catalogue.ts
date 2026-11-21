@@ -286,6 +286,10 @@ export const FoilPattern = {
   cosmos: 'cosmos',
   'cracked-ice': 'cracked-ice',
   crosshatch: 'crosshatch',
+  tinsel: 'tinsel',
+  mirror: 'mirror',
+  'energy-symbol': 'energy-symbol',
+  sheen: 'sheen',
 } as const;
 
 export interface GroupMetadata {
@@ -487,12 +491,24 @@ export interface PrintedIdentifier {
   symbol?: string | null;
 }
 
+export type PrintingError = typeof PrintingError[keyof typeof PrintingError];
+
+
+export const PrintingError = {
+  'stage-2-evolution-frame': 'stage-2-evolution-frame',
+} as const;
+
 /**
  * Each entry is an observed combination; never infer an edition × finish cross product.
  */
 export interface PrintingVariant {
   edition?: null | Edition;
   finish?: null | Finish;
+  /**
+     * Exact printed flavour text for this physical variant, overriding the card's default bio.
+     * @nullable
+     */
+  flavourText?: string | null;
   foilPattern?: null | FoilPattern;
   /** @nullable */
   products?: string[] | null;
@@ -544,6 +560,11 @@ export interface PrintingMetadata {
   illustrators?: string[] | null;
   legendPart?: null | LegendPart;
   printedDenominator?: null | PrintedDenominator;
+  /**
+     * Verified physical printing errors, separate from the card's rules text.
+     * @nullable
+     */
+  printingErrors?: PrintingError[] | null;
   /** @nullable */
   products?: string[] | null;
   regulationMark?: null | RegulationMark;

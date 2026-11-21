@@ -155,6 +155,14 @@ vocabulary! { FoilPattern {
     Cosmos => "cosmos",
     CrackedIce => "cracked-ice",
     Crosshatch => "crosshatch",
+    Tinsel => "tinsel",
+    Mirror => "mirror",
+    EnergySymbol => "energy-symbol",
+    Sheen => "sheen",
+} }
+
+vocabulary! { PrintingError {
+    Stage2EvolutionFrame => "stage-2-evolution-frame",
 } }
 
 impl Subtype {
@@ -233,6 +241,7 @@ pub fn document() -> serde_json::Value {
         "edition": Edition::VALUES,
         "cardSize": CardSize::VALUES,
         "foilPattern": FoilPattern::VALUES,
+        "printingError": PrintingError::VALUES,
         "abilityKind": AbilityKind::VALUES,
         "power": Power::VALUES,
         "costModifier": CostModifier::VALUES,

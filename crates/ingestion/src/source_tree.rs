@@ -64,6 +64,7 @@ struct LocalisedIdentity {
     pokemon: catalogue::PokemonAttributes,
 }
 const PRINTING_FIELDS: &[&str] = &[
+    "printingErrors",
     "size",
     "legendPart",
     "vUnionPart",

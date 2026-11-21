@@ -512,7 +512,11 @@
         "enum": [
           "cosmos",
           "cracked-ice",
-          "crosshatch"
+          "crosshatch",
+          "tinsel",
+          "mirror",
+          "energy-symbol",
+          "sheen"
         ],
         "type": "string"
       },
@@ -930,6 +934,12 @@
         ],
         "type": "object"
       },
+      "PrintingError": {
+        "enum": [
+          "stage-2-evolution-frame"
+        ],
+        "type": "string"
+      },
       "PrintingMetadata": {
         "additionalProperties": false,
         "properties": {
@@ -995,6 +1005,16 @@
               {
                 "$ref": "#/components/schemas/PrintedDenominator"
               }
+            ]
+          },
+          "printingErrors": {
+            "description": "Verified physical printing errors, separate from the card's rules text.",
+            "items": {
+              "$ref": "#/components/schemas/PrintingError"
+            },
+            "type": [
+              "array",
+              "null"
             ]
           },
           "products": {
@@ -1091,6 +1111,13 @@
               {
                 "$ref": "#/components/schemas/Finish"
               }
+            ]
+          },
+          "flavourText": {
+            "description": "Exact printed flavour text for this physical variant, overriding the card's default bio.",
+            "type": [
+              "string",
+              "null"
             ]
           },
           "foilPattern": {
