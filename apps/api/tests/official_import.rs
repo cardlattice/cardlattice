@@ -1,8 +1,8 @@
 use catalogue::Draft;
-use chrono::{NaiveDate, Utc};
 use ingestion::official_pokemon::{OfficialBatch, SetCandidate, TERMS_URL, import};
 use serde_json::{Value, json};
 use sqlx::PgPool;
+use time::{Date, OffsetDateTime};
 
 const FIXTURES: &str = include_str!("../../../data/development.json");
 const GAME: &str = "pokemon";
@@ -17,9 +17,9 @@ fn batch() -> OfficialBatch {
         terms_url: TERMS_URL.into(),
         sets: vec![SetCandidate {
             name: "Original import test set".into(),
-            release_date: NaiveDate::from_ymd_opt(2026, 1, 2).unwrap(),
+            release_date: Date::from_calendar_date(2026, time::Month::January, 2).unwrap(),
             source_url: "https://press.pokemon.com/en/products/Original-import-test-set".into(),
-            retrieved_at: Utc::now(),
+            retrieved_at: OffsetDateTime::now_utc(),
             content_sha256: "a".repeat(64),
         }],
     }
@@ -120,7 +120,8 @@ async fn official_import_is_atomic_audited_and_idempotent(pool: PgPool) {
         .await
         .unwrap();
     let mut corrected = reviewed;
-    corrected.sets[0].release_date = NaiveDate::from_ymd_opt(2026, 1, 3).unwrap();
+    corrected.sets[0].release_date =
+        Date::from_calendar_date(2026, time::Month::January, 3).unwrap();
     assert_eq!(
         import(&pool, &corrected, true, false)
             .await

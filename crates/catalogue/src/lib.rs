@@ -1,8 +1,8 @@
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+use time::{Date, OffsetDateTime};
 use unicode_normalization::UnicodeNormalization;
 use utoipa::ToSchema;
 
@@ -97,11 +97,13 @@ pub struct Record {
     pub language: Option<String>,
     pub region: Option<String>,
     pub rarity: Option<String>,
-    pub release_date: Option<NaiveDate>,
+    pub release_date: Option<Date>,
     pub attributes: Value,
     pub synthetic: bool,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -135,7 +137,7 @@ pub struct Draft {
     pub language: Option<String>,
     pub region: Option<String>,
     pub rarity: Option<String>,
-    pub release_date: Option<NaiveDate>,
+    pub release_date: Option<Date>,
     #[serde(default = "empty_object")]
     pub attributes: Value,
     #[serde(default)]
@@ -531,6 +533,31 @@ pub struct Page {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn record_dates_keep_existing_json_contract() {
+        let input = serde_json::json!({
+            "id": "test", "kind": "set", "name": "Synthetic date contract",
+            "releaseDate": "2024-02-29", "attributes": {}, "synthetic": true,
+            "createdAt": "2026-01-02T03:04:05.123456Z",
+            "updatedAt": "2026-01-02T03:04:06Z"
+        });
+        let record: Record = serde_json::from_value(input.clone()).unwrap();
+        let output = serde_json::to_value(&record).unwrap();
+        for key in ["releaseDate", "createdAt", "updatedAt"] {
+            assert_eq!(output[key], input[key]);
+        }
+        let mut invalid = input;
+        invalid["releaseDate"] = serde_json::json!("2023-02-29");
+        assert!(serde_json::from_value::<Record>(invalid).is_err());
+        let draft: Draft = serde_json::from_value(serde_json::json!({
+            "kind":"set", "name":"Synthetic date", "releaseDate":"2024-02-29"
+        }))
+        .unwrap();
+        assert_eq!(
+            serde_json::to_value(draft).unwrap()["releaseDate"],
+            "2024-02-29"
+        );
+    }
     #[test]
     fn same_name_card_attributes_preserve_identity() {
         let mut draft: Draft = serde_json::from_value(serde_json::json!({

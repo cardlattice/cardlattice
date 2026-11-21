@@ -2,7 +2,6 @@
 //! Discovery never writes to the catalogue; publication requires an explicitly reviewed batch.
 use crate::{IngestionError, revision_and_outbox, write_record};
 use catalogue::{Draft, Kind, Record, SourceInput, SourceMethod};
-use chrono::{DateTime, NaiveDate, Utc};
 use html5ever::{parse_document, tendril::TendrilSink};
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use serde::{Deserialize, Serialize};
@@ -10,6 +9,7 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::{collections::HashSet, time::Duration};
+use time::{Date, OffsetDateTime};
 
 pub const TERMS_URL: &str = "https://press.pokemon.com/en/Assets-Use-Terms";
 const PRODUCT_PREFIX: &str = "https://press.pokemon.com/en/products/";
@@ -43,9 +43,10 @@ pub struct ScanPlan {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetCandidate {
     pub name: String,
-    pub release_date: NaiveDate,
+    pub release_date: Date,
     pub source_url: String,
-    pub retrieved_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub retrieved_at: OffsetDateTime,
     pub content_sha256: String,
 }
 
@@ -142,13 +143,16 @@ pub fn parse_product(html: &str, source_url: &str) -> Result<SetCandidate, Offic
         .strip_prefix("Pokémon TCG: ")
         .ok_or_else(|| invalid("Page is not an identified Pokémon TCG product"))?
         .to_owned();
-    let release_date = NaiveDate::parse_from_str(&dates[0], "%B %e, %Y")
-        .map_err(|_| invalid("Release date must be a full, unambiguous calendar date"))?;
+    let release_date = Date::parse(
+        &dates[0],
+        time::macros::format_description!("[month repr:long] [day padding:none], [year]"),
+    )
+    .map_err(|_| invalid("Release date must be a full, unambiguous calendar date"))?;
     Ok(SetCandidate {
         name,
         release_date,
         source_url: source_url.into(),
-        retrieved_at: Utc::now(),
+        retrieved_at: OffsetDateTime::now_utc(),
         content_sha256: format!("{:x}", Sha256::digest(html.as_bytes())),
     })
 }
@@ -211,7 +215,10 @@ fn source(candidate: &SetCandidate) -> SourceInput {
     SourceInput {
         description: format!(
             "The Pokémon Company International official product information. Factual title and US release date transcribed for an independent, non-commercial catalogue. Retrieved {}; page SHA-256 {}. Informational-use guidelines: {}. CC0 applies only to Cardlattice's original factual metadata contribution, not the publisher's text, artwork, or trademarks.",
-            candidate.retrieved_at.to_rfc3339(),
+            candidate
+                .retrieved_at
+                .format(&time::format_description::well_known::Rfc3339)
+                .expect("valid RFC3339 timestamp"),
             candidate.content_sha256,
             TERMS_URL
         ),

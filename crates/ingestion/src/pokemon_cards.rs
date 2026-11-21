@@ -1,12 +1,12 @@
 //! Reviewed, factual checklist imports. No artwork, catalogue dumps or name-based merging.
 use crate::{official_pokemon::OfficialImportError, revision_and_outbox, write_record};
 use catalogue::{Draft, Kind, Record, SourceInput, SourceMethod};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::collections::HashSet;
+use time::OffsetDateTime;
 
 pub const TERMS_URL: &str = "https://www.pokemon.com/us/legal/";
 const NAMESPACE: &str = "pokemon-official-numbered-checklist";
@@ -22,7 +22,8 @@ pub struct CardCandidate {
 pub struct Checklist {
     pub set_source_url: String,
     pub source_url: String,
-    pub retrieved_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub retrieved_at: OffsetDateTime,
     pub content_sha256: String,
     pub scope: String,
     pub expected_count: usize,
@@ -82,7 +83,7 @@ impl CardBatch {
                 || set.cards.len() != set.expected_count
                 || set.content_sha256.len() != 64
                 || !set.content_sha256.bytes().all(|b| b.is_ascii_hexdigit())
-                || set.retrieved_at > Utc::now()
+                || set.retrieved_at > OffsetDateTime::now_utc()
             {
                 return Err(invalid("Invalid checklist source, scope, count or digest"));
             }
@@ -124,7 +125,10 @@ pub async fn import(
         let source = SourceInput {
             description: format!(
                 "Names and collector numbers independently transcribed from the publisher's English checklist, main numbered section only. Retrieved {}; PDF SHA-256 {}. Energy symbols expanded to text after visual review. Rules, rarity, variants and artwork are not inferred. Card identities are provisional per printing pending rules review. CC0 covers only our factual metadata contribution, not the PDF, artwork or trademarks.",
-                checklist.retrieved_at.to_rfc3339(),
+                checklist
+                    .retrieved_at
+                    .format(&time::format_description::well_known::Rfc3339)
+                    .expect("valid RFC3339 timestamp"),
                 checklist.content_sha256
             ),
             reference_url: Some(checklist.source_url.clone()),

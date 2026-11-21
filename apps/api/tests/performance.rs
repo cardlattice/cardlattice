@@ -1,9 +1,9 @@
 //! Opt-in measurements against a disposable PostgreSQL database; never a latency claim.
 use axum::http::HeaderMap;
-use chrono::Utc;
 use serde_json::json;
 use sqlx::PgPool;
 use std::time::Instant;
+use time::OffsetDateTime;
 
 fn report(name: &str, mut values: Vec<f64>) {
     values.sort_by(f64::total_cmp);
@@ -29,7 +29,7 @@ async fn measured_catalogue_workloads(pool: PgPool) {
     let mut searches = Vec::new();
     let mut validators = Vec::new();
     let payload = json!({"data":{"name":"Original benchmark record","synthetic":true,"attributes":{"category":"pokemon","hp":40,"types":["Grass"]}}});
-    let modified = Utc::now();
+    let modified = OffsetDateTime::now_utc();
     for sample in 0..550 {
         let started = Instant::now();
         let _:catalogue::Record=sqlx::query_as("SELECT * FROM catalogue_records WHERE id='01910000-0000-7000-8000-000000010000' AND deleted_at IS NULL").fetch_one(&pool).await.unwrap();
@@ -54,7 +54,7 @@ async fn measured_catalogue_workloads(pool: PgPool) {
     }
     println!(
         "{}",
-        json!({"environment":"local process plus PostgreSQL","records":20007,"warmupSamples":50,"concurrency":1,"cdnMeasured":false,"timestamp":Utc::now()})
+        json!({"environment":"local process plus PostgreSQL","records":20007,"warmupSamples":50,"concurrency":1,"cdnMeasured":false,"timestamp":OffsetDateTime::now_utc().format(&time::format_description::well_known::Rfc3339).unwrap()})
     );
     report("primary_key_card_lookup", lookups);
     report("indexed_full_text_search", searches);

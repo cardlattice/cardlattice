@@ -11,9 +11,9 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use catalogue::{Draft, Record};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use time::OffsetDateTime;
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -37,7 +37,8 @@ impl Operation {
 pub struct Submission {
     pub operation: Operation,
     pub target_id: Option<String>,
-    pub base_updated_at: Option<DateTime<Utc>>,
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub base_updated_at: Option<OffsetDateTime>,
     pub draft: Draft,
     pub terms_accepted: bool,
     pub website: Option<String>,
@@ -48,12 +49,15 @@ pub struct Contribution {
     pub id: String,
     pub operation: String,
     pub target_id: Option<String>,
-    pub base_updated_at: Option<DateTime<Utc>>,
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub base_updated_at: Option<OffsetDateTime>,
     pub payload: Value,
     pub status: String,
     pub record_id: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub reviewed_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub reviewed_at: Option<OffsetDateTime>,
 }
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

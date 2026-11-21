@@ -1,13 +1,13 @@
 //! Contributor-facing files. Directory context supplies identity; no executable data.
 use crate::bundle::{Entry, Error, ExternalId};
 use catalogue::{Draft, Kind, pokemon::PrintingMetadata};
-use chrono::NaiveDate;
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
 use std::{
     collections::{BTreeMap, HashSet},
     path::{Path, PathBuf},
 };
+use time::Date;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -15,7 +15,7 @@ struct RecordFile {
     name: String,
     language: Option<String>,
     region: Option<String>,
-    release_date: Option<NaiveDate>,
+    release_date: Option<Date>,
     series: Option<String>,
     printed_identifiers: Option<Vec<catalogue::relationships::PrintedIdentifier>>,
     related_sets: Option<Vec<String>>,
@@ -28,7 +28,7 @@ struct RecordFile {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ReleaseFile {
     name: Option<String>,
-    release_date: Option<NaiveDate>,
+    release_date: Option<Date>,
     #[serde(default)]
     external_ids: Vec<ExternalIdPattern>,
 }
@@ -47,7 +47,7 @@ struct PrintingFile {
     identity: Option<String>,
     collector_number: Option<String>,
     rarity: Option<String>,
-    release_date: Option<NaiveDate>,
+    release_date: Option<Date>,
     pokemon: Option<catalogue::PokemonAttributes>,
     #[serde(default)]
     external_ids: Vec<ExternalId>,

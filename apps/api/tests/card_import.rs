@@ -1,10 +1,10 @@
-use chrono::{NaiveDate, Utc};
 use ingestion::{
     official_pokemon,
     pokemon_cards::{self, CardBatch, CardCandidate, Checklist},
 };
 use serde_json::Value;
 use sqlx::PgPool;
+use time::{Date, OffsetDateTime};
 
 const SET_URL: &str = "https://press.pokemon.com/en/products/Original-checklist-test";
 fn batch() -> CardBatch {
@@ -12,7 +12,7 @@ fn batch() -> CardBatch {
         schema_version: 1, reviewed_by: Some("Original synthetic test".into()), terms_url: pokemon_cards::TERMS_URL.into(),
         sets: vec![Checklist {
             set_source_url: SET_URL.into(), source_url: "https://d1i787aglh9bmb.cloudfront.net/assets/img/me-expansions/test/gallery/_pdfs/Original.pdf".into(),
-            retrieved_at: Utc::now(), content_sha256: "b".repeat(64), scope: "main-numbered-checklist".into(), expected_count: 2,
+            retrieved_at: OffsetDateTime::now_utc(), content_sha256: "b".repeat(64), scope: "main-numbered-checklist".into(), expected_count: 2,
             cards: vec![CardCandidate { collector_number: "001".into(), name: "Original Flabébé ♀".into() },CardCandidate { collector_number: "002".into(), name: "Original Flabébé ♀".into() }],
         }],
     }
@@ -32,9 +32,9 @@ async fn checklist_import_preserves_identity_is_atomic_and_idempotent(pool: PgPo
             terms_url: official_pokemon::TERMS_URL.into(),
             sets: vec![official_pokemon::SetCandidate {
                 name: "Original checklist test".into(),
-                release_date: NaiveDate::from_ymd_opt(2026, 1, 2).unwrap(),
+                release_date: Date::from_calendar_date(2026, time::Month::January, 2).unwrap(),
                 source_url: SET_URL.into(),
-                retrieved_at: Utc::now(),
+                retrieved_at: OffsetDateTime::now_utc(),
                 content_sha256: "a".repeat(64),
             }],
         },
