@@ -168,14 +168,19 @@ impl Draft {
                 .map(|scope| format!("card-{scope}"))
                 .unwrap_or_else(|| format!("{game}-card-{}", slug(&self.name))),
             Kind::Printing => format!(
-                "{}-{}-{}-{}",
+                "{}-{}-{}-{}{}",
                 self.set_id.as_deref().unwrap_or_default(),
                 self.language.as_deref().unwrap_or_default(),
                 self.region.as_deref().unwrap_or("global"),
                 self.collector_number
                     .as_deref()
                     .or_else(|| self.attributes.get("unnumberedKey").and_then(Value::as_str))
-                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                if self.attributes.get("size").and_then(Value::as_str) == Some("jumbo") {
+                    "-jumbo"
+                } else {
+                    ""
+                }
             ),
         };
         parse_id(&id)
@@ -321,7 +326,7 @@ impl Draft {
         let identity = match self.kind {
             Kind::Game => format!("game:{}", self.slug.as_deref().unwrap_or_default()),
             Kind::Printing => format!(
-                "printing:{:?}:{:?}:{}:{:?}:{:?}:{:?}",
+                "printing:{:?}:{:?}:{}:{:?}:{:?}:{:?}{}",
                 self.game_id,
                 self.set_id,
                 self.collector_number
@@ -336,7 +341,12 @@ impl Draft {
                     )),
                 self.language,
                 self.region,
-                self.release_date
+                self.release_date,
+                if self.attributes.get("size").and_then(Value::as_str) == Some("jumbo") {
+                    ":jumbo"
+                } else {
+                    ""
+                }
             ),
             // Reviewed localisations may have identical names and rules text.
             Kind::Card if self.attributes.get("identityGroup").is_some() => format!(

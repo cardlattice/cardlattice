@@ -5,8 +5,8 @@ use utoipa::ToSchema;
 
 pub mod vocabulary;
 use vocabulary::{
-    AbilityKind, Category, CostModifier, Edition, EnergyType, Finish, LegendPart, Power,
-    RegulationMark, Stage, Subtype, VUnionPart,
+    AbilityKind, CardSize, Category, CostModifier, Edition, EnergyType, Finish, FoilPattern,
+    LegendPart, Power, RegulationMark, Stage, Subtype, VUnionPart,
 };
 
 fn text(value: &str, max: usize) -> bool {
@@ -141,12 +141,17 @@ impl PokemonAttributes {
                 .subtypes
                 .as_ref()
                 .is_some_and(|values| values.contains(&Subtype::PokemonTool));
+        let technical_machine = self.category == Some(Category::Trainer)
+            && self
+                .subtypes
+                .as_ref()
+                .is_some_and(|values| values.contains(&Subtype::TechnicalMachine));
         if matches!(self.category, Some(Category::Trainer | Category::Energy))
             && ((!trainer_pokemon && self.hp.is_some())
                 || (!trainer_pokemon && !pokemon_tool && self.abilities.is_some())
                 || self.stage.is_some()
                 || self.evolves_from.is_some()
-                || (!pokemon_tool && self.attacks.is_some())
+                || (!pokemon_tool && !technical_machine && self.attacks.is_some())
                 || self.weaknesses.is_some()
                 || self.resistances.is_some()
                 || self.retreat_cost.is_some()
@@ -229,6 +234,9 @@ impl PokemonAttributes {
 #[derive(Debug, Default, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingMetadata {
+    /// Physical size of this distinct printing when its rules differ from other sizes.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size: Option<CardSize>,
     /// Physical half; pair membership is represented by a shared collection.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub legend_part: Option<LegendPart>,
@@ -247,7 +255,7 @@ pub struct PrintingMetadata {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub regulation_mark: Option<RegulationMark>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub printed_denominator: Option<u16>,
+    pub printed_denominator: Option<PrintedDenominator>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub illustrators: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -284,7 +292,10 @@ impl PrintingMetadata {
                 .artwork
                 .as_ref()
                 .is_some_and(|v| crate::parse_id(v).is_err())
-            || self.printed_denominator.is_some_and(|v| v == 0 || v > 9999)
+            || self
+                .printed_denominator
+                .as_ref()
+                .is_some_and(|v| !v.valid())
             || self.additional_numbers.as_ref().is_some_and(|v| !v.valid())
             || self
                 .illustrators
@@ -302,6 +313,11 @@ impl PrintingMetadata {
             let mut seen = Vec::new();
             let mut finishes = Vec::new();
             for (key, variant) in variants {
+                if self.size.is_some() && variant.size.is_some() && self.size != variant.size {
+                    return Err(ValidationError(
+                        "Variant size must match its distinct printing".into(),
+                    ));
+                }
                 if key.is_empty()
                     || key.len() > 100
                     || !key
@@ -344,18 +360,68 @@ impl PrintingMetadata {
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AdditionalNumbers {
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[schema(pattern = "^(0[1-9]|[12][0-9]|30)/30$")]
-    pub pikachu30th: String,
+    pub pikachu30th: Option<String>,
+    /// Additional ID explicitly labelled on the physical card, not its collector number.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(pattern = "^[A-Za-z0-9][A-Za-z0-9-]{0,31}$")]
+    pub printed_id: Option<String>,
 }
 impl AdditionalNumbers {
     fn valid(&self) -> bool {
-        let Some((number, denominator)) = self.pikachu30th.split_once('/') else {
+        if self.pikachu30th.is_none() && self.printed_id.is_none() {
             return false;
-        };
-        denominator == "30"
-            && number.len() == 2
-            && number.bytes().all(|b| b.is_ascii_digit())
-            && number.parse::<u8>().is_ok_and(|v| (1..=30).contains(&v))
+        }
+        let badge_valid = self.pikachu30th.as_ref().is_none_or(|badge| {
+            let Some((number, denominator)) = badge.split_once('/') else {
+                return false;
+            };
+            denominator == "30"
+                && number.len() == 2
+                && number.bytes().all(|b| b.is_ascii_digit())
+                && number.parse::<u8>().is_ok_and(|v| (1..=30).contains(&v))
+        });
+        badge_valid
+            && self.printed_id.as_ref().is_none_or(|id| {
+                !id.is_empty()
+                    && id.len() <= 32
+                    && id.as_bytes()[0].is_ascii_alphanumeric()
+                    && id.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-')
+            })
+    }
+}
+
+/// Preserve subset denominators such as H32 and RC25 without changing numeric JSON.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PrintedDenominator {
+    Number(u16),
+    Code(String),
+}
+impl utoipa::PartialSchema for PrintedDenominator {
+    fn schema() -> utoipa::openapi::RefOr<utoipa::openapi::schema::Schema> {
+        serde_json::from_value(serde_json::json!({"oneOf":[
+            {"type":"integer","minimum":1,"maximum":9999},
+            {"type":"string","pattern":"^[A-Z]{1,8}[1-9][0-9]{0,3}$"}
+        ]}))
+        .expect("valid printed denominator schema")
+    }
+}
+impl ToSchema for PrintedDenominator {}
+impl PrintedDenominator {
+    fn valid(&self) -> bool {
+        match self {
+            Self::Number(value) => (1..=9999).contains(value),
+            Self::Code(value) => {
+                let letters = value.bytes().take_while(u8::is_ascii_uppercase).count();
+                let digits = &value[letters..];
+                (1..=8).contains(&letters)
+                    && (1..=4).contains(&digits.len())
+                    && !digits.starts_with('0')
+                    && digits.bytes().all(|c| c.is_ascii_digit())
+            }
+        }
     }
 }
 
@@ -363,6 +429,10 @@ impl AdditionalNumbers {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PrintingVariant {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size: Option<CardSize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub foil_pattern: Option<FoilPattern>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub finish: Option<Finish>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -375,12 +445,20 @@ pub struct PrintingVariant {
 impl PrintingVariant {
     fn validate(&self) -> Result<(), ValidationError> {
         if self.finish.is_none()
+            && self.size.is_none()
+            && self.foil_pattern.is_none()
             && self.edition.is_none()
             && self.stamps.as_ref().is_none_or(Vec::is_empty)
             && self.products.as_ref().is_none_or(Vec::is_empty)
         {
             return Err(ValidationError(
-                "A variant needs an observed finish, edition, stamp or product".into(),
+                "A variant needs an observed finish, foil pattern, size, edition, stamp or product"
+                    .into(),
+            ));
+        }
+        if self.foil_pattern.is_some() && self.finish == Some(Finish::NonHolo) {
+            return Err(ValidationError(
+                "A foil pattern cannot describe a non-holo variant".into(),
             ));
         }
         PrintingMetadata {
@@ -557,13 +635,111 @@ mod tests {
             .unwrap();
             assert!(metadata.validate().is_err());
         }
-        for value in [
-            json!({}),
-            json!({"pikachu30th":9}),
-            json!({"pikachu": "01/30"}),
-        ] {
+        for value in [json!({"pikachu30th":9}), json!({"pikachu": "01/30"})] {
             assert!(serde_json::from_value::<AdditionalNumbers>(value).is_err());
         }
+        assert!(
+            !serde_json::from_value::<AdditionalNumbers>(json!({}))
+                .unwrap()
+                .valid()
+        );
+    }
+
+    #[test]
+    fn literal_denominators_and_printed_ids_preserve_scalar_types() {
+        for value in [
+            json!({"printedDenominator":147}),
+            json!({"printedDenominator":"H32"}),
+            json!({"printedDenominator":"RC25"}),
+            json!({"additionalNumbers":{"printedId":"Y-02"}}),
+        ] {
+            let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+            metadata.validate().unwrap();
+            assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        }
+        for value in [
+            json!({"printedDenominator":0}),
+            json!({"printedDenominator":"147"}),
+            json!({"printedDenominator":"RC0"}),
+            json!({"printedDenominator":"RC025"}),
+            json!({"printedDenominator":" RC25"}),
+            json!({"printedDenominator":"é32"}),
+            json!({"additionalNumbers":{"printedId":" Y-02"}}),
+        ] {
+            let parsed = serde_json::from_value::<PrintingMetadata>(value);
+            assert!(parsed.is_err() || parsed.unwrap().validate().is_err());
+        }
+    }
+
+    #[test]
+    fn historical_technical_machines_grant_attacks_but_not_pokemon_stats() {
+        let tool = json!({"category":"trainer","subtypes":["Technical Machine"],"attacks":[{"name":"Original synthetic attack","cost":["Colorless"],"damage":"20"}]});
+        serde_json::from_value::<PokemonAttributes>(tool.clone())
+            .unwrap()
+            .validate()
+            .unwrap();
+        for patch in [
+            json!({"category":"pokemon"}),
+            json!({"category":"energy"}),
+            json!({"subtypes":["Item"]}),
+            json!({"abilities":[]}),
+            json!({"hp":30}),
+            json!({"stage":"Baby"}),
+        ] {
+            let mut changed = tool.clone();
+            changed
+                .as_object_mut()
+                .unwrap()
+                .extend(patch.as_object().unwrap().clone());
+            assert!(
+                serde_json::from_value::<PokemonAttributes>(changed)
+                    .unwrap()
+                    .validate()
+                    .is_err()
+            );
+        }
+        serde_json::from_value::<PokemonAttributes>(json!({"category":"pokemon","stage":"Baby"}))
+            .unwrap()
+            .validate()
+            .unwrap();
+    }
+
+    #[test]
+    fn physical_sizes_distinguish_observed_variants() {
+        let value = json!({"variants":{"standard":{"size":"standard","finish":"non-holo","stamps":["winner"]},"jumbo":{"size":"jumbo","finish":"non-holo","stamps":["winner"]}}});
+        let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        let mut duplicate = value;
+        duplicate["variants"]["jumbo"]["size"] = json!("standard");
+        assert!(
+            serde_json::from_value::<PrintingMetadata>(duplicate)
+                .unwrap()
+                .validate()
+                .is_err()
+        );
+        let mismatched = json!({"size":"jumbo","variants":{"normal":{"size":"standard"}}});
+        assert!(
+            serde_json::from_value::<PrintingMetadata>(mismatched)
+                .unwrap()
+                .validate()
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn observed_foil_patterns_distinguish_variants_and_reject_non_holo() {
+        let value = json!({"variants":{"first":{"finish":"holo","foilPattern":"cosmos"},"second":{"finish":"holo","foilPattern":"cracked-ice"}}});
+        let metadata: PrintingMetadata = serde_json::from_value(value.clone()).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        let invalid = json!({"variants":{"first":{"finish":"non-holo","foilPattern":"cosmos"}}});
+        assert!(
+            serde_json::from_value::<PrintingMetadata>(invalid)
+                .unwrap()
+                .validate()
+                .is_err()
+        );
     }
 
     #[test]
