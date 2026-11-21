@@ -37,6 +37,7 @@ vocabulary! { EnergyType {
 
 vocabulary! { Stage {
     Basic => "Basic",
+    Baby => "Baby",
     Stage1 => "Stage 1",
     Stage2 => "Stage 2",
     Restored => "Restored",
@@ -83,6 +84,7 @@ vocabulary! { Subtype {
     Stadium => "Stadium",
     PokemonTool => "Pokémon Tool",
     PokemonToolF => "Pokémon Tool F",
+    TechnicalMachine => "Technical Machine",
     AceSpec => "ACE SPEC",
     BasicEnergy => "Basic Energy",
     SpecialEnergy => "Special Energy",
@@ -144,6 +146,25 @@ vocabulary! { Edition {
     Unlimited => "unlimited",
 } }
 
+vocabulary! { CardSize {
+    Standard => "standard",
+    Jumbo => "jumbo",
+} }
+
+vocabulary! { FoilPattern {
+    Cosmos => "cosmos",
+    CrackedIce => "cracked-ice",
+    Crosshatch => "crosshatch",
+    Tinsel => "tinsel",
+    Mirror => "mirror",
+    EnergySymbol => "energy-symbol",
+    Sheen => "sheen",
+} }
+
+vocabulary! { PrintingError {
+    Stage2EvolutionFrame => "stage-2-evolution-frame",
+} }
+
 impl Subtype {
     pub fn allowed_for(self, category: Category) -> bool {
         match self {
@@ -151,7 +172,8 @@ impl Subtype {
             | Self::Supporter
             | Self::Stadium
             | Self::PokemonTool
-            | Self::PokemonToolF => category == Category::Trainer,
+            | Self::PokemonToolF
+            | Self::TechnicalMachine => category == Category::Trainer,
             Self::AceSpec => matches!(category, Category::Trainer | Category::Energy),
             Self::TagTeam => matches!(category, Category::Pokemon | Category::Trainer),
             Self::BasicEnergy | Self::SpecialEnergy => category == Category::Energy,
@@ -217,6 +239,9 @@ pub fn document() -> serde_json::Value {
         "rarity": Rarity::VALUES,
         "finish": Finish::VALUES,
         "edition": Edition::VALUES,
+        "cardSize": CardSize::VALUES,
+        "foilPattern": FoilPattern::VALUES,
+        "printingError": PrintingError::VALUES,
         "abilityKind": AbilityKind::VALUES,
         "power": Power::VALUES,
         "costModifier": CostModifier::VALUES,

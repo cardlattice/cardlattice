@@ -50,8 +50,17 @@ export interface Ability {
  * Additional printed numbering never replaces the primary collector number.
  */
 export interface AdditionalNumbers {
-  /** @pattern ^(0[1-9]|[12][0-9]|30)/30$ */
-  pikachu30th: string;
+  /**
+     * @nullable
+     * @pattern ^(0[1-9]|[12][0-9]|30)/30$
+     */
+  pikachu30th?: string | null;
+  /**
+     * Additional ID explicitly labelled on the physical card, not its collector number.
+     * @nullable
+     * @pattern ^[A-Za-z0-9][A-Za-z0-9-]{0,31}$
+     */
+  printedId?: string | null;
 }
 
 export interface ArtworkMetadata {
@@ -95,6 +104,14 @@ export interface Attack {
   /** @nullable */
   text?: string | null;
 }
+
+export type CardSize = typeof CardSize[keyof typeof CardSize];
+
+
+export const CardSize = {
+  standard: 'standard',
+  jumbo: 'jumbo',
+} as const;
 
 export interface CatalogueRecord {
   attributes: unknown;
@@ -262,6 +279,19 @@ export const Finish = {
   'reverse-holo': 'reverse-holo',
 } as const;
 
+export type FoilPattern = typeof FoilPattern[keyof typeof FoilPattern];
+
+
+export const FoilPattern = {
+  cosmos: 'cosmos',
+  'cracked-ice': 'cracked-ice',
+  crosshatch: 'crosshatch',
+  tinsel: 'tinsel',
+  mirror: 'mirror',
+  'energy-symbol': 'energy-symbol',
+  sheen: 'sheen',
+} as const;
+
 export interface GroupMetadata {
   /** @nullable */
   description?: string | null;
@@ -324,6 +354,7 @@ export type Stage = typeof Stage[keyof typeof Stage];
 
 export const Stage = {
   Basic: 'Basic',
+  Baby: 'Baby',
   Stage_1: 'Stage 1',
   Stage_2: 'Stage 2',
   Restored: 'Restored',
@@ -373,6 +404,7 @@ export const Subtype = {
   Stadium: 'Stadium',
   Pokémon_Tool: 'Pokémon Tool',
   Pokémon_Tool_F: 'Pokémon Tool F',
+  Technical_Machine: 'Technical Machine',
   ACE_SPEC: 'ACE SPEC',
   Basic_Energy: 'Basic Energy',
   Special_Energy: 'Special Energy',
@@ -444,6 +476,8 @@ export interface PokemonAttributes {
   weightKilograms?: number | null;
 }
 
+export type PrintedDenominator = number | string;
+
 export interface PrintedIdentifier {
   /** @nullable */
   code?: string | null;
@@ -457,14 +491,28 @@ export interface PrintedIdentifier {
   symbol?: string | null;
 }
 
+export type PrintingError = typeof PrintingError[keyof typeof PrintingError];
+
+
+export const PrintingError = {
+  'stage-2-evolution-frame': 'stage-2-evolution-frame',
+} as const;
+
 /**
  * Each entry is an observed combination; never infer an edition × finish cross product.
  */
 export interface PrintingVariant {
   edition?: null | Edition;
   finish?: null | Finish;
+  /**
+     * Exact printed flavour text for this physical variant, overriding the card's default bio.
+     * @nullable
+     */
+  flavourText?: string | null;
+  foilPattern?: null | FoilPattern;
   /** @nullable */
   products?: string[] | null;
+  size?: null | CardSize;
   /** @nullable */
   stamps?: string[] | null;
 }
@@ -511,14 +559,16 @@ export interface PrintingMetadata {
   /** @nullable */
   illustrators?: string[] | null;
   legendPart?: null | LegendPart;
+  printedDenominator?: null | PrintedDenominator;
   /**
-     * @minimum 0
+     * Verified physical printing errors, separate from the card's rules text.
      * @nullable
      */
-  printedDenominator?: number | null;
+  printingErrors?: PrintingError[] | null;
   /** @nullable */
   products?: string[] | null;
   regulationMark?: null | RegulationMark;
+  size?: null | CardSize;
   /** @nullable */
   stamps?: string[] | null;
   /**

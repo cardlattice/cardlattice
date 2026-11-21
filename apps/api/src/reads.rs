@@ -6,13 +6,13 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use catalogue::{ListQuery, Page, Record, encode_cursor, normalize};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::{Postgres, QueryBuilder};
+use time::OffsetDateTime;
 use utoipa::ToSchema;
 
-pub async fn modified(state: &AppState) -> Result<DateTime<Utc>, ApiError> {
+pub async fn modified(state: &AppState) -> Result<OffsetDateTime, ApiError> {
     Ok(sqlx::query_scalar(
         "SELECT COALESCE(MAX(created_at),'1970-01-01'::timestamptz) FROM catalogue_revisions",
     )
@@ -222,7 +222,11 @@ pub async fn catalogue(
         let last = records.last().expect("positive page limit");
         // Sort by canonical name even when the displayed name is localized.
         let key = if newest {
-            last.created_at.format("%Y-%m-%d %H:%M:%S%.6f").to_string()
+            last.created_at
+                .format(time::macros::format_description!(
+                    "[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:6]"
+                ))
+                .expect("valid pagination timestamp")
         } else {
             sqlx::query_scalar("SELECT normalized_name FROM catalogue_records WHERE id=$1")
                 .bind(&last.id)
@@ -344,7 +348,7 @@ pub async fn datasets(
     )
     .fetch_all(&state.pool)
     .await?;
-    let modified: DateTime<Utc> = sqlx::query_scalar(
+    let modified: OffsetDateTime = sqlx::query_scalar(
         "SELECT COALESCE(MAX(GREATEST(created_at,withdrawn_at)),'1970-01-01'::timestamptz) FROM publication_manifests",
     ).fetch_one(&state.pool).await?;
     Ok(cached_json(
@@ -425,16 +429,16 @@ pub async fn status(State(state): State<AppState>) -> Result<Json<Value>, ApiErr
     let recent = measurements
         .first()
         .and_then(|v| v["measuredAt"].as_str())
-        .and_then(|v| DateTime::parse_from_rfc3339(v).ok())
-        .is_some_and(|v| (Utc::now() - v.with_timezone(&Utc)).num_seconds() < 90);
+        .and_then(|v| OffsetDateTime::parse(v, &time::format_description::well_known::Rfc3339).ok())
+        .is_some_and(|v| (OffsetDateTime::now_utc() - v).whole_seconds() < 90);
     let (pending,failed):(i64,i64)=sqlx::query_as("SELECT count(*) FILTER(WHERE status='pending'),count(*) FILTER(WHERE status='failed') FROM cache_invalidation_outbox").fetch_one(&state.pool).await?;
-    let latest: Option<DateTime<Utc>> = sqlx::query_scalar(
+    let latest: Option<OffsetDateTime> = sqlx::query_scalar(
         "SELECT MAX(created_at) FROM publication_manifests WHERE withdrawn_at IS NULL",
     )
     .fetch_one(&state.pool)
     .await?;
     Ok(Json(
-        json!({"status":if !recent {"unknown"}else if measurements.first().is_some_and(|v|v["healthy"]==true)&&failed==0 {"operational"}else{"degraded"},"measurements":measurements,"pendingInvalidations":pending,"failedInvalidations":failed,"latestPublicationAt":latest,"probeIntervalSeconds":30,"note":"Origin database probes; not global uptime. Probe storage is unavailable during a complete database outage; stale measurements are unknown."}),
+        json!({"status":if !recent {"unknown"}else if measurements.first().is_some_and(|v|v["healthy"]==true)&&failed==0 {"operational"}else{"degraded"},"measurements":measurements,"pendingInvalidations":pending,"failedInvalidations":failed,"latestPublicationAt":latest.map(|v| v.format(&time::format_description::well_known::Rfc3339).expect("valid publication timestamp")),"probeIntervalSeconds":30,"note":"Origin database probes; not global uptime. Probe storage is unavailable during a complete database outage; stale measurements are unknown."}),
     ))
 }
 

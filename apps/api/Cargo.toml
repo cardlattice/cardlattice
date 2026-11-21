@@ -12,7 +12,7 @@ catalogue = { version = "0.1.0", path = "../../crates/catalogue" }
 ingestion = { version = "0.1.0", path = "../../crates/ingestion" }
 publishing = { version = "0.1.0", path = "../../crates/publishing" }
 observability = { version = "0.1.0", path = "../../crates/observability" }
-chrono.workspace = true
+time.workspace = true
 httpdate.workspace = true
 serde.workspace = true
 serde_json.workspace = true

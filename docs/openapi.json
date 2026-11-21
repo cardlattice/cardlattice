@@ -59,12 +59,20 @@
         "properties": {
           "pikachu30th": {
             "pattern": "^(0[1-9]|[12][0-9]|30)/30$",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "printedId": {
+            "description": "Additional ID explicitly labelled on the physical card, not its collector number.",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,31}$",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": [
-          "pikachu30th"
-        ],
         "type": "object"
       },
       "ArtworkMetadata": {
@@ -138,6 +146,13 @@
           "cost"
         ],
         "type": "object"
+      },
+      "CardSize": {
+        "enum": [
+          "standard",
+          "jumbo"
+        ],
+        "type": "string"
       },
       "CatalogueRecord": {
         "properties": {
@@ -490,6 +505,18 @@
           "non-holo",
           "holo",
           "reverse-holo"
+        ],
+        "type": "string"
+      },
+      "FoilPattern": {
+        "enum": [
+          "cosmos",
+          "cracked-ice",
+          "crosshatch",
+          "tinsel",
+          "mirror",
+          "energy-symbol",
+          "sheen"
         ],
         "type": "string"
       },
@@ -863,6 +890,19 @@
         ],
         "type": "string"
       },
+      "PrintedDenominator": {
+        "oneOf": [
+          {
+            "maximum": 9999,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "pattern": "^[A-Z]{1,8}[1-9][0-9]{0,3}$",
+            "type": "string"
+          }
+        ]
+      },
       "PrintedIdentifier": {
         "additionalProperties": false,
         "properties": {
@@ -893,6 +933,12 @@
           "language"
         ],
         "type": "object"
+      },
+      "PrintingError": {
+        "enum": [
+          "stage-2-evolution-frame"
+        ],
+        "type": "string"
       },
       "PrintingMetadata": {
         "additionalProperties": false,
@@ -952,10 +998,22 @@
             ]
           },
           "printedDenominator": {
-            "format": "int32",
-            "minimum": 0,
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrintedDenominator"
+              }
+            ]
+          },
+          "printingErrors": {
+            "description": "Verified physical printing errors, separate from the card's rules text.",
+            "items": {
+              "$ref": "#/components/schemas/PrintingError"
+            },
             "type": [
-              "integer",
+              "array",
               "null"
             ]
           },
@@ -975,6 +1033,17 @@
               },
               {
                 "$ref": "#/components/schemas/RegulationMark"
+              }
+            ]
+          },
+          "size": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CardSize",
+                "description": "Physical size of this distinct printing when its rules differ from other sizes."
               }
             ]
           },
@@ -1044,6 +1113,23 @@
               }
             ]
           },
+          "flavourText": {
+            "description": "Exact printed flavour text for this physical variant, overriding the card's default bio.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "foilPattern": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FoilPattern"
+              }
+            ]
+          },
           "products": {
             "items": {
               "type": "string"
@@ -1051,6 +1137,16 @@
             "type": [
               "array",
               "null"
+            ]
+          },
+          "size": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CardSize"
+              }
             ]
           },
           "stamps": {
@@ -1268,6 +1364,7 @@
       "Stage": {
         "enum": [
           "Basic",
+          "Baby",
           "Stage 1",
           "Stage 2",
           "Restored",
@@ -1447,6 +1544,7 @@
           "Stadium",
           "Pokémon Tool",
           "Pokémon Tool F",
+          "Technical Machine",
           "ACE SPEC",
           "Basic Energy",
           "Special Energy"

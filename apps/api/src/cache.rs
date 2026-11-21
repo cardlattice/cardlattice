@@ -3,14 +3,14 @@ use axum::{
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
-use chrono::{DateTime, Utc};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
+use time::OffsetDateTime;
 
 pub fn cached_json<T: Serialize>(
     value: &T,
     request: &HeaderMap,
-    modified: DateTime<Utc>,
+    modified: OffsetDateTime,
     edge_ttl: u32,
 ) -> Response {
     let bytes = serde_json::to_vec(value).expect("JSON response serialization");
@@ -64,7 +64,7 @@ mod tests {
     use super::*;
     #[test]
     fn weak_validator_and_precedence() {
-        let now = Utc::now();
+        let now = OffsetDateTime::now_utc();
         let mut headers = HeaderMap::new();
         let first = cached_json(&serde_json::json!({"id":1}), &headers, now, 60);
         headers.insert(

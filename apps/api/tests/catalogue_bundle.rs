@@ -225,6 +225,44 @@ fn source_fixture(root: &std::path::Path) -> Bundle {
 }
 
 #[test]
+fn source_tree_keeps_jumbo_rules_separate_and_literal_printed_details() {
+    let source = tempfile::tempdir().unwrap();
+    let mut bundle = source_fixture(source.path());
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001.yaml",
+        "name: Prism Seed\npokemon: {category: pokemon, hp: 60, stage: Baby}\nprintedDenominator: H32\nadditionalNumbers: {printedId: Y-02}\n",
+    );
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001-jumbo.yaml",
+        "name: Prism Seed\ncollectorNumber: '001'\nsize: jumbo\npokemon: {category: pokemon, hp: 70, stage: Baby}\nprintedDenominator: RC25\n",
+    );
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    bundle.validate().unwrap();
+    for (suffix, hp, denominator) in [("", 60, "H32"), ("-jumbo", 70, "RC25")] {
+        let id = format!("pokemon-laboratory-en-US-001{suffix}");
+        let printing = bundle.records.iter().find(|entry| entry.id == id).unwrap();
+        assert_eq!(printing.draft.record_id().unwrap(), id);
+        assert_eq!(printing.draft.collector_number.as_deref(), Some("001"));
+        assert_eq!(printing.draft.attributes["printedDenominator"], denominator);
+        let card = bundle
+            .records
+            .iter()
+            .find(|entry| Some(&entry.id) == printing.draft.card_id.as_ref())
+            .unwrap();
+        assert_eq!(card.draft.attributes["hp"], hp);
+    }
+    write(
+        source.path(),
+        "pokemon/cards/laboratory/en/US/001-duplicate.yaml",
+        "name: Prism Seed\ncollectorNumber: '001'\nsize: standard\npokemon: {category: pokemon, hp: 60, stage: Baby}\n",
+    );
+    bundle.records = ingestion::source_tree::load(source.path()).unwrap();
+    assert!(bundle.validate().is_err());
+}
+
+#[test]
 fn source_tree_inherits_context_without_evidence() {
     let source = tempfile::tempdir().unwrap();
     let bundle = source_fixture(source.path());

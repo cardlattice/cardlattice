@@ -1,11 +1,11 @@
 use catalogue::Record;
-use chrono::{DateTime, NaiveDate, Utc};
 use futures_util::TryStreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::path::PathBuf;
+use time::{Date, OffsetDateTime};
 use tokio::io::AsyncWriteExt;
 use utoipa::ToSchema;
 
@@ -36,13 +36,14 @@ pub enum PublishError {
 pub struct Manifest {
     pub id: String,
     pub revision: i64,
-    pub release_date: NaiveDate,
+    pub release_date: Date,
     pub schema_version: i32,
     pub sha256: String,
     pub byte_size: i64,
     pub record_count: i64,
     pub filename: String,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
 }
 
 pub fn retry_delay(attempt: i32) -> i64 {
@@ -71,7 +72,7 @@ pub async fn publish_snapshot(
         sqlx::query_scalar("SELECT COALESCE(MAX(revision),0) FROM catalogue_revisions WHERE after_data->>'synthetic'='false' OR before_data->>'synthetic'='false'")
             .fetch_one(&mut *tx)
             .await?;
-    let release_date: NaiveDate =
+    let release_date: Date =
         sqlx::query_scalar("SELECT (transaction_timestamp() AT TIME ZONE 'UTC')::date")
             .fetch_one(&mut *tx)
             .await?;
