@@ -8,7 +8,7 @@ permissions:
   contents: read
 jobs:
   build:
-    name: Build client catalogue
+    name: Build catalogue apps
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,6 +25,7 @@ jobs:
           name: cloudflare-sites
           path: |
             apps/web/dist/
+            apps/status/dist/
             infra/api-coming-soon/
           if-no-files-found: error
   deploy:
@@ -59,3 +60,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: pnpm exec wrangler pages deploy .deploy/infra/api-coming-soon --project-name cardlattice-api-coming-soon --branch main
+      - name: Publish catalogue status dashboard
+        if: vars.STATUS_PAGES_PROJECT != ''
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          STATUS_PAGES_PROJECT: ${{ vars.STATUS_PAGES_PROJECT }}
+        run: pnpm exec wrangler pages deploy .deploy/apps/status/dist --project-name "$STATUS_PAGES_PROJECT" --branch main

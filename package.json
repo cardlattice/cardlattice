@@ -1,19 +1,22 @@
 {
   "name": "cardlattice",
   "private": true,
-  "packageManager": "pnpm@12.4.1",
   "scripts": {
-    "dev": "pnpm --filter @cardlattice/web dev",
-    "build": "pnpm --filter @cardlattice/web build",
-    "typecheck": "pnpm --filter @cardlattice/web typecheck",
-    "test": "pnpm --filter @cardlattice/web test",
-    "lint": "pnpm --filter @cardlattice/web lint",
-    "format": "pnpm --filter @cardlattice/web format",
+    "dev": "turbo run dev --filter=@cardlattice/web",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "test:e2e": "pnpm --filter @cardlattice/web test:e2e",
-    "format:check": "pnpm --filter @cardlattice/web format:check"
+    "format:check": "turbo run format:check",
+    "dev:status": "turbo run dev --filter=@cardlattice/status",
+    "build:status": "turbo run build --filter=@cardlattice/status"
   },
   "devDependencies": {
+    "turbo": "^2.11.13",
     "wrangler": "4.161.0"
-  }
+  },
+  "packageManager": "pnpm@12.4.1"
 }

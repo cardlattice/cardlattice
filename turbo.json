@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["API_PROXY_TARGET", "VITE_*"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_*", "NODE_ENV"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {},
+    "format": {
+      "cache": false
+    },
+    "format:check": {},
+    "@cardlattice/status#test": {
+      "outputs": ["coverage/**"]
+    }
+  }
+}
