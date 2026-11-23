@@ -1,3 +1,6 @@
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
+import GlobeIcon from "./icons/GlobeIcon.tsx";
 import us from "flag-icons/flags/4x3/us.svg";
 import jp from "flag-icons/flags/4x3/jp.svg";
 import kr from "flag-icons/flags/4x3/kr.svg";
@@ -9,30 +12,32 @@ import de from "flag-icons/flags/4x3/de.svg";
 import es from "flag-icons/flags/4x3/es.svg";
 import it from "flag-icons/flags/4x3/it.svg";
 import br from "flag-icons/flags/4x3/br.svg";
-import Icon from "./Icon.tsx";
-const flags: Record<string, string> = {
-  en: "us",
-  ja: "jp",
-  ko: "kr",
-  nl: "nl",
-  "zh-Hans": "cn",
-  "zh-Hant": "tw",
-  fr: "fr",
-  de: "de",
-  es: "es",
-  it: "it",
-  pt: "br",
-};
+
+const flags = new Map([
+  ["en", { country: "us", source: us }],
+  ["ja", { country: "jp", source: jp }],
+  ["ko", { country: "kr", source: kr }],
+  ["nl", { country: "nl", source: nl }],
+  ["zh-Hans", { country: "cn", source: cn }],
+  ["zh-Hant", { country: "tw", source: tw }],
+  ["fr", { country: "fr", source: fr }],
+  ["de", { country: "de", source: de }],
+  ["es", { country: "es", source: es }],
+  ["it", { country: "it", source: it }],
+  ["pt", { country: "br", source: br }],
+]);
+
 export default function LanguageIcon({ language }: { language: string }) {
-  const flag = flags[language];
-  const sources: Record<string, string> = { us, jp, kr, nl, cn, tw, fr, de, es, it, br };
+  const flag = flags.get(language);
   return flag ? (
-    <span
-      className={`fi fi-${flag} flag`}
-      style={{ backgroundImage: `url(${sources[flag]})` }}
+    <img
+      alt=""
+      src={flag.source}
+      data-country={flag.country}
+      {...stylex.props(styles.flag)}
       aria-hidden="true"
     />
   ) : (
-    <Icon name="globe" />
+    <GlobeIcon />
   );
 }

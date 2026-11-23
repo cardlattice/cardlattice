@@ -1,13 +1,17 @@
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
 import { useQuery } from "@tanstack/react-query";
 import App from "./App.tsx";
 import { coverageQuery } from "../lib/coverage-query.ts";
 
 export default function Dashboard() {
   const coverage = useQuery(coverageQuery);
-  if (coverage.data) return <App rows={coverage.data.rows} revision={coverage.data.sourceCommit} />;
-  if (coverage.isError)
+  if (coverage.data) {
+    return <App rows={coverage.data.rows} revision={coverage.data.sourceCommit} />;
+  }
+  if (coverage.isError) {
     return (
-      <main className="container">
+      <main data-ui="container" {...stylex.props(styles.container)}>
         <h1>Catalogue Progress</h1>
         <p role="alert">{coverage.error.message}</p>
         <button type="button" onClick={() => void coverage.refetch()}>
@@ -15,8 +19,9 @@ export default function Dashboard() {
         </button>
       </main>
     );
+  }
   return (
-    <main className="container">
+    <main data-ui="container" {...stylex.props(styles.container)}>
       <p role="status">Loading catalogue coverage…</p>
     </main>
   );

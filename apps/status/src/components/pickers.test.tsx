@@ -1,5 +1,6 @@
+import SelectPicker from "./SelectPicker.tsx";
 // @vitest-environment jsdom
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import SetBrowser from "./SetBrowser.tsx";
@@ -30,7 +31,7 @@ it("selects search suggestions with the keyboard and preserves free text", async
   await user.type(search, "Orig");
   expect(await screen.findByRole("option", { name: "Alpha" })).toBeTruthy();
   await user.keyboard("{ArrowDown}{Enter}");
-  expect((search as HTMLInputElement).value).toBe("Alpha");
+  expect(search.getAttribute("value")).toBe("Alpha");
   expect(screen.getByRole("status").textContent).toBe("1 set found");
   await user.clear(search);
   await user.type(search, "unknown");
@@ -39,9 +40,9 @@ it("selects search suggestions with the keyboard and preserves free text", async
   ).toBeTruthy();
   await user.keyboard("{Escape}");
   expect(search.getAttribute("aria-expanded")).toBe("false");
-  expect((search as HTMLInputElement).value).toBe("unknown");
+  expect(search.getAttribute("value")).toBe("unknown");
   await user.tab();
-  expect((search as HTMLInputElement).value).toBe("unknown");
+  expect(search.getAttribute("value")).toBe("unknown");
 });
 it("opens suggestions with the trigger and selects with a pointer", async () => {
   const user = userEvent.setup();
@@ -51,8 +52,7 @@ it("opens suggestions with the trigger and selects with a pointer", async () => 
   expect(screen.getByRole("status").textContent).toBe("1 set found");
   await user.click(screen.getByRole("button", { name: "Clear filters" }));
   expect(
-    (screen.getByRole("combobox", { name: "Find a set, game, series or ID" }) as HTMLInputElement)
-      .value,
+    screen.getByRole("combobox", { name: "Find a set, game, series or ID" }).getAttribute("value"),
   ).toBe("");
   expect(screen.getByRole("status").textContent).toBe("3 sets found");
 });
@@ -62,10 +62,13 @@ it("shows flags, selects a language, and restores all languages", async () => {
   const trigger = screen.getByRole("combobox", { name: "Language" });
   await user.click(trigger);
   const japanese = await screen.findByRole("option", { name: "Japanese" });
-  expect(japanese.querySelector(".fi-jp")?.className).toBe("fi fi-jp flag");
-  expect(screen.getByRole("option", { name: "English" }).querySelector(".fi-us")?.className).toBe(
-    "fi fi-us flag",
-  );
+  expect(japanese.querySelector("[data-country='jp']")?.getAttribute("data-country")).toBe("jp");
+  expect(
+    screen
+      .getByRole("option", { name: "English" })
+      .querySelector("[data-country='us']")
+      ?.getAttribute("data-country"),
+  ).toBe("us");
   await user.click(japanese);
   expect(trigger.textContent).toBe("Japanese");
   expect(screen.getByRole("status").textContent).toBe("1 set found");
@@ -108,9 +111,12 @@ it("uses a globe fallback for unlocalised and unmapped languages", async () => {
     expect(option.querySelector("img")).toBeNull();
     expect(option.querySelector("svg")).not.toBeNull();
   }
-  expect(screen.getByRole("option", { name: "Korean" }).querySelector(".fi-kr")?.className).toBe(
-    "fi fi-kr flag",
-  );
+  expect(
+    screen
+      .getByRole("option", { name: "Korean" })
+      .querySelector("[data-country='kr']")
+      ?.getAttribute("data-country"),
+  ).toBe("kr");
 });
 it("bounds suggestions and resets pagination when selecting a language", async () => {
   const user = userEvent.setup();
@@ -139,5 +145,22 @@ it("shows the Dutch flag even for a global release", () => {
       revision="abc"
     />,
   );
-  expect(document.querySelector(".release-language .fi-nl")).not.toBeNull();
+  expect(document.querySelector("[data-ui='release-language'] [data-country='nl']")).not.toBeNull();
+});
+
+it("keeps an unmatched selection labelled and lets the user recover", async () => {
+  const onChange = vi.fn();
+  render(
+    <SelectPicker
+      label="Example"
+      value="removed"
+      options={[{ value: "valid", label: "Available" }]}
+      onChange={onChange}
+    />,
+  );
+  const trigger = screen.getByRole("combobox", { name: "Example" });
+  expect(trigger.textContent).toBe("Example");
+  await userEvent.click(trigger);
+  await userEvent.click(await screen.findByRole("option", { name: "Available" }));
+  expect(onChange).toHaveBeenCalledWith("valid");
 });

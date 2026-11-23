@@ -1,29 +1,36 @@
-import { github, wordmark } from "../lib/artwork.ts";
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
+import GithubIcon from "./icons/GithubIcon.tsx";
+import Wordmark from "./Wordmark.tsx";
 import { repo } from "../lib/model.ts";
 export default function Header({ revision }: { revision: string }) {
   return (
-    <header className="container page-header">
+    <header data-ui="container page-header" {...stylex.props(styles.container, styles.header)}>
       <a
-        className="wordmark"
+        data-ui="wordmark"
+        {...stylex.props(styles.wordmark)}
         href="https://cardlattice.com"
         target="_blank"
         rel="noopener"
         aria-label="Cardlattice home"
-        dangerouslySetInnerHTML={{ __html: wordmark }}
-      />
-      <nav className="header-actions" aria-label="Project">
-        <div className="header-buttons">
+      >
+        <Wordmark />
+      </a>
+      <nav data-ui="header-actions" {...stylex.props(styles.headerActions)} aria-label="Project">
+        <div data-ui="header-buttons" {...stylex.props(styles.headerButtons)}>
           <a
-            className="header-button commit-button"
+            data-ui="header-button commit-button"
+            {...stylex.props(styles.headerButton, styles.commitButton)}
             href={`${repo}/commit/${revision}`}
             target="_blank"
             rel="noopener"
           >
-            <span className="commit-dot" aria-hidden="true" />
+            <span data-ui="commit-dot" {...stylex.props(styles.commitDot)} aria-hidden="true" />
             Last commit: {revision.slice(0, 7)}
           </a>
           <a
-            className="header-button primary-button"
+            data-ui="header-button primary-button"
+            {...stylex.props(styles.headerButton, styles.primaryButton)}
             href={`${repo}/blob/main/CONTRIBUTING.md`}
             target="_blank"
             rel="noopener"
@@ -32,13 +39,15 @@ export default function Header({ revision }: { revision: string }) {
           </a>
         </div>
         <a
-          className="github-link"
+          data-ui="github-link"
+          {...stylex.props(styles.githubLink)}
           href={repo}
           target="_blank"
           rel="noopener"
           aria-label="Cardlattice data on GitHub"
-          dangerouslySetInnerHTML={{ __html: github }}
-        />
+        >
+          <GithubIcon />
+        </a>
       </nav>
     </header>
   );

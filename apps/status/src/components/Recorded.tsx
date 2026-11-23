@@ -1,3 +1,5 @@
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
 import { percent } from "../lib/coverage-model.ts";
 import { n } from "../lib/model.ts";
 export default function Recorded({
@@ -10,17 +12,20 @@ export default function Recorded({
   ring?: boolean;
 }) {
   return (
-    <span className="recorded">
+    <span data-ui="recorded" {...stylex.props(styles.recorded)}>
       {ring && (
         <svg
-          className={`coverage-ring ${value === cards && cards > 0 ? "complete" : ""}`}
+          data-ui="coverage-ring"
+          data-complete={value === cards && cards > 0}
+          {...stylex.props(styles.ring)}
           viewBox="0 0 12 12"
           fill="none"
           aria-hidden="true"
         >
           <circle cx="6" cy="6" r="5" />
           <circle
-            className="coverage-value"
+            data-ui="coverage-value"
+            {...stylex.props(styles.ringValue, value === cards && cards > 0 && styles.ringComplete)}
             cx="6"
             cy="6"
             r="5"
@@ -32,7 +37,9 @@ export default function Recorded({
       )}
       <span>
         {n(value)}
-        <span className="secondary">/{n(cards)}</span>
+        <span data-ui="secondary" {...stylex.props(styles.secondary)}>
+          /{n(cards)}
+        </span>
       </span>
     </span>
   );

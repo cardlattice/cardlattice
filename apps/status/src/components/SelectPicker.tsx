@@ -1,6 +1,9 @@
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
+import CheckIcon from "./icons/CheckIcon.tsx";
+import ChevronIcon from "./icons/ChevronIcon.tsx";
 import { Select } from "@base-ui/react/select";
 import type { ReactNode } from "react";
-import Icon from "./Icon.tsx";
 
 export interface SelectOption {
   value: string;
@@ -20,14 +23,18 @@ export default function SelectPicker({
   options: SelectOption[];
   triggerLabel?: string;
 }) {
-  const selected = options.find((option) => option.value === value)!;
+  const selected = options.find((option) => option.value === value);
   return (
     <Select.Root value={value} onValueChange={(next) => onChange(next || "")} modal={false}>
-      <Select.Trigger className="select-trigger" aria-label={label}>
-        {selected.icon}
-        <span>{triggerLabel ?? selected.label}</span>
+      <Select.Trigger
+        data-ui="select-trigger"
+        {...stylex.props(styles.selectTrigger)}
+        aria-label={label}
+      >
+        {selected?.icon}
+        <span>{triggerLabel ?? selected?.label ?? label}</span>
         <Select.Icon>
-          <Icon name="chevron" />
+          <ChevronIcon />
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
@@ -35,16 +42,27 @@ export default function SelectPicker({
           sideOffset={6}
           align="start"
           alignItemWithTrigger={false}
-          className="picker-positioner"
+          data-ui="picker-positioner"
+          {...stylex.props(styles.positioner)}
         >
-          <Select.Popup className="picker-popup">
+          <Select.Popup data-ui="picker-popup" {...stylex.props(styles.popup)}>
             <Select.List aria-label={label}>
               {options.map((option) => (
-                <Select.Item key={option.value} value={option.value} className="picker-option">
+                <Select.Item
+                  key={option.value}
+                  value={option.value}
+                  data-ui="picker-option"
+                  className={(state) =>
+                    stylex.props(styles.option, state.highlighted && styles.highlighted).className
+                  }
+                >
                   {option.icon}
                   <Select.ItemText>{option.label}</Select.ItemText>
-                  <Select.ItemIndicator className="picker-check">
-                    <Icon name="check" />
+                  <Select.ItemIndicator
+                    data-ui="picker-check"
+                    {...stylex.props(styles.pickerCheck)}
+                  >
+                    <CheckIcon />
                   </Select.ItemIndicator>
                 </Select.Item>
               ))}

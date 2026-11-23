@@ -99,3 +99,14 @@ it("rejects mismatched printing totals", async () => {
     "printing count mismatch",
   );
 });
+
+it.each([
+  { records: [{ id: "invalid", metadata: { kind: 42 } }] },
+  { records: "not an array" },
+  { records: [{ id: "invalid", metadata: { kind: "printing", attributes: [] } }] },
+])("rejects a checksum-valid snapshot with invalid record data: %j", async (invalid) => {
+  const body = JSON.stringify({ sourceCommit: revision, ...invalid });
+  const sha256 = createHash("sha256").update(body).digest("hex");
+  mockSnapshot({ sha256, filename: `catalogue-${sha256}.json` }, body);
+  await expect(loadCoverage(new AbortController().signal)).rejects.toThrow();
+});

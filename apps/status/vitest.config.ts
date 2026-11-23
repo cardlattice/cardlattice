@@ -1,5 +1,7 @@
+import stylex from "@stylexjs/unplugin";
 import { defineConfig } from "vitest/config";
 export default defineConfig({
+  plugins: [stylex.vite({ dev: true, test: true, runtimeInjection: false, useCSSLayers: true })],
   test: {
     coverage: {
       provider: "v8",

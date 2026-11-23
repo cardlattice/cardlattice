@@ -10,3 +10,9 @@ it("mounts the dashboard with a query provider", async () => {
   expect(mocks.create).toHaveBeenCalledWith(document.getElementById("root"));
   expect(mocks.render).toHaveBeenCalledOnce();
 });
+
+it("reports a missing mounting element", async () => {
+  vi.resetModules();
+  document.body.replaceChildren();
+  await expect(import("./main.tsx")).rejects.toThrow("Missing dashboard root element");
+});

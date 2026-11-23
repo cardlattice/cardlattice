@@ -4,7 +4,7 @@ export const statusLabels = { empty: "Not Started", partial: "In Progress", done
 export const n = (value: number) => new Intl.NumberFormat("en-GB").format(value);
 const languageNames = new Intl.DisplayNames(["en"], { type: "language" });
 export const languageName = (code: string) =>
-  code === "und" ? "Not yet localised" : languageNames.of(code)!;
+  code === "und" ? "Not yet localised" : (languageNames.of(code) ?? code);
 export const releaseLanguages = (rows: Coverage[]) =>
   new Set(rows.map((row) => row.language).filter((language) => language !== "und"));
 export function groupSets(rows: Coverage[]) {
@@ -14,19 +14,21 @@ export function groupSets(rows: Coverage[]) {
     releases.push(row);
     sets.set(row.setId, releases);
   }
-  return [...sets.values()].map((releases) => ({
-    releases,
-    status: releases.every((row) => row.cards === 0)
-      ? ("empty" as const)
-      : releases.every(
-            (row) =>
-              row.cards === row.finishes &&
-              row.cards === row.illustrators &&
-              row.cards === row.rarities,
-          )
-        ? ("done" as const)
-        : ("partial" as const),
-  }));
+  return [...sets.values()].map((releases) => ({ releases, status: groupStatus(releases) }));
+}
+function groupStatus(releases: Coverage[]): keyof typeof statusLabels {
+  if (releases.every((row) => row.cards === 0)) {
+    return "empty";
+  }
+  if (
+    releases.every(
+      (row) =>
+        row.cards === row.finishes && row.cards === row.illustrators && row.cards === row.rarities,
+    )
+  ) {
+    return "done";
+  }
+  return "partial";
 }
 export type Group = ReturnType<typeof groupSets>[number];
 export function filterSets(
@@ -45,16 +47,19 @@ export function filterSets(
         .normalize("NFKC")
         .toLowerCase()
         .includes(term)
-    )
+    ) {
       return [];
+    }
     const missing = status === "finishes" || status === "illustrators";
-    if (status && !missing && status !== group.status) return [];
+    if (status && !missing && status !== group.status) {
+      return [];
+    }
     const releases = group.releases.filter(
       (row) => (!language || row.language === language) && (!missing || row[status] < row.cards),
     );
     return releases.length ? [{ ...group, releases }] : [];
   });
-  if (sort !== "default")
+  if (sort !== "default") {
     filtered.sort((a, b) => {
       const score = (group: Group) =>
         group.releases.reduce(
@@ -64,5 +69,6 @@ export function filterSets(
         );
       return score(b) - score(a) || a.releases[0].name.localeCompare(b.releases[0].name, "en");
     });
+  }
   return filtered;
 }

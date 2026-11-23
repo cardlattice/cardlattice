@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import App from "./App.tsx";
-import ThemePicker from "./ThemePicker.tsx";
 import ReleaseLabel from "./ReleaseLabel.tsx";
 import { filterSets, groupSets, languageName } from "../lib/model.ts";
 import type { Coverage } from "../lib/coverage-model.ts";
@@ -72,11 +71,13 @@ describe("dashboard", () => {
     render(<App rows={rows} revision={revision} />);
     expect(screen.getByRole("status").textContent).toBe("3 sets found");
     expect(screen.getByText("Known Printings").nextElementSibling?.textContent).toBe("5");
-    expect(screen.getByText("Done", { selector: ".badge" })).toBeTruthy();
+    expect(screen.getByText("Done", { selector: "[data-ui='badge']" })).toBeTruthy();
     expect(
       screen.getByLabelText("View Alpha · English · US source on GitHub").getAttribute("href"),
     ).toContain(`/tree/${revision}/catalogue/pokemon/cards/a/en/US`);
-    expect(document.querySelector(".coverage-ring.complete")).not.toBeNull();
+    expect(
+      document.querySelector("[data-ui='coverage-ring'][data-complete='true']"),
+    ).not.toBeNull();
   });
   it("filters, clears, sorts, and prevents form navigation", async () => {
     render(<App rows={rows} revision={revision} />);
@@ -93,7 +94,7 @@ describe("dashboard", () => {
     expect(document.activeElement).toBe(query);
     expect(screen.getByRole("status").textContent).toBe("3 sets found");
     await choose("Sort by", "Most printings");
-    expect(document.querySelector(".set-name")?.textContent).toBe("Alpha");
+    expect(document.querySelector("[data-ui='set-name']")?.textContent).toBe("Alpha");
     await choose("Status", "Missing finishes");
     expect(screen.getByRole("status").textContent).toBe("1 set found");
     await choose("Status", "Missing illustrators");
@@ -104,11 +105,11 @@ describe("dashboard", () => {
       row({ key: String(i), setId: `pokemon.${i}`, name: `Set ${i}` }),
     );
     render(<App rows={many} revision={revision} />);
-    expect(document.querySelectorAll(".set-card").length).toBe(25);
+    expect(document.querySelectorAll("[data-ui='set-card']").length).toBe(25);
     fireEvent.click(screen.getByText("Next"));
     expect(screen.getByText("26–50 of 51")).toBeTruthy();
     await waitFor(() =>
-      expect(document.activeElement).toBe(document.querySelector(".set-card summary")),
+      expect(document.activeElement).toBe(document.querySelector("[data-ui='set-card'] summary")),
     );
     fireEvent.click(screen.getByText("Previous"));
     expect(screen.getByText("1–25 of 51")).toBeTruthy();
@@ -117,7 +118,7 @@ describe("dashboard", () => {
     expect(screen.getByText("1–50 of 51")).toBeTruthy();
     fireEvent.click(screen.getByText("Next"));
     expect(screen.getByText("51–51 of 51")).toBeTruthy();
-    expect((screen.getByText("Next") as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText("Next").hasAttribute("disabled")).toBe(true);
     fireEvent.change(screen.getByRole("combobox", { name: "Find a set, game, series or ID" }), {
       target: { value: "Set 0" },
     });
@@ -134,14 +135,16 @@ describe("dashboard", () => {
     const au = row({ region: "AU" });
     const us = row();
     const { container } = render(<ReleaseLabel row={us} releases={[us, au]} />);
-    expect(container.querySelector(".release-region")?.textContent).toContain("United States");
+    expect(container.querySelector("[data-ui='release-region']")?.textContent).toContain(
+      "United States",
+    );
     cleanup();
     render(<ReleaseLabel row={au} releases={[au]} />);
     expect(screen.getByText("· Australia")).toBeTruthy();
     cleanup();
     const fr = row({ language: "eo", region: "FR" });
     render(<ReleaseLabel row={fr} releases={[fr]} />);
-    expect(document.querySelector(".release-language > svg")).toBeTruthy();
+    expect(document.querySelector("[data-ui='release-language'] > svg")).toBeTruthy();
     expect(languageName("und")).toBe("Not yet localised");
   });
   it("sorts by printings, gaps, names and stable name tie breaks", () => {
@@ -162,32 +165,6 @@ describe("dashboard", () => {
     expect(filterSets(groups, "", "", "empty", "default")).toHaveLength(1);
     expect(filterSets(groups, "", "xx", "", "default")).toHaveLength(0);
   });
-  it.each(["light", "dark", "invalid", null])(
-    "restores and changes theme from %s",
-    async (saved) => {
-      if (saved) localStorage.setItem("cardlattice-theme", saved);
-      render(<ThemePicker />);
-      expect(screen.getByRole("combobox", { name: "Theme" }).textContent).toBe(
-        saved === "light" ? "Light" : saved === "dark" ? "Dark" : "Auto",
-      );
-      await choose("Theme", "Dark");
-      expect(document.documentElement.dataset.theme).toBe("dark");
-      expect(localStorage.getItem("cardlattice-theme")).toBe("dark");
-      await choose("Theme", "Auto");
-      expect(document.documentElement.dataset.theme).toBeUndefined();
-    },
-  );
-  it("works when local storage is unavailable", async () => {
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
-      throw new Error("denied");
-    });
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("denied");
-    });
-    render(<ThemePicker />);
-    await choose("Theme", "Light");
-    expect(document.documentElement.dataset.theme).toBe("light");
-  });
 });
 
 it("hydrates the server-rendered dashboard without mismatches", async () => {
@@ -200,7 +177,30 @@ it("hydrates the server-rendered dashboard without mismatches", async () => {
     root = hydrateRoot(container, <App rows={rows} revision={revision} />, { onRecoverableError });
   });
   expect(onRecoverableError).not.toHaveBeenCalled();
-  expect(container.querySelector("form")!.hasAttribute("inert")).toBe(false);
+  expect(container.querySelector("form")?.hasAttribute("inert")).toBe(false);
   await act(async () => root.unmount());
   container.remove();
+});
+
+it("opens and closes a set's coverage details", async () => {
+  render(<App rows={rows} revision={revision} />);
+  const summary = screen.getByLabelText("Alpha");
+  const details = summary.closest("details");
+  expect(details?.open).toBe(false);
+  await userEvent.click(summary);
+  await waitFor(() => expect(details?.open).toBe(true));
+  await userEvent.click(summary);
+  await waitFor(() => expect(details?.open).toBe(false));
+});
+it("uses the language code when a display name is unavailable", () => {
+  vi.spyOn(Intl.DisplayNames.prototype, "of").mockReturnValue(undefined);
+  expect(languageName("zz")).toBe("zz");
+});
+it("leaves theme selection to the system without reading saved preferences", () => {
+  const read = vi.spyOn(Storage.prototype, "getItem");
+  const write = vi.spyOn(Storage.prototype, "setItem");
+  render(<App rows={rows} revision={revision} />);
+  expect(screen.queryByRole("combobox", { name: "Theme" })).toBeNull();
+  expect(read).not.toHaveBeenCalled();
+  expect(write).not.toHaveBeenCalled();
 });

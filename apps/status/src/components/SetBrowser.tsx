@@ -1,10 +1,15 @@
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
+import SortIcon from "./icons/SortIcon.tsx";
+import CheckIcon from "./icons/CheckIcon.tsx";
+import { statuses } from "../lib/status.ts";
 import SelectPicker from "./SelectPicker.tsx";
 import SetSearch from "./SetSearch.tsx";
 import LanguagePicker from "./LanguagePicker.tsx";
 import { useHydrated } from "../hooks/useHydrated.ts";
 import { useRef, useState } from "react";
-import { filterSets, languageName, statusLabels, type Group } from "../lib/model.ts";
-import Icon from "./Icon.tsx";
+import { filterSets, languageName, type Group } from "../lib/model.ts";
+
 import SetCard from "./SetCard.tsx";
 export default function SetBrowser({ groups, revision }: { groups: Group[]; revision: string }) {
   const [query, setQuery] = useState("");
@@ -25,16 +30,17 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
   function changePage(offset: number) {
     setPage(page + offset);
     // Focus the first visible summary after React commits the new page.
-    requestAnimationFrame(() => list.current!.querySelector("summary")!.focus());
+    requestAnimationFrame(() => list.current?.querySelector("summary")?.focus());
   }
   return (
-    <section className="sets" aria-labelledby="sets-title">
-      <h2 id="sets-title" className="sr-only">
+    <section data-ui="sets" {...stylex.props(styles.sets)} aria-labelledby="sets-title">
+      <h2 id="sets-title" data-ui="sr-only" {...stylex.props(styles.srOnly)}>
         Set coverage
       </h2>
       <form
         id="filters"
-        className="filters"
+        data-ui="filters"
+        {...stylex.props(styles.filters)}
         role="search"
         inert={!ready}
         onSubmit={(event) => event.preventDefault()}
@@ -46,7 +52,7 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
           setStatus("");
           setSort("default");
           setPage(0);
-          input.current!.focus();
+          input.current?.focus();
         }}
       >
         <SetSearch
@@ -74,14 +80,14 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
             setPage(0);
           }}
           options={[
-            { value: "", label: "Status", icon: <Icon name="check" /> },
-            ...Object.entries(statusLabels).map(([value, label]) => ({
+            { value: "", label: "Status", icon: <CheckIcon /> },
+            ...Object.entries(statuses).map(([value, presentation]) => ({
               value,
-              label,
-              icon: <span className={`status-dot ${value}`} aria-hidden="true" />,
+              label: presentation.label,
+              icon: <span {...stylex.props(styles.dot, presentation.dot)} aria-hidden="true" />,
             })),
-            { value: "finishes", label: "Missing finishes", icon: <Icon name="check" /> },
-            { value: "illustrators", label: "Missing illustrators", icon: <Icon name="check" /> },
+            { value: "finishes", label: "Missing finishes", icon: <CheckIcon /> },
+            { value: "illustrators", label: "Missing illustrators", icon: <CheckIcon /> },
           ]}
         />
         <SelectPicker
@@ -96,9 +102,10 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
             { value: "name", label: "Set name" },
             { value: "cards", label: "Most printings" },
             { value: "gaps", label: "Most missing finishes" },
-          ].map((option) => ({ ...option, icon: <Icon name="sort" /> }))}
+          ].map((option) => ({ ...option, icon: <SortIcon /> }))}
         />
         <button
+          {...stylex.props(styles.button)}
           type="reset"
           id="clear"
           hidden={!query.trim() && !language && !status && sort === "default"}
@@ -106,10 +113,10 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
           Clear filters
         </button>
       </form>
-      <p id="results" className="sr-only" role="status">
+      <p id="results" data-ui="sr-only" {...stylex.props(styles.srOnly)} role="status">
         {filtered.length} {filtered.length === 1 ? "set" : "sets"} found
       </p>
-      <div id="set-list" ref={list}>
+      <div {...stylex.props(styles.setList)} id="set-list" ref={list}>
         {visible.map((group) => (
           <SetCard key={group.releases[0].setId} group={group} revision={revision} />
         ))}
@@ -117,8 +124,13 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
       <p id="empty" hidden={filtered.length > 0}>
         {groups.length ? "No sets match these filters." : "No sets are recorded yet."}
       </p>
-      <div className="pagination" id="pagination" hidden={!ready || filtered.length <= 25}>
-        <div className="page-size">
+      <div
+        data-ui="pagination"
+        {...stylex.props(styles.pagination)}
+        id="pagination"
+        hidden={!ready || filtered.length <= 25}
+      >
+        <div data-ui="page-size" {...stylex.props(styles.pageSize)}>
           <span>Sets per page</span>
           <SelectPicker
             label="Sets per page"
@@ -135,10 +147,16 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
           {filtered.length}
         </span>
         <div>
-          <button type="button" disabled={page === 0} onClick={() => changePage(-1)}>
+          <button
+            {...stylex.props(styles.button)}
+            type="button"
+            disabled={page === 0}
+            onClick={() => changePage(-1)}
+          >
             Previous
           </button>{" "}
           <button
+            {...stylex.props(styles.button)}
             type="button"
             disabled={start + size >= filtered.length}
             onClick={() => changePage(1)}

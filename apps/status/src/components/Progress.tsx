@@ -1,32 +1,55 @@
-import type { CSSProperties } from "react";
-import { statusLabels, type Group } from "../lib/model.ts";
+import * as stylex from "@stylexjs/stylex";
+import { styles } from "../styles.stylex.ts";
+import { statuses } from "../lib/status.ts";
+import { type Group } from "../lib/model.ts";
 export default function Progress({ groups }: { groups: Group[] }) {
-  const progress = (["empty", "partial", "done"] as const).map((status) => ({
+  const progress = Object.entries(statuses).map(([status, presentation]) => ({
+    presentation,
     status,
     count: groups.filter((group) => group.status === status).length,
   }));
   const format = new Intl.NumberFormat("en-GB", { style: "percent", maximumFractionDigits: 1 });
   return (
-    <section className="progress" aria-labelledby="progress-title">
-      <div className="progress-heading">
-        <h2 id="progress-title">Progress</h2>
-        <ul className="progress-legend">
-          {progress.map(({ status, count }) => (
-            <li key={status} className={status}>
+    <section data-ui="progress" {...stylex.props(styles.progress)} aria-labelledby="progress-title">
+      <div data-ui="progress-heading" {...stylex.props(styles.progressHeading)}>
+        <h2 {...stylex.props(styles.progressTitle)} id="progress-title">
+          Progress
+        </h2>
+        <ul data-ui="progress-legend" {...stylex.props(styles.legend)}>
+          {progress.map(({ status, count, presentation }) => (
+            <li key={status} {...stylex.props(styles.legendItem)}>
+              <span aria-hidden="true" {...stylex.props(styles.dot, presentation.dot)} />
               {format.format(groups.length ? count / groups.length : 0)}{" "}
-              {statusLabels[status].toLowerCase()}
+              {presentation.label.toLowerCase()}
             </li>
           ))}
         </ul>
       </div>
-      <div className="progress-bar" aria-hidden="true">
-        {[...progress]
-          .reverse()
-          .filter(({ count }) => count > 0)
-          .map(({ status, count }) => (
-            <span key={status} className={status} style={{ "--count": count } as CSSProperties} />
-          ))}
-      </div>
+      <svg
+        data-ui="progress-bar"
+        {...stylex.props(styles.bar)}
+        width="100%"
+        height="14"
+        viewBox="0 0 100 14"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        {progress.map(({ status, count, presentation }, index) => (
+          <rect
+            key={status}
+            className={stylex.props(presentation.bar).className}
+            x={
+              groups.length
+                ? (progress.slice(index + 1).reduce((sum, item) => sum + item.count, 0) /
+                    groups.length) *
+                  100
+                : 0
+            }
+            width={groups.length ? (count / groups.length) * 100 : 0}
+            height="14"
+          />
+        ))}
+      </svg>
     </section>
   );
 }

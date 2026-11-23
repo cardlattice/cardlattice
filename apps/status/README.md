@@ -22,7 +22,14 @@ local data checkout, Cloudflare account or credentials are needed to run the app
 and `src/lib` contains queries, coverage calculations and the snapshot loader.
 All application files have a per-file 100% Vitest statement, branch, function and
 line coverage threshold. Oxlint includes React Doctor and TanStack Query rules;
-Oxfmt handles formatting. The combobox and every select use Base UI primitives
+Oxfmt handles formatting. Braces are required on control-flow blocks; type assertions
+and non-null assertions are rejected by lint. Incoming JSON is validated before use.
+
+Component styling uses StyleX, with palette tokens that automatically follow the
+system light/dark preference. There is no theme picker or stored theme preference.
+SVG artwork is rendered by individual React components. The global stylesheet only
+contains the font declaration and base resets in a lower-priority CSS layer.
+The combobox and every select use Base UI primitives
 with keyboard navigation. Flags come from `flag-icons`; Inter comes from
 `@fontsource-variable/inter`. These assets are bundled locally, not fetched from a CDN.
 

@@ -4,7 +4,11 @@ import Dashboard from "./components/Dashboard.tsx";
 import "./style.css";
 
 const client = new QueryClient();
-createRoot(document.getElementById("root")!).render(
+const root = document.getElementById("root");
+if (!root) {
+  throw new Error("Missing dashboard root element");
+}
+createRoot(root).render(
   <QueryClientProvider client={client}>
     <Dashboard />
   </QueryClientProvider>,

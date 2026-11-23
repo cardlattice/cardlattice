@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarize, hasFinish, escapeHtml, percent, type RecordData } from "./coverage-model.ts";
+import { summarize, hasFinish, percent, type RecordData } from "./coverage-model.ts";
 const set: RecordData = {
   id: "pokemon-test",
   metadata: { kind: "set", name: "Test", gameId: "pokemon", attributes: { printedDenominator: 1 } },
@@ -42,9 +42,6 @@ describe("status coverage", () => {
   it("rejects duplicate records and dangling sets", () => {
     expect(() => summarize([set, printing("x"), printing("x")])).toThrow("Duplicate");
     expect(() => summarize([printing("x")])).toThrow("Unknown");
-  });
-  it("escapes contribution text before inserting it into HTML", () => {
-    expect(escapeHtml("<script>\"&'")).toBe("&lt;script&gt;&quot;&amp;&#39;");
   });
 });
 

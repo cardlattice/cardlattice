@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { loadCoverage } from "../lib/load-coverage.ts";
 vi.mock("../lib/load-coverage.ts", () => ({ loadCoverage: vi.fn() }));
 import Dashboard from "./Dashboard.tsx";
-import ThemePicker from "./ThemePicker.tsx";
 import { coverageQuery } from "../lib/coverage-query.ts";
 const data = { rows: [], sourceCommit: "a".repeat(40), snapshotSha256: "b".repeat(64) };
 const clients: QueryClient[] = [];
@@ -18,7 +17,9 @@ function client() {
 }
 afterEach(() => {
   cleanup();
-  for (const value of clients) value.clear();
+  for (const value of clients) {
+    value.clear();
+  }
   clients.length = 0;
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
@@ -26,13 +27,8 @@ afterEach(() => {
   localStorage.clear();
 });
 it("shows loading then data, and reuses cached coverage on remount", async () => {
-  let complete!: (response: typeof data) => void;
-  const fetcher = vi.fn(
-    () =>
-      new Promise<typeof data>((resolve) => {
-        complete = resolve;
-      }),
-  );
+  const pending = Promise.withResolvers<typeof data>();
+  const fetcher = vi.fn(() => pending.promise);
   vi.mocked(loadCoverage).mockImplementation(fetcher);
   const cache = client();
   const first = render(
@@ -41,7 +37,7 @@ it("shows loading then data, and reuses cached coverage on remount", async () =>
     </QueryClientProvider>,
   );
   expect(screen.getByRole("status").textContent).toBe("Loading catalogue coverage…");
-  complete(data);
+  pending.resolve(data);
   await screen.findByText("No sets are recorded yet.");
   expect(cache.getQueryData(coverageQuery.queryKey)).toEqual(data);
   first.unmount();
@@ -81,13 +77,4 @@ it("cancels an in-flight request when the dashboard unmounts", async () => {
   expect(signal.aborted).toBe(false);
   view.unmount();
   expect(signal.aborted).toBe(true);
-});
-it("synchronizes theme changes from other tabs", () => {
-  render(<ThemePicker />);
-  act(() => {
-    localStorage.setItem("cardlattice-theme", "dark");
-    window.dispatchEvent(new Event("storage"));
-  });
-  expect(screen.getByRole("combobox", { name: "Theme" }).textContent).toBe("Dark");
-  expect(document.documentElement.dataset.theme).toBe("dark");
 });
