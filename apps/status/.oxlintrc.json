@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "react", "jsx-a11y"],
+  "categories": {
+    "correctness": "error"
+  },
+  "jsPlugins": [
+    {
+      "name": "react-doctor",
+      "specifier": "oxlint-plugin-react-doctor"
+    }
+  ],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "curly": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "never"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "rules": {
+        "react-doctor/no-fetch-in-effect": "error",
+        "react-doctor/no-derived-state": "error",
+        "react-doctor/no-async-effect-callback": "error",
+        "react-doctor/no-array-index-as-key": "error",
+        "react-doctor/no-nested-component-definition": "error",
+        "react-doctor/no-direct-mutation-state": "error",
+        "react-doctor/no-danger-with-children": "error",
+        "react-doctor/button-has-type": "error",
+        "react-doctor/jsx-key": "error",
+        "react-doctor/no-controlled-input-value-without-state-update": "error",
+        "react-doctor/no-create-context-in-render": "error",
+        "react-doctor/no-create-ref-in-function-component": "error",
+        "react-doctor/no-create-store-in-render": "error",
+        "react-doctor/no-render-return-value": "error",
+        "react-doctor/no-unescaped-entities": "error",
+        "react-doctor/no-unknown-property": "error",
+        "react-doctor/query-no-query-in-effect": "error",
+        "react-doctor/query-no-rest-destructuring": "error",
+        "react-doctor/query-no-usequery-for-mutation": "error",
+        "react-doctor/query-no-void-query-fn": "error",
+        "react-doctor/query-stable-query-client": "error",
+        "react-doctor/query-floating-mutate-async": "error",
+        "react-doctor/query-mutation-missing-invalidation": "error",
+        "react-doctor/query-no-mutation-in-effect-as-read": "error",
+        "react-doctor/no-collapse-request-error-to-empty-state": "error",
+        "react-doctor/no-direct-state-mutation": "error",
+        "react-doctor/no-set-state-in-render": "error",
+        "react-doctor/no-effect-with-fresh-deps": "error",
+        "react-doctor/no-mirror-prop-effect": "error"
+      }
+    }
+  ]
+}

@@ -190,3 +190,12 @@ To populate the reviewed Pokémon sets with independently transcribed card names
 collector numbers, see the [official checklist import workflow](data/pokemon/README.md#numbered-card-checklists-2026-11-02)
 and its [validation record](docs/validation/pokemon-cards.md). It imports factual
 metadata only, with provisional card identities and no artwork.
+
+## Status dashboard
+
+The catalogue progress dashboard lives in [apps/status](apps/status/README.md).
+Run `pnpm dev:status` to start it on port 8788. It consumes verified snapshots from
+the data repository without moving catalogue validation or publishing into this app.
+
+Turborepo coordinates `build`, `typecheck`, `test`, `lint`, and `format:check` across
+`apps/web` and `apps/status`. `pnpm dev` still starts the web app.
