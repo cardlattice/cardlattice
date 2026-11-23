@@ -1,5 +1,4 @@
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import GlobeIcon from "./icons/GlobeIcon.tsx";
 import us from "flag-icons/flags/4x3/us.svg";
 import jp from "flag-icons/flags/4x3/jp.svg";
@@ -41,3 +40,15 @@ export default function LanguageIcon({ language }: { language: string }) {
     <GlobeIcon />
   );
 }
+
+const styles = stylex.create({
+  flag: {
+    display: "inline-block",
+    width: 20,
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 15,
+    objectFit: "contain",
+    borderRadius: 2,
+  },
+});

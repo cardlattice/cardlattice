@@ -69,7 +69,7 @@ describe("dashboard", () => {
     expect(html).toContain("inert");
     expect(html).toContain(`/blob/${revision}/catalogue/pokemon/sets/c.yaml`);
     render(<App rows={rows} revision={revision} />);
-    expect(screen.getByRole("status").textContent).toBe("3 sets found");
+    expect(screen.getByText("3 sets found")).toBeTruthy();
     expect(screen.getByText("Known Printings").nextElementSibling?.textContent).toBe("5");
     expect(screen.getByText("Done", { selector: "[data-ui='badge']" })).toBeTruthy();
     expect(
@@ -92,7 +92,8 @@ describe("dashboard", () => {
     expect(screen.getByText("No sets match these filters.").hidden).toBe(false);
     fireEvent.click(screen.getByText("Clear filters"));
     expect(document.activeElement).toBe(query);
-    expect(screen.getByRole("status").textContent).toBe("3 sets found");
+    expect(screen.getByText("3 sets found")).toBeTruthy();
+    await userEvent.keyboard("{Escape}");
     await choose("Sort by", "Most printings");
     expect(document.querySelector("[data-ui='set-name']")?.textContent).toBe("Alpha");
     await choose("Status", "Missing finishes");

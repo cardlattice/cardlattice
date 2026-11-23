@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import type { Coverage } from "../lib/coverage-model.ts";
 import LanguageIcon from "./LanguageIcon.tsx";
 import { languageName } from "../lib/model.ts";
@@ -32,3 +32,16 @@ export default function ReleaseLabel({ row, releases }: { row: Coverage; release
     </span>
   );
 }
+
+const styles = stylex.create({
+  releaseLanguage: { display: "flex", alignItems: "center", gap: 8 },
+  releaseRegion: { color: colors.secondary, fontSize: 11 },
+  srOnly: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    clipPath: "inset(50%)",
+  },
+});

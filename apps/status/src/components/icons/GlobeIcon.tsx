@@ -1,5 +1,4 @@
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../../styles.stylex.ts";
 export default function GlobeIcon() {
   return (
     <svg
@@ -18,3 +17,7 @@ export default function GlobeIcon() {
     </svg>
   );
 }
+
+const styles = stylex.create({
+  icon: { display: "block", flexShrink: 0, width: 16, height: 16 },
+});

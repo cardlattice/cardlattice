@@ -25,13 +25,15 @@ line coverage threshold. Oxlint includes React Doctor and TanStack Query rules;
 Oxfmt handles formatting. Braces are required on control-flow blocks; type assertions
 and non-null assertions are rejected by lint. Incoming JSON is validated before use.
 
-Component styling uses StyleX, with palette tokens that automatically follow the
+Each component keeps its own StyleX definitions beside its JSX. Shared palette tokens automatically follow the
 system light/dark preference. There is no theme picker or stored theme preference.
 SVG artwork is rendered by individual React components. The global stylesheet only
 contains the font declaration and base resets in a lower-priority CSS layer.
 The combobox and every select use Base UI primitives
 with keyboard navigation. Flags come from `flag-icons`; Inter comes from
 `@fontsource-variable/inter`. These assets are bundled locally, not fetched from a CDN.
+Clicking or focusing the search input opens suggestions. Hovering or focusing a
+progress segment shows its set count and percentage; Escape dismisses the tooltip.
 
 ## Deployment
 

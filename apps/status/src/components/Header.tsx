@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import GithubIcon from "./icons/GithubIcon.tsx";
 import Wordmark from "./Wordmark.tsx";
 import { repo } from "../lib/model.ts";
@@ -52,3 +52,71 @@ export default function Header({ revision }: { revision: string }) {
     </header>
   );
 }
+
+const styles = stylex.create({
+  container: {
+    width: {
+      default: "min(870px, calc(100% - 32px))",
+      "@media (max-width: 390px)": "calc(100% - 24px)",
+    },
+    marginInline: "auto",
+  },
+  header: {
+    display: "flex",
+    alignItems: { default: "center", "@media (max-width: 560px)": "start" },
+    justifyContent: "space-between",
+    gap: 16,
+    paddingTop: { default: 34, "@media (max-width: 560px)": 24 },
+    marginBottom: { default: 54, "@media (max-width: 560px)": 34 },
+    flexDirection: { default: "row", "@media (max-width: 560px)": "column" },
+  },
+  wordmark: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 20,
+    fontWeight: 750,
+    letterSpacing: "-0.06em",
+    textDecoration: "none",
+  },
+  headerActions: { display: "flex", alignItems: "center", gap: 12, maxWidth: "100%" },
+  headerButtons: { display: "flex", alignItems: "center", gap: 6 },
+  headerButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 32,
+    paddingInline: 8,
+    borderRadius: 8,
+    fontSize: { default: 13, "@media (max-width: 390px)": 11 },
+    whiteSpace: { default: "nowrap", "@media (max-width: 390px)": "normal" },
+    textAlign: "center",
+    textDecoration: "none",
+  },
+  commitButton: {
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.borderInteractive,
+    backgroundColor: { default: "transparent", ":hover": colors.hover },
+  },
+  commitDot: {
+    flexShrink: 0,
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: colors.accent,
+  },
+  primaryButton: {
+    backgroundColor: { default: colors.accent, ":hover": colors.accentHover },
+    color: "white",
+  },
+  githubLink: {
+    display: "grid",
+    flexShrink: 0,
+    placeItems: "center",
+    height: 32,
+    borderRadius: 4,
+    color: { default: colors.primary, ":hover": colors.secondary },
+  },
+});

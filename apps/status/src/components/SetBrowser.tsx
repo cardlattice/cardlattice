@@ -1,14 +1,13 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import SortIcon from "./icons/SortIcon.tsx";
 import CheckIcon from "./icons/CheckIcon.tsx";
-import { statuses } from "../lib/status.ts";
 import SelectPicker from "./SelectPicker.tsx";
 import SetSearch from "./SetSearch.tsx";
 import LanguagePicker from "./LanguagePicker.tsx";
 import { useHydrated } from "../hooks/useHydrated.ts";
 import { useRef, useState } from "react";
-import { filterSets, languageName, type Group } from "../lib/model.ts";
+import { filterSets, languageName, statusLabels, type Group } from "../lib/model.ts";
 
 import SetCard from "./SetCard.tsx";
 export default function SetBrowser({ groups, revision }: { groups: Group[]; revision: string }) {
@@ -81,10 +80,10 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
           }}
           options={[
             { value: "", label: "Status", icon: <CheckIcon /> },
-            ...Object.entries(statuses).map(([value, presentation]) => ({
+            ...Object.entries(statusLabels).map(([value, label]) => ({
               value,
-              label: presentation.label,
-              icon: <span {...stylex.props(styles.dot, presentation.dot)} aria-hidden="true" />,
+              label,
+              icon: <span {...stylex.props(styles.dot, dotStyles.get(value))} aria-hidden="true" />,
             })),
             { value: "finishes", label: "Missing finishes", icon: <CheckIcon /> },
             { value: "illustrators", label: "Missing illustrators", icon: <CheckIcon /> },
@@ -168,3 +167,57 @@ export default function SetBrowser({ groups, revision }: { groups: Group[]; revi
     </section>
   );
 }
+
+const styles = stylex.create({
+  sets: { marginTop: 32 },
+  srOnly: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    clipPath: "inset(50%)",
+  },
+  filters: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    rowGap: { default: 8, "@media (max-width: 560px)": 6 },
+    columnGap: { default: 16, "@media (max-width: 560px)": 12 },
+    marginBottom: 16,
+    color: colors.secondary,
+    fontSize: 13,
+  },
+  dot: { display: "inline-block", width: 8, height: 8, borderRadius: "50%", flexShrink: 0 },
+  button: {
+    paddingBlock: 5,
+    paddingInline: 8,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.borderInteractive,
+    borderRadius: 8,
+    backgroundColor: { default: colors.canvas, ":hover": colors.hover },
+  },
+  setList: { display: "grid", gap: 8 },
+  pagination: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    rowGap: 8,
+    columnGap: 16,
+    fontSize: 13,
+    color: colors.secondary,
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  pageSize: { display: "inline-flex", alignItems: "center", gap: 6 },
+  redDot: { backgroundColor: colors.red },
+  orangeDot: { backgroundColor: colors.orange },
+  greenDot: { backgroundColor: colors.green },
+});
+
+const dotStyles = new Map([
+  ["empty", styles.redDot],
+  ["partial", styles.orangeDot],
+  ["done", styles.greenDot],
+]);

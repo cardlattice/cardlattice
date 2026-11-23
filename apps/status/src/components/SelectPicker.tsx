@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import CheckIcon from "./icons/CheckIcon.tsx";
 import ChevronIcon from "./icons/ChevronIcon.tsx";
 import { Select } from "@base-ui/react/select";
@@ -73,3 +73,54 @@ export default function SelectPicker({
     </Select.Root>
   );
 }
+
+const styles = stylex.create({
+  selectTrigger: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 34,
+    paddingBlock: 0,
+    paddingInline: 6,
+    borderWidth: 0,
+    borderRadius: 6,
+    backgroundColor: { default: "transparent", ":hover": colors.hover },
+    color: { default: colors.secondary, ":hover": colors.primary },
+  },
+  positioner: { zIndex: 20 },
+  popup: {
+    minWidth: "max(var(--anchor-width), 220px)",
+    maxWidth: "min(400px, calc(100vw - 24px))",
+    maxHeight: "min(320px, var(--available-height))",
+    overflowY: "auto",
+    overscrollBehavior: "contain",
+    padding: 5,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.borderInteractive,
+    borderRadius: 10,
+    backgroundColor: colors.canvas,
+    color: colors.primary,
+    boxShadow: "0 8px 24px rgb(0 0 0 / 12%)",
+    fontSize: 13,
+  },
+  option: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    minHeight: 38,
+    paddingBlock: 8,
+    paddingInline: 10,
+    borderRadius: 6,
+    cursor: "pointer",
+    outlineStyle: "none",
+  },
+  highlighted: {
+    backgroundColor: colors.hover,
+    outlineWidth: 1,
+    outlineStyle: "solid",
+    outlineColor: colors.borderInteractive,
+    outlineOffset: -1,
+  },
+  pickerCheck: { display: "flex", marginLeft: "auto" },
+});

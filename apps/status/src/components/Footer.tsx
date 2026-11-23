@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 export default function Footer() {
   return (
     <footer data-ui="container page-footer" {...stylex.props(styles.container, styles.footer)}>
@@ -22,3 +22,39 @@ export default function Footer() {
     </footer>
   );
 }
+
+const styles = stylex.create({
+  container: {
+    width: {
+      default: "min(870px, calc(100% - 32px))",
+      "@media (max-width: 390px)": "calc(100% - 24px)",
+    },
+    marginInline: "auto",
+  },
+  footer: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "start",
+    flexWrap: "wrap",
+    gap: 16,
+    marginTop: 48,
+    paddingTop: 20,
+    paddingBottom: 34,
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: colors.border,
+    color: colors.secondary,
+    fontSize: 13,
+  },
+  method: { maxWidth: 460 },
+  methodSummary: { minHeight: 32, alignContent: "center" },
+  footerLinks: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    rowGap: 8,
+    columnGap: 16,
+    fontSize: 13,
+    color: colors.secondary,
+  },
+});

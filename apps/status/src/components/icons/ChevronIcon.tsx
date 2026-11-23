@@ -1,5 +1,4 @@
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../../styles.stylex.ts";
 export default function ChevronIcon() {
   return (
     <svg
@@ -16,3 +15,7 @@ export default function ChevronIcon() {
     </svg>
   );
 }
+
+const styles = stylex.create({
+  icon: { display: "block", flexShrink: 0, width: 16, height: 16 },
+});

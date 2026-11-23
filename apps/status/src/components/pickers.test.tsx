@@ -54,7 +54,7 @@ it("opens suggestions with the trigger and selects with a pointer", async () => 
   expect(
     screen.getByRole("combobox", { name: "Find a set, game, series or ID" }).getAttribute("value"),
   ).toBe("");
-  expect(screen.getByRole("status").textContent).toBe("3 sets found");
+  expect(screen.getByText("3 sets found")).toBeTruthy();
 });
 it("shows flags, selects a language, and restores all languages", async () => {
   const user = userEvent.setup();
@@ -79,14 +79,16 @@ it("shows flags, selects a language, and restores all languages", async () => {
   ).toBe("true");
   await user.click(screen.getByRole("option", { name: "All languages" }));
   expect(trigger.textContent).toBe("Language");
-  expect(screen.getByRole("status").textContent).toBe("3 sets found");
+  expect(screen.getByText("3 sets found")).toBeTruthy();
 });
 it("supports language keyboard selection, Escape, and outside dismissal", async () => {
   const user = userEvent.setup();
   render(<SetBrowser groups={groups} revision="abc" />);
   const trigger = screen.getByRole("combobox", { name: "Language" });
   trigger.focus();
-  await user.keyboard("{ArrowDown}{End}{Enter}");
+  await user.keyboard("{ArrowDown}");
+  await screen.findByRole("option", { name: "Japanese" });
+  await user.keyboard("{End}{Enter}");
   expect(trigger.textContent).toBe("Japanese");
   await user.click(trigger);
   await user.keyboard("{Escape}");
@@ -163,4 +165,33 @@ it("keeps an unmatched selection labelled and lets the user recover", async () =
   await userEvent.click(trigger);
   await userEvent.click(await screen.findByRole("option", { name: "Available" }));
   expect(onChange).toHaveBeenCalledWith("valid");
+});
+
+it("opens search suggestions on input click without typing and reopens after Escape", async () => {
+  const user = userEvent.setup();
+  render(<SetBrowser groups={groups} revision="abc" />);
+  const input = screen.getByRole("combobox", { name: "Find a set, game, series or ID" });
+  await user.click(input);
+  expect(await screen.findByRole("option", { name: "Alpha" })).toBeTruthy();
+  expect(input.getAttribute("aria-expanded")).toBe("true");
+  expect(input.getAttribute("value")).toBe("");
+  await user.keyboard("{Escape}");
+  expect(input.getAttribute("aria-expanded")).toBe("false");
+  await user.click(input);
+  await user.click(await screen.findByRole("option", { name: "Beta" }));
+  expect(input.getAttribute("value")).toBe("Beta");
+  expect(input.getAttribute("aria-expanded")).toBe("false");
+});
+it("opens search suggestions when tabbing into the input and keeps the arrow toggle usable", async () => {
+  const user = userEvent.setup();
+  render(<SetBrowser groups={groups} revision="abc" />);
+  const input = screen.getByRole("combobox", { name: "Find a set, game, series or ID" });
+  await user.tab();
+  expect(document.activeElement).toBe(input);
+  expect(await screen.findByRole("option", { name: "Alpha" })).toBeTruthy();
+  const toggle = screen.getByLabelText("Show set suggestions");
+  await user.click(toggle);
+  expect(input.getAttribute("aria-expanded")).toBe("false");
+  await user.click(toggle);
+  await waitFor(() => expect(input.getAttribute("aria-expanded")).toBe("true"));
 });

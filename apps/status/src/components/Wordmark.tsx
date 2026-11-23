@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 export default function Wordmark() {
   return (
     <>
@@ -22,3 +22,17 @@ export default function Wordmark() {
     </>
   );
 }
+
+const styles = stylex.create({
+  mark: {
+    display: "grid",
+    placeItems: "center",
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundImage: "linear-gradient(140deg, #3e63dd, #2870bd)",
+    color: "white",
+  },
+  markIcon: { width: 24, height: 24 },
+  period: { color: colors.focus },
+});

@@ -1,5 +1,4 @@
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../../styles.stylex.ts";
 export default function GithubIcon() {
   return (
     <svg {...stylex.props(styles.icon)} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -7,3 +6,7 @@ export default function GithubIcon() {
     </svg>
   );
 }
+
+const styles = stylex.create({
+  icon: { display: "block", flexShrink: 0, width: 16, height: 16 },
+});

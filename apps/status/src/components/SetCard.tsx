@@ -1,7 +1,6 @@
+import { colors } from "../palette.stylex.ts";
 import { useState } from "react";
-import { statuses } from "../lib/status.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import ExternalIcon from "./icons/ExternalIcon.tsx";
 import ChevronIcon from "./icons/ChevronIcon.tsx";
 import GlobeIcon from "./icons/GlobeIcon.tsx";
@@ -39,7 +38,7 @@ export default function SetCard({ group, revision }: { group: Group; revision: s
           </span>
         </span>
         <span data-ui="set-status" {...stylex.props(styles.setStatus)}>
-          <span data-ui="badge" {...stylex.props(styles.badge, statuses[status].badge)}>
+          <span data-ui="badge" {...stylex.props(styles.badge, badgeStyles[status])}>
             {statusLabels[status]}
           </span>
           <span data-ui="set-chevron" {...stylex.props(styles.chevron, open && styles.chevronOpen)}>
@@ -149,3 +148,162 @@ export default function SetCard({ group, revision }: { group: Group; revision: s
     </details>
   );
 }
+
+const styles = stylex.create({
+  card: {
+    minWidth: 0,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.border,
+    borderRadius: 12,
+  },
+  summary: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingTop: 18,
+    paddingRight: 19,
+    paddingBottom: 16,
+    paddingLeft: 15,
+    borderRadius: 11,
+    listStyleType: "none",
+    "::-webkit-details-marker": { display: "none" },
+  },
+  setTitle: { display: "grid", gap: 2, minWidth: 0, overflowWrap: "anywhere" },
+  setName: { lineHeight: "20px" },
+  setId: { fontSize: 13, lineHeight: "18px", color: colors.secondary },
+  secondary: { color: colors.secondary },
+  setLanguages: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+    fontSize: 13,
+    lineHeight: "20px",
+    color: colors.secondary,
+  },
+  setStatus: {
+    display: "flex",
+    alignItems: "center",
+    gap: { default: 18, "@media (max-width: 560px)": 6 },
+  },
+  badge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    whiteSpace: "nowrap",
+    paddingBlock: 3,
+    paddingInline: 8,
+    borderRadius: 8,
+    fontSize: 12,
+    lineHeight: "18px",
+    userSelect: "none",
+    "::before": {
+      content: '""',
+      borderRadius: "50%",
+      width: 6,
+      height: 6,
+      backgroundColor: "currentColor",
+    },
+  },
+  chevron: {
+    color: colors.secondary,
+    transform: "rotate(-90deg)",
+    transitionProperty: {
+      default: "none",
+      "@media (prefers-reduced-motion: no-preference)": "transform",
+    },
+    transitionDuration: "220ms",
+  },
+  chevronOpen: { transform: "none" },
+  releasePanel: { minWidth: 0, minHeight: 0 },
+  tableRegion: {
+    position: "relative",
+    overflowX: "auto",
+    marginTop: 0,
+    marginRight: 17,
+    marginBottom: 19,
+    marginLeft: 15,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    outlineOffset: -2,
+  },
+  table: {
+    width: "100%",
+    minWidth: 614,
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    tableLayout: "fixed",
+    fontSize: 13,
+    fontVariantNumeric: "tabular-nums",
+  },
+  srOnly: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    clipPath: "inset(50%)",
+  },
+  languageCol: { width: "21%" },
+  printingsCol: { width: "24.4%" },
+  finishesCol: { width: "16.25%" },
+  illustratorCol: { width: "17.1%" },
+  linkCol: { width: "7%" },
+  cell: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingRight: 0,
+    paddingLeft: 15,
+    textAlign: "left",
+    fontWeight: 400,
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: colors.border,
+  },
+  tableHeading: {
+    height: 32,
+    borderBlockWidth: 1,
+    borderBlockStyle: "solid",
+    borderBlockColor: colors.border,
+    color: colors.secondary,
+    fontSize: 12,
+    ":first-child": {
+      borderLeftWidth: 1,
+      borderLeftStyle: "solid",
+      borderLeftColor: colors.border,
+      borderTopLeftRadius: 12,
+      borderBottomLeftRadius: 12,
+    },
+    ":last-child": {
+      borderRightWidth: 1,
+      borderRightStyle: "solid",
+      borderRightColor: colors.border,
+      borderTopRightRadius: 12,
+      borderBottomRightRadius: 12,
+    },
+  },
+  firstRowCell: { borderTopWidth: 0 },
+  row: { height: 48 },
+  printings: { paddingLeft: 29 },
+  sourceCell: { padding: 0, textAlign: "center" },
+  sourceLink: {
+    display: "inline-grid",
+    width: 28,
+    height: 28,
+    placeItems: "center",
+    borderRadius: 5,
+    color: { default: colors.secondary, ":hover": colors.primary },
+    backgroundColor: { default: "transparent", ":hover": colors.hover },
+  },
+  redBadge: { backgroundColor: colors.redBadge, color: colors.redText },
+  orangeBadge: { backgroundColor: colors.orangeBadge, color: colors.orangeText },
+  greenBadge: { backgroundColor: colors.greenBadge, color: colors.greenText },
+});
+
+const badgeStyles = {
+  empty: styles.redBadge,
+  partial: styles.orangeBadge,
+  done: styles.greenBadge,
+};

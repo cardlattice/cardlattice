@@ -1,5 +1,5 @@
+import { colors } from "../palette.stylex.ts";
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import { percent } from "../lib/coverage-model.ts";
 import { n } from "../lib/model.ts";
 export default function Recorded({
@@ -44,3 +44,11 @@ export default function Recorded({
     </span>
   );
 }
+
+const styles = stylex.create({
+  recorded: { display: "flex", alignItems: "center", gap: 5 },
+  ring: { width: 12, height: 12, stroke: colors.borderInteractive, strokeWidth: 2 },
+  ringValue: { stroke: colors.orange },
+  ringComplete: { stroke: colors.green },
+  secondary: { color: colors.secondary },
+});

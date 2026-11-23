@@ -1,5 +1,4 @@
 import * as stylex from "@stylexjs/stylex";
-import { styles } from "../styles.stylex.ts";
 import { useQuery } from "@tanstack/react-query";
 import App from "./App.tsx";
 import { coverageQuery } from "../lib/coverage-query.ts";
@@ -26,3 +25,13 @@ export default function Dashboard() {
     </main>
   );
 }
+
+const styles = stylex.create({
+  container: {
+    width: {
+      default: "min(870px, calc(100% - 32px))",
+      "@media (max-width: 390px)": "calc(100% - 24px)",
+    },
+    marginInline: "auto",
+  },
+});
