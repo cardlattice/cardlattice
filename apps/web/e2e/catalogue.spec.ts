@@ -48,6 +48,7 @@ const manifest = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route("https://api.tcgdex.net/**", (route) => route.fulfill({ json: [] }));
   await page.route("**/data/manifest.json", (route) => route.fulfill({ json: manifest }));
   await page.route("**/data/catalogue-*.json", (route) =>
     route.fulfill({ body: bundle, contentType: "application/json" }),
@@ -59,15 +60,13 @@ test("browse and search a static snapshot without an API", async ({ page }) => {
   page.on("request", (request) => {
     if (new URL(request.url()).pathname.startsWith("/v1/")) apiRequests.push(request.url());
   });
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Card data.");
-  await page.getByRole("link", { name: "Explore the catalogue", exact: true }).click();
+  await page.goto("/games");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "A catalogue, built in the open.",
   );
   await page.getByRole("link", { name: /Pokémon/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pokémon");
-  await page.getByRole("link", { name: "Cards", exact: true }).click();
+  await page.locator("main").getByRole("link", { name: "Cards", exact: true }).click();
   await page.getByRole("link", { name: /Café Seed/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Café Seed");
   await page.reload();
@@ -76,10 +75,10 @@ test("browse and search a static snapshot without an API", async ({ page }) => {
   await expect(page).toHaveURL(/cardId=original-card/);
   await expect(page.getByRole("link", { name: /Café Seed/ })).toHaveCount(1);
   await page.goto("/search?q=caf%C3%A9&language=nl");
-  await expect(page.getByRole("link", { name: /Café Seed/ })).toHaveCount(2);
-  await page.getByRole("textbox", { name: "Search catalogue" }).fill("no matching record");
+  await expect(page.getByRole("link", { name: /Café Seed/ })).toHaveCount(1);
+  await page.getByRole("searchbox", { name: "Search cards" }).fill("no matching record");
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "No records here yet" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "No cards found" })).toBeVisible();
   await page.goto("/docs");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("The API is coming soon.");
   await page.goto("/datasets");
@@ -104,7 +103,7 @@ test("failed downloads show a retryable error", async ({ page }) => {
 for (const theme of ["light", "dark"]) {
   test(`static pages are accessible on a phone: ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 1000 });
-    await page.addInitScript((value) => localStorage.setItem("cardlattice-theme", value), theme);
+    await page.emulateMedia({ colorScheme: theme as "light" | "dark" });
     for (const path of [
       "/",
       "/games",

@@ -1,5 +1,7 @@
 import { defineConfig } from "vitest/config";
 import { createLogger } from "vite";
+import stylex from "@stylexjs/unplugin";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -8,6 +10,14 @@ const logger = createLogger();
 export default defineConfig({
   customLogger: logger,
   plugins: [
+    stylex.vite({
+      useCSSLayers: true,
+      runtimeInjection: false,
+      unstable_moduleResolution: {
+        type: "commonJS",
+        rootDir: fileURLToPath(new URL("./", import.meta.url)),
+      },
+    }),
     react(),
     tailwindcss(),
     {

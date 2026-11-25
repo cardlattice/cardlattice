@@ -1,6 +1,7 @@
 packages:
   - apps/*
 allowBuilds:
+  "@imlunahey/components@https://codeload.github.com/ImLunaHey/components/tar.gz/311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4#path:/packages/components": true
   esbuild: true
   workerd: true
 minimumReleaseAgeExclude:
