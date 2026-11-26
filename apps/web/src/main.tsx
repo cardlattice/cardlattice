@@ -10,27 +10,40 @@ import {
   Link,
 } from "@tanstack/react-router";
 import { queryClient } from "./query-client";
-import { Layout } from "./components/Layout";
+import { App } from "./catalogue-ui/app";
+import { CatalogueProvider } from "./catalogue-ui/catalogue-provider";
+import { Catalogue } from "./catalogue-ui/catalogue";
+import { Record as CatalogueRecord } from "./catalogue-ui/record";
+import { Information as CatalogueInformation } from "./catalogue-ui/information";
+import "@imlunahey/components/styles.css";
 import "./styles.css";
 
 const root = createRootRoute({
-  component: Layout,
+  component: () => (
+    <CatalogueProvider>
+      <App />
+    </CatalogueProvider>
+  ),
   notFoundComponent: () => (
-    <div className="page empty">
-      <h1>Page not found</h1>
-      <p>This address doesn’t point to a catalogue page.</p>
-      <Link to="/games" className="button button-primary">
-        Browse the catalogue
-      </Link>
+    <div className="legacy-content">
+      <div className="page empty">
+        <h1>Page not found</h1>
+        <p>This address doesn’t point to a catalogue page.</p>
+        <Link to="/games" className="button button-primary">
+          Browse the catalogue
+        </Link>
+      </div>
     </div>
   ),
   errorComponent: ({ error, reset }) => (
-    <div className="page notice error" role="alert">
-      <h1>Something went wrong</h1>
-      <p>{error instanceof Error ? error.message : "An unexpected error occurred."}</p>
-      <button type="button" className="button" onClick={reset}>
-        Try again
-      </button>
+    <div className="legacy-content">
+      <div className="page notice error" role="alert">
+        <h1>Something went wrong</h1>
+        <p>{error instanceof Error ? error.message : "An unexpected error occurred."}</p>
+        <button type="button" className="button" onClick={reset}>
+          Try again
+        </button>
+      </div>
     </div>
   ),
 });
@@ -38,7 +51,14 @@ const route = (path: string, component: ReturnType<typeof lazyRouteComponent>) =
   createRoute({
     getParentRoute: () => root,
     path,
-    component,
+    component: () => {
+      const Page = component;
+      return (
+        <div className="legacy-content">
+          <Page />
+        </div>
+      );
+    },
     validateSearch: (search: Record<string, unknown>) => ({
       game: typeof search.game === "string" ? search.game : "pokemon",
       q: typeof search.q === "string" ? search.q : "",
@@ -55,10 +75,6 @@ const route = (path: string, component: ReturnType<typeof lazyRouteComponent>) =
     }),
   });
 const routes = [
-  route(
-    "/",
-    lazyRouteComponent(() => import("./pages/Home"), "Home"),
-  ),
   ...[
     "/games",
     "/games/$game",
@@ -68,8 +84,6 @@ const routes = [
     "/games/$game/products",
     "/games/$game/collections",
     "/games/$game/artworks",
-
-    "/search",
   ].map((path) =>
     route(
       path,
@@ -99,10 +113,7 @@ const routes = [
     "/datasets",
     lazyRouteComponent(() => import("./pages/Datasets"), "Datasets"),
   ),
-  route(
-    "/coverage",
-    lazyRouteComponent(() => import("./pages/Coverage"), "Coverage"),
-  ),
+
   route(
     "/status",
     lazyRouteComponent(() => import("./pages/Status"), "Status"),
@@ -126,7 +137,60 @@ const routes = [
     ),
   ),
 ];
-const router = createRouter({ routeTree: root.addChildren(routes), defaultPreload: "intent" });
+const browseRoutes = [
+  "/",
+  "/search",
+  "/pokemon",
+  "/pokemon/cards",
+  "/pokemon/sets",
+  "/pokemon/sets/$id",
+].map((path) =>
+  createRoute({
+    getParentRoute: () => root,
+    path,
+    component: Catalogue,
+    validateSearch: (search: Record<string, unknown>) => ({
+      ...search,
+      set:
+        typeof search.set === "string"
+          ? search.set
+          : typeof search.setId === "string"
+            ? search.setId
+            : "",
+      page: Math.max(1, Number.isSafeInteger(Number(search.page)) ? Number(search.page) : 1),
+    }),
+  }),
+);
+const cardRoutes = ["/pokemon/printings/$id", "/pokemon/cards/$id"].map((path) =>
+  createRoute({
+    getParentRoute: () => root,
+    path,
+    component: CatalogueRecord,
+    remountDeps: ({ params }) => params,
+    validateSearch: (search: Record<string, unknown>) => ({
+      origin:
+        typeof search.origin === "string" &&
+        /^\/(?:search|pokemon\/(?:cards|sets(?:\/[a-zA-Z0-9-]+)?))?$/.test(search.origin)
+          ? search.origin
+          : "/pokemon/cards",
+      browse:
+        search.browse && typeof search.browse === "object" && !Array.isArray(search.browse)
+          ? search.browse
+          : {},
+    }),
+  }),
+);
+const catalogueInfo = ["data", "coverage"].map((page) =>
+  createRoute({
+    getParentRoute: () => root,
+    path: "/" + page,
+    component: () => <CatalogueInformation page={page} />,
+  }),
+);
+const router = createRouter({
+  routeTree: root.addChildren([...routes, ...browseRoutes, ...cardRoutes, ...catalogueInfo]),
+  defaultPreload: "intent",
+});
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

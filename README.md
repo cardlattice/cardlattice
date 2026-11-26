@@ -5,6 +5,19 @@ TanStack DB and TanStack Query. `status.cardlattice.com` hosts coverage and stat
 snapshots; the Rust API at `api.cardlattice.com` is coming soon. See
 [Cloudflare Pages deployment](docs/cloudflare-pages.md) for CI and domain setup.
 
+The catalogue UI uses the shared React/StyleX components from
+[`ImLunaHey/components`](https://github.com/ImLunaHey/components). pnpm installs
+the package from an immutable Git commit and builds its explicit subpath exports;
+the exact dependency is approved in `pnpm-workspace.yaml`. No registry token is
+needed. Run `pnpm install --frozen-lockfile` and `pnpm dev` to work on the app.
+
+Cards, sets and printing details live under `/pokemon`; the existing `/games`
+routes and documentation remain available. Catalogue downloads are verified
+against the published manifest before rendering. Optional artwork comes from
+TCGdex only when language, set and collector identity match; unavailable images
+remain explicit placeholders. Artwork is attributed separately from CC0 metadata
+and is never added to downloaded source records. The UI follows the system theme.
+
 
 Free, open trading card metadata. Independently maintained public data
 infrastructure, with anonymous read access and original, reviewed contributions.
