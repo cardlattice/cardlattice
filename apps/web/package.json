@@ -14,7 +14,7 @@
     "generate": "orval"
   },
   "dependencies": {
-    "@imlunahey/components": "github:ImLunaHey/components#311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4&path:/packages/components",
+    "@imlunahey/components": "github:ImLunaHey/components#4c0f7b8873b8612e8fc37f995cf49066366fbd57&path:/packages/components",
     "@stylexjs/stylex": "^0.19.2",
     "@tanstack/query-core": "5.105.0",
     "@tanstack/query-db-collection": "^1.5.2",

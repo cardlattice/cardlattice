@@ -255,8 +255,8 @@ importers:
   apps/web:
     dependencies:
       '@imlunahey/components':
-        specifier: github:ImLunaHey/components#311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4&path:/packages/components
-        version: https://codeload.github.com/ImLunaHey/components/tar.gz/311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4#path:/packages/components(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: github:ImLunaHey/components#4c0f7b8873b8612e8fc37f995cf49066366fbd57&path:/packages/components
+        version: https://codeload.github.com/ImLunaHey/components/tar.gz/4c0f7b8873b8612e8fc37f995cf49066366fbd57#path:/packages/components(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@stylexjs/stylex':
         specifier: ^0.19.2
         version: 0.19.2
@@ -980,8 +980,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@imlunahey/components@https://codeload.github.com/ImLunaHey/components/tar.gz/311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4#path:/packages/components':
-    resolution: {gitHosted: true, integrity: sha512-7W2ATQR2XNtwJrKeUPS+IOyW2azS8fBYkvnp0948iz4qW5dLD3SeQcJcT6Uko5h4zDiA0dYRQSi7vdWEopGTgA==, path: /packages/components, tarball: https://codeload.github.com/ImLunaHey/components/tar.gz/311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4}
+  '@imlunahey/components@https://codeload.github.com/ImLunaHey/components/tar.gz/4c0f7b8873b8612e8fc37f995cf49066366fbd57#path:/packages/components':
+    resolution: {gitHosted: true, integrity: sha512-X/HSwQgLZtpVpTU9gO7ZQMJSAxO5fi7TumtGcDrrMMtbYUoFqRbuT+IoT6AHd06Xr4cU5gc1Xs84lkd56TZ7bw==, path: /packages/components, tarball: https://codeload.github.com/ImLunaHey/components/tar.gz/4c0f7b8873b8612e8fc37f995cf49066366fbd57}
     version: 0.1.0
     peerDependencies:
       react: ^19.0.0
@@ -4333,7 +4333,7 @@ snapshots:
   '@img/sharp-win32-x64@0.35.5':
     optional: true
 
-  '@imlunahey/components@https://codeload.github.com/ImLunaHey/components/tar.gz/311ecfc8b18cb907c041e14a7b6ef560f8f5ddb4#path:/packages/components(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@imlunahey/components@https://codeload.github.com/ImLunaHey/components/tar.gz/4c0f7b8873b8612e8fc37f995cf49066366fbd57#path:/packages/components(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@stylexjs/stylex': 0.19.2
       '@tanstack/charts': 1.5.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
